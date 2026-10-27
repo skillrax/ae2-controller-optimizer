@@ -144,11 +144,7 @@ This writes one self-contained HTML page (it works offline). Open it in any brow
 - **Bill of materials:** controllers, smart and dense cables, input tunnels, cable anchors,
   and the output tunnels you'll need.
 - **Layer viewer:** step through the build one layer at a time. Parts are drawn on the edge
-  of the cell they face. Click a cell for its parts and **world coordinates**: type your
-  build's corner position once and every cell shows where it goes. Tick layers off as you
-  build them.
-- **Input list for linking:** inputs are labelled I1…IN in build order with their world
-  positions. Tick each one off as you link it with a memory card; ticks are saved in the browser.
+  of the cell they face; click a cell for its parts. Tick layers off as you build them.
 - **Tunnel network:** the channels it needs (one per input and output), how the build's
   exits group into dense trunks of 32, and a **suggested tunnel-network controller**
   designed by the same optimizer. Each 32-channel outlet gets its own dense cable and route

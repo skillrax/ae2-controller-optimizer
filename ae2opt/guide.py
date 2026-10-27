@@ -341,13 +341,6 @@ details summary{cursor:pointer;color:var(--accent)}
 <div class="panel stats" id="stats"></div>
 <div id="notes"></div>
 
-<div class="panel">
-<b>Where is your build?</b> <span class="muted">Enter the world position of the build's lowest north-west corner
-(the cell at x=0, layer 0, z=0 in this guide). Every cell then shows its world coordinates.</span>
-<div class="toolbar">X <input class="coord" id="ox" type="number" value="0"> Y <input class="coord" id="oy" type="number" value="64">
-Z <input class="coord" id="oz" type="number" value="0"></div>
-</div>
-
 <h2>1. Bill of materials</h2>
 <div class="panel"><table id="bom"></table>
 <p class="muted">Counts are AE2 parts and blocks. Their crafting cost depends on your pack's recipes (check JEI).
@@ -374,17 +367,7 @@ Use fluix (uncoloured) cables unless noted.</p></div>
 <div id="viewer-main"></div>
 </div>
 
-<h2>3. Link the input tunnels</h2>
-<div class="panel">
-<p>Each input carries one controller face's channels (<b id="facech"></b>) to its output.
-Shift-right-click an input with a <b>Memory Card</b> to store its frequency, then right-click the output tunnel
-(where you want the channels) to link it. Tick each input when it's done: ticks are saved in this browser.</p>
-<div class="toolbar"><label>Layer <select id="inlayer"><option value="">all</option></select></label>
-<span id="inprogress" class="muted"></span></div>
-<div class="gridwrap"><table id="inputs"></table></div>
-</div>
-
-<h2>4. Tunnel network</h2>
+<h2>3. Tunnel network</h2>
 <div class="panel" id="tn"></div>
 <div id="viewer-tc"></div>
 </main>
@@ -397,15 +380,12 @@ const store = {
   get(k, d){ try { const v = localStorage.getItem("ae2opt:" + PLAN.title + ":" + k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem("ae2opt:" + PLAN.title + ":" + k, JSON.stringify(v)); } catch(e){} }
 };
-const origin = () => [+$("ox").value || 0, +$("oy").value || 0, +$("oz").value || 0];
-const world = (p) => { const o = origin(); return [p[0] + o[0], p[1] + o[1], p[2] + o[2]]; };
 const fmt = (p) => p.join(", ");
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 $("title").textContent = PLAN.title;
 const pr = PLAN.profile;
 $("subtitle").textContent = `Profile ${pr.name}: normal cable ${pr.normal}, dense ${pr.dense}, controller size ${pr.size.join("×")}. Build is ${PLAN.size.join(" × ")} blocks (x × layers × z).`;
-$("facech").textContent = pr.dense + " channels";
 const tn = PLAN.tunnel_network;
 $("stats").innerHTML = [
   [PLAN.inputs.length, "input tunnels"],
@@ -414,10 +394,6 @@ $("stats").innerHTML = [
   [tn.channels.toLocaleString(), "tunnel-network channels needed"],
 ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
 $("notes").innerHTML = PLAN.notes.map(n => `<div class="panel warn">Note: ${n}</div>`).join("");
-const ox = store.get("origin", null);
-if (ox) { $("ox").value = ox[0]; $("oy").value = ox[1]; $("oz").value = ox[2]; }
-for (const id of ["ox","oy","oz"]) $(id).addEventListener("input", () => { store.set("origin", origin()); refresh(); });
-
 const BOM_LABELS = {controllers:"ME Controller", smart_cable:"ME Smart Cable (fluix), one per cable cell",
   dense_smart_cable:"ME Dense Smart Cable (fluix)", p2p_input:"ME P2P Tunnel: inputs (in the build)",
   p2p_output:"ME P2P Tunnel: outputs", cable_anchor:"Cable Anchor", other:"Other blocks"};
@@ -487,15 +463,15 @@ function makeViewer(host, cells, size, key){
     showDetail();
   }
   function showDetail(){
-    if (!selected){ detail.innerHTML = `<h3>Layer ${layer}</h3><p class="muted">Click a cell for its parts and world position.</p>` + layerSummary(); return; }
-    const c = selected, w = world(c.pos);
+    if (!selected){ detail.innerHTML = `<h3>Layer ${layer}</h3><p class="muted">Click a cell for its parts.</p>` + layerSummary(); return; }
+    const c = selected;
     let h = `<h3>${c.kind === "controller" ? "Controller" : c.kind === "cable" ? (c.cable === "dense" ? "Dense smart cable" : "Smart cable") : c.kind}</h3>
-      <div>Cell x ${c.pos[0]}, layer ${c.pos[1]}, z ${c.pos[2]}</div><div><b>World ${fmt(w)}</b></div>`;
+      <div>Cell x ${c.pos[0]}, layer ${c.pos[1]}, z ${c.pos[2]}</div>`;
     if (c.sides){
       const names = {tunnel:"P2P tunnel (input)", output:"P2P tunnel (output)", anchor:"cable anchor", exit:"exit: leave open", outlet:"outlet: leave open toward the controller", device:"device"};
       h += "<ul>" + ["up","down","north","south","west","east"].filter(k => c.sides[k]).map(k => {
-        const p = c.sides[k]; const inp = p.part === "tunnel" ? PLAN.inputs.find(i => i.pos.join() === c.pos.join() && i.side === k) : null;
-        return `<li><b>${k}</b>: ${names[p.part] || p.part}${inp ? " (" + inp.label + ")" : ""}</li>`; }).join("") + "</ul>";
+        const p = c.sides[k];
+        return `<li><b>${k}</b>: ${names[p.part] || p.part}</li>`; }).join("") + "</ul>";
       const ex = PLAN.exits.find(e => e.pos.join() === c.pos.join());
       if (ex) h += `<div class="ok">Exit: carries ${ex.channels} tunnel-network channel(s), trunk ${ex.trunk}</div>`;
     }
@@ -516,24 +492,6 @@ function makeViewer(host, cells, size, key){
   draw();
   return { refresh: draw };
 }
-
-// ------------------------------------------------------------------ inputs
-const linked = new Set(store.get("linked", []));
-const layers = [...new Set(PLAN.inputs.map(i => i.pos[1]))].sort((a,b) => a-b);
-$("inlayer").innerHTML += layers.map(y => `<option value="${y}">${y}</option>`).join("");
-$("inlayer").addEventListener("change", drawInputs);
-function drawInputs(){
-  const f = $("inlayer").value;
-  const rows = PLAN.inputs.filter(i => f === "" || i.pos[1] === +f);
-  $("inputs").innerHTML = "<tr><th></th><th>Input</th><th>Layer</th><th>Cell (x, z)</th><th>Side</th><th>World</th></tr>" +
-    rows.map(i => `<tr class="${linked.has(i.label) ? "done" : ""}"><td><input type="checkbox" data-l="${i.label}" ${linked.has(i.label) ? "checked" : ""}></td>
-      <td>${i.label}</td><td>${i.pos[1]}</td><td>${i.pos[0]}, ${i.pos[2]}</td><td>${i.side}</td><td>${fmt(world(i.pos))}</td></tr>`).join("");
-  $("inprogress").textContent = `${linked.size} of ${PLAN.inputs.length} linked`;
-}
-$("inputs").addEventListener("change", e => {
-  const l = e.target.dataset.l; if (!l) return;
-  e.target.checked ? linked.add(l) : linked.delete(l); store.set("linked", [...linked]); drawInputs();
-});
 
 // ------------------------------------------------------------------ tunnel network
 function drawTN(){
@@ -567,8 +525,7 @@ if (PLAN.tunnel_controller){
   $("viewer-tc").className = "panel";
   viewers.push(makeViewer($("viewer-tc"), PLAN.tunnel_controller.cells, PLAN.tunnel_controller.size, "tc"));
 }
-function refresh(){ viewers.forEach(v => v.refresh()); drawInputs(); }
-drawTN(); drawInputs();
+drawTN();
 </script>
 </body>
 </html>
