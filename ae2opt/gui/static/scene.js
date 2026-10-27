@@ -165,7 +165,6 @@ export function describe(b, info, side, origin, dense = 32) {
       badge = PART_STATE[pi.state];
       rows.push(["Frequency", p.freq], ["Faces", cap(side)]);
       if (pi.faces_controller && !p.output) rows.push(["Feeds", "a controller face (32-channel link)"]);
-      if (pi.state === "online" && !pi.linked && !p.output) rows.push(["Note", "no output on this frequency yet"]);
     } else if (p.type === "anchor") {
       title = "Cable anchor"; rows.push(["Blocks", `${cap(side)} side of the cable`]);
     } else {

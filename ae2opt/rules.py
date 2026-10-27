@@ -235,23 +235,19 @@ def check(layout: Layout, profile: Profile = DEFAULT_PROFILE, sim: SimResult | N
     for t in tunnels:
         slot = groups.setdefault((t.inner_grid, t.freq), {"in": [], "out": []})
         slot["out" if t.output else "in"].append(t.key[0])
-    no_out: list[tuple[int, Pos]] = []
     no_in: list[tuple[int, Pos]] = []
     for (_, freq), slot in sorted(groups.items()):
         if len(slot["in"]) > 1:
             v.append(Violation("FREQ", ERROR, f"frequency {freq} has {len(slot['in'])} inputs on one network; "
                                "AE2 keeps only one", tuple(slot["in"])))
-        if slot["in"] and not slot["out"]:
-            no_out += [(freq, p) for p in slot["in"]]
+        # Inputs without an output are not reported: a controller build is designed
+        # on its own, and its outputs live at the far end of the tunnel network.
         if slot["out"] and not slot["in"]:
             no_in += [(freq, p) for p in slot["out"]]
     def freqs(items):
         fs = sorted({f for f, _ in items})
         return ", ".join(map(str, fs[:10])) + (f", ... ({len(fs)} total)" if len(fs) > 10 else "")
 
-    if no_out:
-        v.append(Violation("FREQ", WARNING, f"{len(no_out)} input(s) have no output yet (frequencies "
-                           f"{freqs(no_out)})", tuple(sorted({p for _, p in no_out}))))
     if no_in:
         v.append(Violation("FREQ", WARNING, f"{len(no_in)} output(s) have no input (frequencies "
                            f"{freqs(no_in)})", tuple(sorted({p for _, p in no_in}))))
