@@ -163,7 +163,7 @@ details.field summary { cursor: pointer; color: var(--muted); font-weight: 500; 
 .empty button { pointer-events: auto; }
 .empty p { color: var(--muted); max-width: 380px; margin: 0 auto 16px; }
 .empty .row { justify-content: center; }
-.busy { position: absolute; inset: 0; z-index: 30; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(10,12,16,.55); backdrop-filter: blur(2px); }
+.busy { position: fixed; inset: 0; z-index: 90; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(10,12,16,.55); backdrop-filter: blur(2px); }
 .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--line-2); border-top-color: var(--accent-2); animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 

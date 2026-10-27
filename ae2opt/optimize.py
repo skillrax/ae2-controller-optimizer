@@ -99,8 +99,10 @@ class OptimizeSpec:
     lns_time: float = 0.0              # total seconds (0 = off)
     lns_step: float = 10.0             # seconds per neighbourhood
     random_seed: int = 0
-    # Final pass: keep controllers and tunnels, minimize cable cells (seconds; 0 = off).
-    polish_time: float = 10.0
+    # Final pass: keep controllers and tunnels, fewest trunks then fewest cable cells
+    # (seconds; 0 = off; None = scale with the box: about 10 s for 3x3x3 up to 60 s for 7x7x7).
+    # It also runs when the search is stopped, so saved results are always tidied.
+    polish_time: float | None = None
     # A proven upper bound on tunnels from an earlier run of the same spec. Proven
     # bounds stay valid, so a resumed run reports min(this, its own bound).
     known_upper: int | None = None
@@ -612,9 +614,11 @@ class _Search:
                   controllers=sum(vec[v.Index()] for v in m.x.values()))
 
     def run(self, target, seconds: float, hint: _Incumbent | None = None, phase: str = "",
-            report_bound: bool = False):
-        """Solve `target`; returns (status, solver, vec, score)."""
+            report_bound: bool = False, stop: threading.Event | None = None):
+        """Solve `target`; returns (status, solver, vec, score). `stop` replaces the
+        search's own stop signal (polish runs after a stop, on its own signal)."""
         spec, model = self.spec, self.model
+        stop = stop or self.stop
         if hint is not None:
             target.ClearHints()
             h = target.Proto().solution_hint
@@ -642,7 +646,7 @@ class _Search:
 
         def watch():
             while not done.is_set():
-                if self.stop.wait(0.25):
+                if stop.wait(0.25):
                     solver.StopSearch()
                     return
 
@@ -705,6 +709,88 @@ def _lns(search: _Search, inc: _Incumbent, budget: float, notes: list[str]) -> _
 
 def _tunnels_of(model: _Model, inc: _Incumbent) -> int:
     return sum(inc.vec[v.Index()] for v in model.f.values())
+
+
+def _polish_seconds(spec: OptimizeSpec, model: _Model) -> float:
+    if spec.polish_time is not None:
+        return spec.polish_time
+    return min(60.0, max(10.0, len(model.k) / 12))
+
+
+def _polish_target(model: _Model, xs, faces):
+    """Fixed controllers and tunnel faces; fewest trunks first, then fewest cables."""
+    target = model.clone()
+    model.fix_shape(target, xs)
+    for key, v in model.f.items():
+        target.Add(v == int(key in faces))
+    target.Minimize((len(model.k) + 1) * sum(model.par_sink.values()) + sum(model.k.values()))
+    return target
+
+
+def _polish(search: _Search, best: _Incumbent, seconds: float, notes: list[str]) -> _Incumbent:
+    model = search.model
+    search.emit("phase", phase="polish: fewest trunks, then fewest cables")
+    faces = {k for k, v in model.f.items() if best.vec[v.Index()]}
+    target = _polish_target(model, best.xs(model), faces)
+    _, _, vec, score = search.run(target, seconds, hint=best, phase="polish", stop=threading.Event())
+    if vec is None or score != best.score:
+        return best
+
+    def count(v_, vars_):
+        return sum(v_[x.Index()] for x in vars_)
+    b_t, a_t = count(best.vec, model.par_sink.values()), count(vec, model.par_sink.values())
+    b_c, a_c = count(best.vec, model.k.values()), count(vec, model.k.values())
+    if (a_t, a_c) < (b_t, b_c):
+        notes.append(f"polish: trunks {b_t} -> {a_t}, cable cells {b_c} -> {a_c}")
+    return _Incumbent(vec, score, best.source)
+
+
+def polish_layout(profile: Profile, spec: OptimizeSpec, layout: Layout, seconds: float | None = None,
+                  workers: int | None = None, stop: threading.Event | None = None) -> tuple[Layout, dict]:
+    """Tidy the wiring of a saved layout (e.g. a run's best-so-far checkpoint):
+    same controllers and tunnels, fewest trunks, then fewest cables.
+
+    Returns (harness layout, info). If the layout cannot be re-wired under the
+    model's rules, or the result channels fewer tunnels, the input comes back
+    unchanged with info["changed"] False."""
+    if cp_model is None:
+        raise OptimizerUnavailable("OR-Tools is not installed: pip install ortools")
+    from dataclasses import replace as _replace
+    size = spec.size or profile.max_controller_size
+    if workers is not None:
+        spec = _replace(spec, workers=workers)
+    model = _Model(spec, profile, size)
+    xs = frozenset(c for c in layout.controllers() if c in model.r.box_set)
+    faces = set()
+    for pos, b in layout.blocks.items():
+        if b.kind != "cable":
+            continue
+        for d, part in b.parts.items():
+            if isinstance(part, P2PTunnel) and not part.output and (step(pos, d), d.opposite) in model.f:
+                if step(pos, d) in xs:
+                    faces.add((step(pos, d), d.opposite))
+
+    def stats(lay: Layout) -> dict:
+        report = check(lay, profile)
+        cables = [b for b in lay.blocks.values() if b.kind == "cable"]
+        return {"tunnels": _validated(report), "exits": sum(1 for b in lay.blocks.values() if b.kind == "port"),
+                "dense": sum(1 for b in cables if b.cable is CableType.DENSE), "cables": len(cables)}
+
+    before = stats(layout)
+    info = {"changed": False, "before": before, "after": before}
+    target = _polish_target(model, xs, faces)
+    search = _Search(model, spec, None, None)
+    seconds = _polish_seconds(spec, model) if seconds is None else seconds
+    _, _, vec, _ = search.run(target, seconds, stop=stop or threading.Event())
+    if vec is None:
+        return layout, info
+    lay, _, _, exits = _extract(model, lambda v: vec[v.Index()])
+    lay, harness, _, _ = _repair(lay, model.r, exits, profile)
+    after = stats(harness)
+    if after["tunnels"] < before["tunnels"]:
+        return layout, info
+    info.update(changed=True, after=after)
+    return harness, info
 
 
 def layout_from_vector(model: _Model, vec: list[int]) -> Layout:
@@ -786,27 +872,13 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
     if search.stop.is_set():
         notes.append("stopped early; this is the best layout found so far")
 
-    # 3b. Polish: same controllers and tunnels, fewest cable cells (shorter routes,
-    #     fewer anchors). Cannot change the score, so it never affects results.
-    if spec.polish_time > 0 and not search.stop.is_set():
-        search.emit("phase", phase="polish: fewest trunks, then fewest cables")
-        target = model.clone()
-        model.fix_shape(target, best.xs(model))
-        for v in model.f.values():
-            target.Add(v == best.vec[v.Index()])
-        # Fewest trunks (exits to the tunnel network) first, then fewest cables.
-        target.Minimize((len(model.k) + 1) * sum(model.par_sink.values()) + sum(model.k.values()))
-        # Scale with the search: quick problems get a quick polish (2 s minimum).
-        seconds = min(spec.polish_time, max(2.0, time.monotonic() - search.started))
-        _, _, vec, score = search.run(target, seconds, hint=best, phase="polish")
-        if vec is not None and score == best.score:
-            def count(v_, vars_):
-                return sum(v_[x.Index()] for x in vars_)
-            b_t, a_t = count(best.vec, model.par_sink.values()), count(vec, model.par_sink.values())
-            b_c, a_c = count(best.vec, model.k.values()), count(vec, model.k.values())
-            if (a_t, a_c) < (b_t, b_c):
-                notes.append(f"polish: trunks {b_t} -> {a_t}, cable cells {b_c} -> {a_c}")
-            best = _Incumbent(vec, score, best.source)
+    # 3b. Polish: same controllers and tunnels, fewest trunks then fewest cables.
+    #     Cannot change the score. Runs after a stop too (on its own stop signal),
+    #     so a stopped run still saves tidy wiring.
+    polish = _polish_seconds(spec, model)
+    if polish > 0:
+        seconds = min(polish, max(2.0, time.monotonic() - search.started))
+        best = _polish(search, best, seconds, notes)
 
     # 4. Build, simulate, and repair anything AE2's pathing would not channel.
     search.emit("phase", phase="checking with the simulator")

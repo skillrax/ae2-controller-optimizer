@@ -89,7 +89,6 @@
         <button class="btn" data-goto="optimize">Optimize a build</button>
       </div>
     </div>
-    <div class="busy" id="busy" hidden><div class="spinner"></div><span id="busyText">Working…</span></div>
   </div>
   <aside class="inspector" id="inspector">
     <div class="card status" id="statusCard"></div>
@@ -248,6 +247,7 @@
 </main>
 
 <input type="file" id="openFile" accept=".json,application/json" hidden>
+<div class="busy" id="busy" hidden><div class="spinner"></div><span id="busyText">Working…</span></div>
 <div class="toasts" id="toasts"></div>
 <canvas id="thumbCanvas" class="offscreen" width="320" height="200"></canvas>
 <script type="module" src="/static/app.js"></script>

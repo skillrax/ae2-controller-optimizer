@@ -16,6 +16,11 @@ Run folder contents:
   worker.log      solver output
   stop            created to ask the worker to stop (removed on start)
 
+best.json is overwritten with each better solution as the search finds it; those
+checkpoints have untidied wiring (run.json "best_polished": false). The final
+save, including after "save and stop", tidies the wiring first (fewest trunks,
+then fewest cables); the GUI tidies a checkpoint before showing it.
+
 Stopping and resuming keeps the best layout and the best proven bound (a proven
 bound stays valid); the solver's internal search tree cannot be saved, so the
 proof work itself starts over on resume.
@@ -131,6 +136,7 @@ def worker_main(run_dir: str | Path) -> int:
                 os.replace(tmp, run_dir / BEST_FILE)
                 d = read_run(run_dir)
                 d["best_key"], d["best_tunnels"] = key, ev["tunnels"]
+                d["best_polished"] = False   # a raw checkpoint: wiring not tidied yet
                 write_run(run_dir, d)
         log(ev)
 
@@ -147,6 +153,7 @@ def worker_main(run_dir: str | Path) -> int:
         # checkpoint of the same solution.
         sol.harness.save(run_dir / BEST_FILE)
         data["best_key"], data["best_tunnels"] = key, sol.tunnels_validated
+        data["best_polished"] = True
         (run_dir / RESULT_FILE).write_text(sol.summary() + "\n", "utf-8")
     else:
         (run_dir / RESULT_FILE).write_text(

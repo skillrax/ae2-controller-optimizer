@@ -864,26 +864,44 @@ const Opt = {
     }
   },
 
-  async loadMini(id) {
+  // The preview shows the best-so-far checkpoint; the server tidies its wiring in the
+  // background (fewest trunks), so show the raw one meanwhile and swap when ready.
+  async loadMini(id, refit = true) {
+    clearTimeout(this.miniTimer);
     try {
       const lay = await api(`/api/layout?src=run:${encodeURIComponent(id)}`);
+      if (id !== this.current) return;
       const m = new Map(lay.blocks.map(b => [key(b.pos), b]));
       let analysis = null;
       try { analysis = await api("/api/check", { layout: lay, profile: S.profile }); } catch { /* still show it */ }
-      this.mini.setItems(buildItems(m, { analysis }), { refit: true });
-      $("#runViewLabel").textContent = "best so far · drag to rotate";
+      this.mini.setItems(buildItems(m, { analysis }), { refit });
+      const exits = lay.blocks.filter(b => b.type === "port").length;
+      $("#runViewLabel").textContent = lay.polishing ? "best so far · tidying the wiring…"
+        : `best so far · ${exits} tunnel-network connection${exits === 1 ? "" : "s"} · drag to rotate`;
+      if (lay.polishing) this.miniTimer = setTimeout(() => this.loadMini(id, false), 2000);
     } catch { $("#runViewLabel").textContent = "no layout saved yet"; }
   },
 
   async openBest() {
-    if (!this.current) return;
-    try {
-      const lay = await api(`/api/layout?src=run:${encodeURIComponent(this.current)}`);
-      setLayout(lay, { title: `Run ${this.current}` });
-      showTab("design");
-    } catch (err) { toast(`No saved layout yet: ${err.message}`, "bad"); }
+    if (this.current) await openRun(this.current, `Run ${this.current}`);
   },
 };
+
+// Opens a run's best layout in the designer, waiting for its wiring to be tidied.
+async function openRun(id, title) {
+  busy("Tidying the wiring (fewest trunks)…");
+  try {
+    const lay = await api(`/api/layout?src=run:${encodeURIComponent(id)}&wait=1`);
+    setLayout(lay, { title });
+    showTab("design");
+    const t = lay.tidy;
+    if (t?.changed) {
+      const b = t.before, a = t.after;
+      toast(`Wiring tidied: ${b.exits} → ${a.exits} tunnel-network connections, ${b.dense} → ${a.dense} dense cables, ${b.cables} → ${a.cables} cable cells.`, "ok");
+    } else if (t?.error) toast(`Couldn't tidy the wiring (${t.error}); showing it as saved.`, "bad");
+  } catch (err) { toast(`No saved layout yet: ${err.message}`, "bad"); }
+  busy(null);
+}
 
 function statePill(r, id = "") {
   const st = r.live ? (r.paused ? "PAUSED" : r.state) : (r.status || r.state || "");
@@ -975,6 +993,7 @@ const Lib = {
   async open(e) {
     const c = e.target.closest(".lcard");
     if (!c) return;
+    if (c.dataset.src.startsWith("run:")) return openRun(c.dataset.src.slice(4), c.dataset.title);
     try {
       const lay = await api(`/api/layout?src=${encodeURIComponent(c.dataset.src)}`);
       setLayout(lay, { title: c.dataset.title });

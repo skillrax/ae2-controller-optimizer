@@ -113,6 +113,33 @@ class GuiServerTests(unittest.TestCase):
             with self.assertRaises(urllib.error.HTTPError):
                 self.get(f"/api/layout?src={src}")
 
+    def test_run_checkpoint_is_tidied_before_it_is_opened(self):
+        try:
+            import ortools  # noqa: F401
+        except ImportError:
+            self.skipTest("needs OR-Tools")
+        from ae2opt import runner
+        from ae2opt.optimize import OptimizeSpec, layout_from_vector, optimize
+        events = []
+        spec = OptimizeSpec(size=(3, 3, 3), time_limit=20, workers=8, polish_time=0)
+        optimize(DEFAULT_PROFILE, spec, progress=events.append)
+        model = next(ev["model"] for ev in events if ev["kind"] == "start")
+        raw = layout_from_vector(model, next(ev for ev in events if ev["kind"] == "solution")["vec"])
+        run_dir = self.server.app.runs.root / "3x3x3-checkpoint"
+        runner.new_run(run_dir, DEFAULT_PROFILE, spec)
+        raw.save(run_dir / runner.BEST_FILE)
+        data = runner.read_run(run_dir)
+        data.update(best_polished=False, status="STOPPED")
+        runner.write_run(run_dir, data)
+
+        lay = json.loads(self.get("/api/layout?src=run:3x3x3-checkpoint&wait=1")[0])
+        self.assertTrue(lay["polished"])
+        tidy = lay["tidy"]
+        self.assertGreaterEqual(tidy["after"]["tunnels"], tidy["before"]["tunnels"])
+        self.assertLessEqual(tidy["after"]["exits"], tidy["before"]["exits"])
+        if tidy["changed"]:   # a stopped run keeps the tidied layout
+            self.assertTrue(runner.read_run(run_dir)["best_polished"])
+
     def test_run_box_cannot_exceed_profile_limit(self):
         from ae2opt.gui.server import _settings_to_spec
         with self.assertRaises(ValueError):

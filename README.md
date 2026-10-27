@@ -61,7 +61,8 @@ and saves any running optimizer runs.
   `AppliedEnergistics2.cfg`. Each value shows where it came from; nothing is saved until
   you press Save.
 
-Options: `--port N`, `--no-browser`, `--runs-dir DIR` (default `%APPDATA%e2optuns`).
+Options: `--port N`, `--no-browser`, `--runs-dir DIR` (default `%APPDATA%e2opt
+uns`).
 
 ## How the optimizer works
 
@@ -80,7 +81,12 @@ controller, and have one exit each. Groups that touch get different colours, so 
 don't connect. With these rules no cable can exceed its capacity, whatever route AE2's
 pathing picks (MECHANICS.md §5b). By default every controller face next to a cable carries
 a tunnel, so builds need **no cable anchors**. A final polish step picks the **fewest
-trunks**, then the fewest cables. Example: the proven 3×3×3 optimum has 74 tunnels, 0
+trunks**, then the fewest cables. The search itself only counts tunnels, so the
+best-so-far layouts saved during a run have untidied wiring (often one exit per smart
+group and no dense cable); polish is what merges them into dense trunks. It runs on
+every saved result, including after save and stop, and gets about 10 s for 3×3×3 up to
+60 s for 7×7×7. The GUI tidies a mid-run checkpoint the same way before showing it (a
+stopped 4×4×4: 52 exits and no dense cable became 6 trunks, the minimum for 164 tunnels). Example: the proven 3×3×3 optimum has 74 tunnels, 0
 anchors, 3 trunks, and two cable colours plus fluix ([examples/best_3x3x3.html](examples/best_3x3x3.html)).
 
 **Exit cells** are where your tunnel network (its own controller, dense trunks) must
@@ -167,8 +173,8 @@ python -m ae2opt run --box 5 5 5 --workers 16 --hours 8 --dir runs/5x5x5
 - **p — pause:** the solver process is frozen by the OS. It uses no CPU, loses nothing, and
   continues exactly where it was. Its memory stays allocated.
 - **r — resume:** continue a paused solver.
-- **q — save and stop** (Ctrl+C does the same): the solver stops cleanly and the best layout
-  is saved.
+- **q — save and stop** (Ctrl+C does the same): the solver stops cleanly, tidies the best
+  layout's wiring (up to a minute on big boxes), and saves it.
 
 **Defaults that keep your PC usable:** the solver runs at below-normal priority, so other
 programs come first (`--normal-priority` turns this off). `--hours` limits active time;
@@ -213,8 +219,8 @@ This writes one self-contained HTML page (it works offline). Open it in any brow
   designed by the same optimizer. Each 32-channel outlet gets its own dense cable and route
   out, so no two outlets share a cable.
 
-The optimizer also ends every run with a short polish step. It keeps the controllers and
-tunnels and shortens cable routes, which cuts the cable and anchor count.
+The optimizer also ends every run with a polish step. It keeps the controllers and
+tunnels, merges groups into the fewest dense trunks, and shortens cable routes.
 
 Example: [examples/best_7x7x7.html](examples/best_7x7x7.html) is the guide for the
 708-tunnel layout. Its tunnel network needs 1,416 channels, which means 46 outlets from a

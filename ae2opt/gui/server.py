@@ -261,7 +261,7 @@ class LiveRun:
             if not self.done and not self.stopping:
                 self._stop()
         try:
-            self.proc.wait(timeout=60)
+            self.proc.wait(timeout=180)   # the worker tidies the wiring before it saves
         except Exception:
             self.proc.kill()
 
@@ -272,10 +272,86 @@ class LiveRun:
                 "active": p.active_before + self.active, "session_active": self.active, "budget": self.budget}
 
 
+class Polisher:
+    """Tidies the wiring of runs' best-so-far checkpoints before they are shown.
+
+    The worker saves raw checkpoints as it finds better solutions; their wiring is
+    untidied (many separate exits, little dense cable). This re-wires a checkpoint
+    with the same controllers and tunnels (optimize.polish_layout) in a background
+    thread, caches the result per checkpoint, and, once the run is no longer
+    running, saves it back as the run's best.json."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.cache: dict[str, tuple[int, dict]] = {}       # run id -> (best.json mtime_ns, layout)
+        self.jobs: dict[str, tuple[int, threading.Thread]] = {}
+
+    def get(self, run_dir: Path, live: bool, wait: bool) -> dict:
+        best = run_dir / runner.BEST_FILE
+        if not best.is_file():
+            raise KeyError(f"{run_dir.name} has no saved layout yet")
+        data = runner.read_run(run_dir)
+        mtime = best.stat().st_mtime_ns
+        raw = Layout.load(best).to_dict()
+        # Runs from before this flag existed count as untidied unless they finished.
+        polished = data.get("best_polished", data.get("status") in ("OPTIMAL", "FEASIBLE", "FINISHED"))
+        if polished or not _has_ortools():
+            return {**raw, "polished": bool(polished), "polishing": False}
+        rid = run_dir.name
+        with self.lock:
+            hit = self.cache.get(rid)
+            if hit and hit[0] == mtime:
+                return {**hit[1], "polished": True, "polishing": False}
+            job = self.jobs.get(rid)
+            if job is None or job[0] != mtime:
+                t = threading.Thread(target=self._work, args=(run_dir, mtime, live), daemon=True)
+                self.jobs[rid] = (mtime, t)
+                t.start()
+            thread = self.jobs[rid][1]
+        if wait:
+            thread.join(timeout=180)
+            with self.lock:
+                hit = self.cache.get(rid)
+            # A stopped run's tidied layout is saved back, so best.json may be newer now.
+            if hit and hit[0] in (mtime, best.stat().st_mtime_ns):
+                return {**hit[1], "polished": True, "polishing": False}
+        return {**raw, "polished": False, "polishing": thread.is_alive()}
+
+    def _work(self, run_dir: Path, mtime: int, live: bool) -> None:
+        from ..optimize import polish_layout
+        rid = run_dir.name
+        try:
+            data = runner.read_run(run_dir)
+            profile = Profile.from_dict(data["profile"])
+            spec = runner.spec_from_dict(data["spec"])
+            # Leave most of the CPU to a running solver.
+            workers = 2 if live else max(1, os.cpu_count() or 8)
+            lay, info = polish_layout(profile, spec, Layout.load(run_dir / runner.BEST_FILE), workers=workers)
+            out = lay.to_dict()
+            out["tidy"] = info
+            with self.lock:
+                self.cache[rid] = (mtime, out)
+            best = run_dir / runner.BEST_FILE
+            if not live and info["changed"] and best.stat().st_mtime_ns == mtime:
+                tmp = run_dir / (runner.BEST_FILE + ".tmp")
+                lay.save(tmp)
+                os.replace(tmp, best)
+                data = runner.read_run(run_dir)
+                data["best_polished"] = True
+                runner.write_run(run_dir, data)
+                with self.lock:
+                    self.cache[rid] = (best.stat().st_mtime_ns, out)
+        except Exception as err:  # show the raw checkpoint rather than nothing
+            with self.lock:
+                self.cache[rid] = (mtime, {**Layout.load(run_dir / runner.BEST_FILE).to_dict(),
+                                           "tidy": {"changed": False, "error": f"{type(err).__name__}: {err}"}})
+
+
 class RunManager:
     def __init__(self, root: Path):
         self.root = root
         self.live: dict[str, LiveRun] = {}
+        self.polisher = Polisher()
 
     def _dir(self, run_id: str) -> Path:
         if not re.fullmatch(r"[A-Za-z0-9._-]+", run_id):
@@ -292,6 +368,7 @@ class RunManager:
         box = spec.get("size") or prof["max_controller_size"]
         out = {"id": d.name, "box": box, "profile": prof["name"], "status": data.get("status"),
                "tunnels": data.get("best_tunnels"), "upper": data.get("best_upper"),
+               "controllers": -data["best_key"][1] if data.get("best_key") else None,
                "active": data.get("active_seconds", 0.0), "sessions": data.get("sessions", 1),
                "mode": "prove" if spec.get("lns_time") in (0, 0.0) else "improve",
                "dense": prof["dense_channel_capacity"], "has_best": (d / runner.BEST_FILE).exists(),
@@ -398,14 +475,15 @@ class App:
             "optimizer": _has_ortools(),
         }
 
-    def load_layout(self, src: str) -> dict:
+    def load_layout(self, src: str, wait: bool = False) -> dict:
         kind, _, ref = src.partition(":")
         if kind == "example" and self.examples:
             path = (self.examples / ref).resolve()
             if self.examples.resolve() not in path.parents:
                 raise ValueError("bad example path")
         elif kind == "run":
-            path = self.runs._dir(ref) / runner.BEST_FILE
+            live = self.runs.live.get(ref)
+            return self.runs.polisher.get(self.runs._dir(ref), live is not None and not live.done, wait)
         else:
             raise ValueError(f"unknown layout source {src!r}")
         return Layout.load(path).to_dict()
@@ -472,8 +550,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/state":
             return self._guard(lambda: self._json(app.state()))
         if path == "/api/layout":
-            src = parse_qs(url.query).get("src", [""])[0]
-            return self._guard(lambda: self._json(app.load_layout(src)))
+            q = parse_qs(url.query)
+            src, wait = q.get("src", [""])[0], q.get("wait", ["0"])[0] == "1"
+            return self._guard(lambda: self._json(app.load_layout(src, wait)))
         if path == "/api/runs":
             return self._guard(lambda: self._json(app.runs.list()))
         m = re.fullmatch(r"/api/runs/([^/]+)", path)
