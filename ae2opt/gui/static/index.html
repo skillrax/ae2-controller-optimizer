@@ -11,7 +11,7 @@
 <header class="topbar">
   <div class="brand">
     <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14L16 30 4 23V9z" fill="var(--panel-2)" stroke="var(--cyan)" stroke-width="2"/><path d="M16 9v14M9 13l7 4 7-4" stroke="var(--fluix)" stroke-width="2" fill="none"/></svg>
-    <div><b>AE2 Controller Optimizer</b><small>ME controller + P2P builds for 1.12.2</small></div>
+    <div><b>AE2 Controller Optimizer <span class="ver" id="appVersion"></span></b><small>ME controller + P2P builds for 1.12.2</small></div>
   </div>
   <nav class="tabs" role="tablist">
     <button data-tab="design" class="active">Design</button>
@@ -24,6 +24,9 @@
     <select id="profileSelect"></select>
     <span class="summary" id="profileSummary"></span>
   </div>
+  <button class="quit" id="btnQuit" title="Quit the app (saves any running optimizer runs)" aria-label="Quit">
+    <svg viewBox="0 0 24 24"><path d="M12 3v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 6.5a7 7 0 1 0 9 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
 </header>
 
 <main>
@@ -108,6 +111,7 @@
         <div class="field-head"><label>Box to fill</label><label class="check"><input type="checkbox" id="boxLock" checked> same on all sides</label></div>
         <div class="box-sliders" id="boxSliders"></div>
         <div class="box-preview" id="boxPreview"></div>
+        <div class="known" id="knownNote" hidden></div>
       </div>
       <div class="field">
         <label>Goal</label>
@@ -190,9 +194,11 @@
       <div class="spacer"></div>
       <button class="btn" id="btnLibOpen">Open a .json file…</button>
     </div>
+    <h3>Known results <span class="muted small" id="libKnownNote"></span></h3>
+    <div class="cards" id="libKnown"></div>
     <h3>Your optimizer results</h3>
     <div class="cards" id="libRuns"></div>
-    <h3>Examples</h3>
+    <h3 id="libExamplesHead">Test structures</h3>
     <div class="cards" id="libExamples"></div>
   </div>
 </section>

@@ -51,6 +51,16 @@ except ImportError:  # pragma: no cover - reported when the optimizer is used
     cp_model = None
 
 
+# Bump when a change to the model can change which build is optimal (the shipped
+# library's proofs record it). 1: anchored wiring; 2: coloured groups + dense trunks.
+MODEL_VERSION = 2
+
+# The optimizer's limit, separate from what a config allows (Extended Life goes up to
+# 63). 7x7x7 is already far beyond proving; past 9 per side the model gets so big
+# that searches don't finish usefully, so bigger boxes are refused.
+MAX_BOX_SIDE = 9
+
+
 @dataclass(frozen=True)
 class OptimizeSpec:
     # Box to fill. None = the profile's maximum controller size.
@@ -711,6 +721,17 @@ def _tunnels_of(model: _Model, inc: _Incumbent) -> int:
     return sum(inc.vec[v.Index()] for v in model.f.values())
 
 
+def check_box(size, profile: Profile) -> None:
+    """Refuse boxes over the profile's controller limit or the optimizer's limit."""
+    if any(s > m for s, m in zip(size, profile.max_controller_size)):
+        raise ValueError(f"box {'x'.join(map(str, size))} is larger than the profile's controller size limit "
+                         f"{'x'.join(map(str, profile.max_controller_size))}")
+    if any(s > MAX_BOX_SIDE for s in size):
+        raise ValueError(f"box {'x'.join(map(str, size))} is too big to optimize: the limit is {MAX_BOX_SIDE} per side. "
+                         "Bigger controllers are legal in Extended Life, but the search can't do anything useful "
+                         "with them; repeat a smaller optimized build instead.")
+
+
 def _polish_seconds(spec: OptimizeSpec, model: _Model) -> float:
     if spec.polish_time is not None:
         return spec.polish_time
@@ -814,9 +835,7 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
     if cp_model is None:
         raise OptimizerUnavailable("OR-Tools is not installed: pip install ortools")
     size = spec.size or profile.max_controller_size
-    if any(s > m for s, m in zip(size, profile.max_controller_size)):
-        raise ValueError(f"box {size} is larger than the profile's controller size limit "
-                         f"{profile.max_controller_size}")
+    check_box(size, profile)
     model = _Model(spec, profile, size)
     search = _Search(model, spec, progress, stop)
     search.emit("start", model=model, size=size)

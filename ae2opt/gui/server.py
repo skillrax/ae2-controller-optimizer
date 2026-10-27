@@ -38,6 +38,8 @@ from ..cfgimport import import_text
 from ..geometry import Direction
 from ..layout import CableBus, Controller, Layout, LayoutError, Marker, P2PTunnel
 from ..profile import DEFAULT_PROFILE, KNOWN_CAPACITY_MAX, KNOWN_SIZE_MAX, Profile, ProfileError, ProfileStore
+from .. import __version__, library
+from ..optimize import MAX_BOX_SIDE, MODEL_VERSION
 from ..rules import check
 
 STATIC = Path(__file__).with_name("static")
@@ -134,13 +136,23 @@ def analyze(layout: Layout, profile: Profile) -> dict:
 
 def _settings_to_spec(settings: dict, profile: Profile):
     from ..optimize import OptimizeSpec
+    from ..optimize import check_box
     box = tuple(int(v) for v in settings.get("box") or profile.max_controller_size)
-    if any(b > m for b, m in zip(box, profile.max_controller_size)):
-        raise ValueError(f"box {box} is larger than the profile's controller limit {profile.max_controller_size}")
+    check_box(box, profile)
     prove = settings.get("mode", "improve") == "prove"
     target = settings.get("target")
+    start, upper = None, None
+    if settings.get("start_library"):
+        # Start from the shipped best-known build; its proven bound still holds.
+        from ..patterns import canonical
+        entry = library.match(profile, box, bool(settings.get("exterior", True)),
+                              bool(settings.get("interior", True)), bool(settings.get("anchor_free", True)))
+        if entry is not None:
+            start = canonical(frozenset(library.load(entry["id"], box).controllers()), box)
+            upper = entry["upper"]
     return OptimizeSpec(
         size=box,
+        start=start, known_upper=upper, seed_time=60.0 if start else 10.0,
         time_limit=math.inf if prove else float(settings.get("main", 300)),
         lns_time=0.0 if prove else math.inf,
         workers=max(1, int(settings.get("workers", os.cpu_count() or 8))),
@@ -441,14 +453,25 @@ class App:
         self.store = store
         self.runs = RunManager(runs_dir)
         self.examples = examples
+        self.last_seen = time.monotonic()   # last request from an open page
+        self.on_quit = None                 # set by serve(): stops the server
+
+    def quit(self) -> None:
+        """Save and stop running optimizer runs, then stop the server."""
+        self.runs.shutdown()
+        if self.on_quit:
+            self.on_quit()
+
+    def busy(self) -> bool:
+        return any(not r.done for r in self.runs.live.values())
 
     def example_files(self) -> list[dict]:
         if not self.examples or not self.examples.is_dir():
             return []
         out = []
         for p in sorted(self.examples.rglob("*.json")):
-            if p.name in ("expected.json",):
-                continue
+            if p.name in ("expected.json",) or p.name.startswith("best_"):
+                continue   # known results are in the shipped library
             try:
                 data = json.loads(p.read_text("utf-8"))
             except (OSError, ValueError):
@@ -473,6 +496,10 @@ class App:
             "runs": self.runs.list(),
             "runs_dir": str(self.runs.root.resolve()),
             "optimizer": _has_ortools(),
+            "library": [dict(e) for e in library.entries()],
+            "model_version": MODEL_VERSION,
+            "max_box_side": MAX_BOX_SIDE,
+            "version": __version__,
         }
 
     def load_layout(self, src: str, wait: bool = False) -> dict:
@@ -481,6 +508,10 @@ class App:
             path = (self.examples / ref).resolve()
             if self.examples.resolve() not in path.parents:
                 raise ValueError("bad example path")
+        elif kind == "library":
+            ref, _, box = ref.partition("@")
+            lay = library.load(ref, [int(v) for v in box.split("x")] if box else None)
+            return {**lay.to_dict(), "polished": True}
         elif kind == "run":
             live = self.runs.live.get(ref)
             return self.runs.polisher.get(self.runs._dir(ref), live is not None and not live.done, wait)
@@ -490,11 +521,9 @@ class App:
 
 
 def _has_ortools() -> bool:
-    try:
-        import ortools  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    """Can the optimizer actually run (its solver module and dependencies load)?"""
+    from .. import optimize
+    return optimize.cp_model is not None
 
 
 def _profile(d: dict | None) -> Profile:
@@ -547,6 +576,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(404, b"not found", "text/plain")
             return self._send(200, f.read_bytes(), _TYPES.get(f.suffix, "application/octet-stream"))
         app = self.app
+        if path == "/api/ping":
+            return self._json({"app": APP_ID, "version": __version__})
         if path == "/api/state":
             return self._guard(lambda: self._json(app.state()))
         if path == "/api/layout":
@@ -566,6 +597,13 @@ class Handler(BaseHTTPRequestHandler):
 
         def route():
             body = self._body()
+            app.last_seen = time.monotonic()
+            if path == "/api/heartbeat":
+                return self._json({"ok": True})
+            if path == "/api/quit":
+                live = sum(1 for r in app.runs.live.values() if not r.done)
+                threading.Thread(target=app.quit, daemon=True).start()
+                return self._json({"ok": True, "saving_runs": live})
             if path == "/api/check":
                 lay = Layout.from_dict(body["layout"])
                 return self._json(analyze(lay, _profile(body.get("profile"))))
@@ -628,6 +666,14 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, data, "application/octet-stream", extra)
 
 
+APP_ID = "ae2opt"
+DEFAULT_PORT = 8765
+# With no page open (no heartbeat) for this long, and no optimizer run going, the
+# server exits. Browsers slow timers in background tabs to about once a minute,
+# so this stays well above that.
+IDLE_EXIT_SECONDS = 180
+
+
 def make_server(port: int = 0, store: ProfileStore | None = None, runs_dir: Path | None = None,
                 examples: Path | None = REPO_EXAMPLES) -> ThreadingHTTPServer:
     app = App(store or ProfileStore(), runs_dir or data_dir() / "runs", examples)
@@ -638,19 +684,77 @@ def make_server(port: int = 0, store: ProfileStore | None = None, runs_dir: Path
     return server
 
 
-def serve(port: int = 0, open_browser: bool = True, runs_dir: Path | None = None) -> int:
-    server = make_server(port, runs_dir=runs_dir)
+def _running_instance(port: int) -> bool:
+    """Is this app already serving on the port?"""
+    import urllib.request
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/ping", timeout=1.5) as r:
+            return json.loads(r.read()).get("app") == APP_ID
+    except (OSError, ValueError):
+        return False
+
+
+def _say(msg: str) -> None:
+    """Print, or log to a file when there is no console (the packaged app)."""
+    if sys.stdout is not None:
+        print(msg, flush=True)
+        return
+    try:
+        log = data_dir() / "app.log"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("a", encoding="utf-8") as f:
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S ") + msg + "\n")
+    except OSError:
+        pass
+
+
+def serve(port: int | None = None, open_browser: bool = True, runs_dir: Path | None = None,
+          idle_exit: bool = True) -> int:
+    """Run the app. With no port given it uses 8765, so the browser keeps the page's
+    saved state (draft, settings) between launches, and a second launch just opens
+    the window of the one already running."""
+    fixed = port is None
+    port = DEFAULT_PORT if fixed else port
+    if port and _running_instance(port):
+        url = f"http://127.0.0.1:{port}/"
+        _say(f"AE2 controller optimizer is already running at {url}; opening it.")
+        if open_browser:
+            webbrowser.open(url)
+        return 0
+    try:
+        server = make_server(port, runs_dir=runs_dir)
+    except OSError:
+        if not fixed:
+            raise
+        server = make_server(0, runs_dir=runs_dir)   # port taken by another program
+    app = server.app
     url = f"http://127.0.0.1:{server.server_address[1]}/"
-    print(f"AE2 controller optimizer is running at {url}")
-    print("Leave this window open while you use the app; press Ctrl+C here to quit.")
+    _say(f"AE2 controller optimizer {__version__} is running at {url}")
+    _say("Quit from the app (top right), or press Ctrl+C here.")
+    stopping = threading.Event()
+
+    def shutdown():
+        if not stopping.is_set():
+            stopping.set()
+            threading.Thread(target=server.shutdown, daemon=True).start()
+
+    app.on_quit = shutdown
+
+    def watchdog():
+        while not stopping.wait(5):
+            if idle_exit and not app.busy() and time.monotonic() - app.last_seen > IDLE_EXIT_SECONDS:
+                _say("No app window open for a while; exiting.")
+                shutdown()
+
+    threading.Thread(target=watchdog, daemon=True).start()
     if open_browser:
         threading.Timer(0.3, lambda: webbrowser.open(url)).start()
     try:
         server.serve_forever(poll_interval=0.5)
     except KeyboardInterrupt:
-        print("\nStopping: saving any running optimizer runs...")
+        _say("Stopping: saving any running optimizer runs...")
     finally:
-        server.app.runs.shutdown()
+        app.runs.shutdown()
         server.server_close()
     return 0
 

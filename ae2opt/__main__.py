@@ -1,4 +1,4 @@
-"""Command line: python -m ae2opt <command> ...
+"""Command line: python -m ae2opt <command> ...   (no command: open the app)
 
   check LAYOUT.json [profile options]   simulate a layout and list rule violations
   optimize [--size X Y Z] [--time S] [--out FILE] [profile options]
@@ -86,8 +86,14 @@ def _run_command(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from . import __version__
+    if argv is None:
+        argv = sys.argv[1:]
+    if not argv:
+        argv = ["gui"]   # double-clicked app, or `python -m ae2opt` on its own
     ap = argparse.ArgumentParser(prog="ae2opt", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--version", action="version", version=f"ae2opt {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     def profile_options(p):
@@ -178,7 +184,9 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("profiles", help="list saved profiles")
 
     gu = sub.add_parser("gui", help="open the app in your browser (local only, works offline)")
-    gu.add_argument("--port", type=int, default=0, help="port on 127.0.0.1 (default: any free port)")
+    gu.add_argument("--port", type=int, help="port on 127.0.0.1 (default 8765, or any free port if taken)")
+    gu.add_argument("--stay", action="store_true",
+                    help="keep running with no app window open (default: exit after a few idle minutes)")
     gu.add_argument("--no-browser", action="store_true", help="don't open a browser window")
     gu.add_argument("--runs-dir", help="folder for optimizer runs (default: %%APPDATA%%/ae2opt/runs)")
 
@@ -272,7 +280,7 @@ def main(argv: list[str] | None = None) -> int:
             from pathlib import Path
             from .gui import serve
             return serve(args.port, open_browser=not args.no_browser,
-                         runs_dir=Path(args.runs_dir) if args.runs_dir else None)
+                         runs_dir=Path(args.runs_dir) if args.runs_dir else None, idle_exit=not args.stay)
         if args.cmd == "profiles":
             for p in ProfileStore().list():
                 print(f"{p.name}: normal={p.normal_channel_capacity} dense={p.dense_channel_capacity} "

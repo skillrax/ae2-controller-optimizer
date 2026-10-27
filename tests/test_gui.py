@@ -51,14 +51,29 @@ class GuiServerTests(unittest.TestCase):
         with self.assertRaises(urllib.error.HTTPError):
             self.get("/static/../server.py")
 
-    def test_state_lists_default_profile_and_examples(self):
+    def test_state_lists_profiles_library_and_test_structures(self):
+        from ae2opt import __version__
         state = json.loads(self.get("/api/state")[0])
         self.assertEqual(state["profiles"][0]["name"], DEFAULT_PROFILE.name)
         self.assertEqual(state["limits"]["size_max"], 63)
+        self.assertEqual(state["version"], __version__)
+        self.assertEqual(state["max_box_side"], 9)
+        lib = {e["id"]: e for e in state["library"]}
+        self.assertEqual(lib["3x3x3"]["tunnels"], 74)
         ids = {e["id"] for e in state["examples"]}
-        self.assertIn("best_3x3x3.json", ids)
-        ex = next(e for e in state["examples"] if e["id"] == "best_3x3x3.json")
-        self.assertEqual(ex["tunnels"], 74)
+        self.assertIn("basic_p2p.json", ids)
+        self.assertFalse(any(i.startswith("best_") for i in ids))   # those are in the library
+
+    def test_ping_identifies_the_app(self):
+        res = json.loads(self.get("/api/ping")[0])
+        self.assertEqual(res["app"], "ae2opt")
+
+    def test_library_layout_can_be_rotated_to_the_requested_box(self):
+        lay = json.loads(self.get("/api/layout?src=library:3x3x4@4x3x3")[0])
+        xs = [b["pos"] for b in lay["blocks"] if b["type"] == "controller"]
+        self.assertEqual(max(p[0] for p in xs) - min(p[0] for p in xs) + 1, 4)
+        with self.assertRaises(urllib.error.HTTPError):
+            self.get("/api/layout?src=library:3x3x4@5x3x3")
 
     def test_check_reports_cells_for_tooltips(self):
         res = self.post_json("/api/check", {"layout": basic_p2p().to_dict()})
@@ -107,7 +122,7 @@ class GuiServerTests(unittest.TestCase):
         self.assertIn(b"<html", body[:200].lower())
 
     def test_layout_sources(self):
-        lay = json.loads(self.get("/api/layout?src=example:best_3x3x3.json")[0])
+        lay = json.loads(self.get("/api/layout?src=example:basic_p2p.json")[0])
         self.assertTrue(lay["blocks"])
         for src in ("example:../pyproject.toml", "run:../x", "nope:1"):
             with self.assertRaises(urllib.error.HTTPError):
@@ -147,6 +162,24 @@ class GuiServerTests(unittest.TestCase):
         spec = _settings_to_spec({"box": [3, 2, 3], "mode": "prove"}, DEFAULT_PROFILE)
         self.assertEqual(spec.size, (3, 2, 3))
         self.assertEqual(spec.lns_time, 0.0)
+
+
+class QuitTests(unittest.TestCase):
+    def test_quit_stops_the_app(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            server = make_server(0, store=ProfileStore(Path(tmp) / "p"), runs_dir=Path(tmp) / "runs")
+            stopped = threading.Event()
+            server.app.on_quit = lambda: (stopped.set(), threading.Thread(target=server.shutdown).start())
+            t = threading.Thread(target=server.serve_forever, daemon=True)
+            t.start()
+            url = f"http://127.0.0.1:{server.server_address[1]}/api/quit"
+            req = urllib.request.Request(url, b"{}", {"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                self.assertTrue(json.loads(r.read())["ok"])
+            self.assertTrue(stopped.wait(10))
+            t.join(10)
+            self.assertFalse(t.is_alive())
+            server.server_close()
 
 
 if __name__ == "__main__":

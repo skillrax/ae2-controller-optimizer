@@ -290,3 +290,19 @@ table.runs td.num { font-family: var(--mono); }
   .stats { grid-template-columns: repeat(3, 1fr); }
   .brand small { display: none; }
 }
+
+/* ------------------------------------------------------------- 1.0 additions */
+.brand .ver { font: 500 11px var(--mono); color: var(--muted); margin-left: 4px; }
+.quit { margin-left: 8px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted); display: grid; place-items: center; cursor: pointer; }
+.quit:hover { color: var(--bad); border-color: rgba(255,100,100,.5); }
+.quit svg { width: 17px; height: 17px; }
+.known { margin-top: 10px; padding: 10px 12px; border-radius: 9px; font-size: 13px; border: 1px solid var(--line-2); background: var(--panel-2); }
+.known.proven { border-color: rgba(155,128,255,.55); background: linear-gradient(135deg, rgba(124,92,240,.18), rgba(77,227,255,.08)); }
+.known b { color: var(--text); }
+.known .row { margin-top: 8px; }
+.known .btn { padding: 4px 10px; font-size: 12.5px; }
+.lcard .tag { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; margin-bottom: 4px; }
+.lcard .tag.proven { background: rgba(155,128,255,.2); color: var(--accent-2); }
+.lcard .tag.best { background: rgba(77,227,255,.12); color: var(--cyan); }
+.closed { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; background: var(--bg); z-index: 200; }
+.closed p { color: var(--muted); }

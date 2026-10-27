@@ -193,6 +193,14 @@ def _resume(proc: subprocess.Popen) -> None:
         os.kill(proc.pid, signal.SIGCONT)
 
 
+def worker_command(run_dir: Path) -> list[str]:
+    """How to start the solver process. A packaged app (PyInstaller) has no
+    `python -m`, so it starts its own executable in worker mode."""
+    if getattr(sys, "frozen", False):
+        return [sys.executable, "_worker", str(run_dir)]
+    return [sys.executable, "-m", "ae2opt", "_worker", str(run_dir)]
+
+
 def start_worker(run_dir: Path, low_priority: bool) -> subprocess.Popen:
     (run_dir / STOP_FILE).unlink(missing_ok=True)
     log = (run_dir / LOG_FILE).open("a", encoding="utf-8")
@@ -201,13 +209,15 @@ def start_worker(run_dir: Path, low_priority: bool) -> subprocess.Popen:
         flags = 0x00000200  # CREATE_NEW_PROCESS_GROUP: Ctrl+C goes to the panel, not the solver
         if low_priority:
             flags |= 0x00004000  # BELOW_NORMAL_PRIORITY_CLASS
+        if getattr(sys, "frozen", False):
+            flags |= 0x08000000  # CREATE_NO_WINDOW: no console window for the solver
         kwargs["creationflags"] = flags
     else:
         kwargs["start_new_session"] = True
         if low_priority:
             kwargs["preexec_fn"] = lambda: os.nice(10)
     try:
-        return subprocess.Popen([sys.executable, "-m", "ae2opt", "_worker", str(run_dir)],
+        return subprocess.Popen(worker_command(run_dir),
                                 stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, **kwargs)
     finally:
         log.close()  # the worker has its own handle

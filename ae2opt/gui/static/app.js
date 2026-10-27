@@ -195,6 +195,20 @@ async function runCheck() {
   Inspector.render();
 }
 
+// --------------------------------------------------------------------------- shipped library
+// Same matching as ae2opt/library.py: a known result only counts for the exact rules.
+function libraryMatch(box, opts) {
+  const p = S.profile, want = [...box].sort((a, b) => a - b).join("x");
+  return (S.server.library || []).find(e => {
+    const r = e.rules;
+    return [...e.box].sort((a, b) => a - b).join("x") === want && r.normal === p.normal_channel_capacity
+      && r.dense === p.dense_channel_capacity && r.model === S.server.model_version && p.channels_enabled
+      && r.exterior === opts.exterior && r.interior === opts.interior && r.anchor_free === opts.anchor_free;
+  }) || null;
+}
+const libSrc = (e, box) => `library:${e.id}${box ? "@" + box.join("x") : ""}`;
+const libTitle = (e, box) => `${(box || e.box).join("×")} · ${e.status === "proven" ? "proven optimal" : "best known"} (${e.tunnels} tunnels)`;
+
 // --------------------------------------------------------------------------- tools
 const ICON = {
   select: '<path d="M6 3l12 7-5.2 1.6L10.5 17z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>',
@@ -688,6 +702,7 @@ const Opt = {
     $$("#modeSeg button").forEach(b => b.onclick = () => this.setMode(b.dataset.mode));
     this.setMode(store.get("mode", "improve"));
     $("#boxLock").onchange = () => this.renderBox();
+    for (const id of ["optExterior", "optInterior", "optAnchorFree"]) $("#" + id).addEventListener("change", () => this.renderKnown());
     $("#btnStart").onclick = () => this.start();
     $("#btnPause").onclick = () => this.act("pause");
     $("#btnResume").onclick = () => this.act("resume");
@@ -722,16 +737,21 @@ const Opt = {
     $("#mainSolve").closest("details").style.display = "";
   },
 
+  // The box can't exceed the profile's controller size, nor the optimizer's own limit.
+  maxBox() { return S.profile.max_controller_size.map(v => Math.min(v, S.server.max_box_side)); },
+
   syncLimits() {
     if (!this.box) this.box = store.get("box", null);
-    const max = S.profile.max_controller_size;
+    const max = this.maxBox();
     this.box = (this.box || [...max]).map((v, i) => Math.min(v, max[i]));
-    $("#optProfileNote").innerHTML = `Uses <b>${esc(S.profile.name)}</b>: ${S.profile.normal_channel_capacity} channels per smart cable, ${S.profile.dense_channel_capacity} per dense, controllers up to ${max.join("×")}.`;
+    const cfg = S.profile.max_controller_size;
+    $("#optProfileNote").innerHTML = `Uses <b>${esc(S.profile.name)}</b>: ${S.profile.normal_channel_capacity} channels per smart cable, ${S.profile.dense_channel_capacity} per dense, controllers up to ${cfg.join("×")}.`
+      + (cfg.some(v => v > S.server.max_box_side) ? ` The optimizer stops at ${S.server.max_box_side} per side: bigger searches don't finish usefully, so repeat a smaller build instead.` : "");
     this.renderBox();
   },
 
   renderBox() {
-    const max = S.profile.max_controller_size, lock = $("#boxLock").checked, el = $("#boxSliders");
+    const max = this.maxBox(), lock = $("#boxLock").checked, el = $("#boxSliders");
     if (lock) { const m = Math.min(...max); const v = Math.min(Math.max(...this.box), m); this.box = [v, v, v].map((x, i) => Math.min(x, max[i])); }
     const axes = lock ? [["Size", 0, Math.min(...max)]] : [["X", 0, max[0]], ["Y", 1, max[1]], ["Z", 2, max[2]]];
     el.innerHTML = axes.map(([n, i, m]) => `<div class="axis"><b>${n === "Size" ? "↔" : n}</b><input type="range" min="1" max="${m}" value="${this.box[i]}" data-i="${i}"><output>${this.box[i]} / ${m}</output></div>`).join("");
@@ -755,7 +775,26 @@ const Opt = {
     const side = [P(w, 0), P(w + d, d), P(w + d, h + d), P(w, h)].join(" ");
     const vol = x * y * z;
     $("#boxPreview").innerHTML = `<svg viewBox="0 0 64 56"><polygon points="${top}" fill="#4a5262"/><polygon points="${side}" fill="#2d3442"/><polygon points="${front}" fill="#373e4a" stroke="#4de3ff" stroke-width=".8"/></svg>
-      <div><b style="color:var(--text)">${x}×${y}×${z}</b> · ${vol} cells<br>${vol <= 48 ? "Small: proofs usually take minutes." : vol <= 64 ? "Medium: a proof can take hours." : "Large: expect a very good build, not a proof."}</div>`;
+      <div><b style="color:var(--text)">${x}×${y}×${z}</b> · ${vol} cells<br>${vol <= 48 ? "Small: proofs usually take minutes." : vol <= 64 ? "Medium: a proof can take hours." : vol <= 343 ? "Large: expect a very good build, not a proof." : "Very large: slow to search; a run needs hours to get good."}</div>`;
+    this.renderKnown();
+  },
+
+  renderKnown() {
+    const el = $("#knownNote"), s = this.settings(), e = libraryMatch(this.box, s);
+    this.known = e;
+    el.hidden = !e;
+    $("#btnStart").textContent = e?.status === "proven" ? "Run anyway" : "Start optimizing";
+    if (!e) return;
+    el.className = `known ${e.status === "proven" ? "proven" : ""}`;
+    el.innerHTML = e.status === "proven"
+      ? `<b>Already proven:</b> ${e.tunnels} tunnels is the best possible for this box with these settings (${e.controllers} controllers, ${e.trunks} trunk${e.trunks === 1 ? "" : "s"}). Running it again can't find more.
+         <div class="row"><button class="btn primary" id="btnOpenKnown">Open it</button></div>`
+      : `<b>Best known:</b> ${e.tunnels} tunnels (proven maximum ${e.upper}), ${e.controllers} controllers, ${e.trunks} trunks.
+         <div class="row"><button class="btn" id="btnOpenKnown">Open it</button>
+         <label class="check"><input type="checkbox" id="startFromKnown" ${store.get("startKnown", true) ? "checked" : ""}> start the run from it</label></div>`;
+    $("#btnOpenKnown").onclick = () => openLibrary(e, this.box);
+    const cb = $("#startFromKnown");
+    if (cb) cb.onchange = () => store.set("startKnown", cb.checked);
   },
 
   labels() {
@@ -773,6 +812,7 @@ const Opt = {
       exterior: $("#optExterior").checked, interior: $("#optInterior").checked,
       anchor_free: $("#optAnchorFree").checked, symmetry: $("#optSymmetry").checked,
       normal_priority: $("#optPriority").checked,
+      start_library: !!(this.known && this.known.status !== "proven" && $("#startFromKnown")?.checked),
     };
   },
 
@@ -887,6 +927,13 @@ const Opt = {
   },
 };
 
+async function openLibrary(e, box) {
+  try {
+    setLayout(await api(`/api/layout?src=${encodeURIComponent(libSrc(e, box))}`), { title: libTitle(e, box) });
+    showTab("design");
+  } catch (err) { toast(err.message, "bad"); }
+}
+
 // Opens a run's best layout in the designer, waiting for its wiring to be tidied.
 async function openRun(id, title) {
   busy("Tidying the wiring (fewest trunks)…");
@@ -962,17 +1009,35 @@ const Lib = {
 
   init() {
     this.thumbViewer = new Viewer($("#thumbCanvas"), { interactive: false, preserve: true });
+    this.renderKnown();
     this.renderExamples(S.server.examples);
   },
 
-  card(src, title, meta, folder) {
+  card(src, title, meta, folder, status) {
     const t = this.thumbs.get(src);
+    const tag = status ? `<span class="tag ${status === "proven" ? "proven" : "best"}">${status === "proven" ? "Proven optimal" : "Best known"}</span>` : "";
     return `<div class="lcard" data-src="${esc(src)}" data-title="${esc(title)}"><div class="thumb">${t ? `<img src="${t}" alt="">` : `<div class="spinner"></div>`}</div>
-      <div class="body">${folder ? `<div class="folder">${esc(folder)}</div>` : ""}<div class="name">${esc(title)}</div><div class="meta">${meta}</div></div></div>`;
+      <div class="body">${tag}${folder ? `<div class="folder">${esc(folder)}</div>` : ""}<div class="name">${esc(title)}</div><div class="meta">${meta}</div></div></div>`;
+  },
+
+  renderKnown() {
+    const el = $("#libKnown");
+    const lib = [...(S.server.library || [])].sort((a, b) => (a.status === "proven" ? 0 : 1) - (b.status === "proven" ? 0 : 1)
+      || a.box[0] * a.box[1] * a.box[2] - b.box[0] * b.box[1] * b.box[2]);
+    $("#libKnownNote").textContent = lib.length ? `· default config (8 / 32), coloured wiring · ${lib.filter(e => e.status === "proven").length} proven, ${lib.filter(e => e.status !== "proven").length} best known` : "";
+    el.innerHTML = lib.length ? lib.map(e => this.card(libSrc(e), `${e.box.join("×")}`,
+      `${e.tunnels} tunnels${e.status === "proven" ? "" : ` (max ${e.upper})`} · ${e.controllers} controllers · ${e.trunks} trunk${e.trunks === 1 ? "" : "s"}`,
+      "", e.status)).join("") : `<p class="none">No library bundled.</p>`;
+    el.onclick = ev => {
+      const c = ev.target.closest(".lcard");
+      if (c) openLibrary(S.server.library.find(e => libSrc(e) === c.dataset.src));
+    };
+    this.thumbAll(el);
   },
 
   renderExamples(list) {
     const el = $("#libExamples");
+    $("#libExamplesHead").hidden = el.hidden = !list.length;
     el.innerHTML = list.length ? list.map(x => this.card(`example:${x.id}`, x.name,
       `${x.controllers} controllers · ${x.tunnels} input tunnels`, x.folder === "." ? "" : x.folder)).join("")
       : `<p class="none">No example files found.</p>`;
@@ -1179,11 +1244,23 @@ function initKeys() {
   });
 }
 
+async function quitApp() {
+  const live = (Opt.runs || []).filter(r => r.live).length;
+  if (!confirm(live ? `Quit? ${live} running optimizer run${live > 1 ? "s" : ""} will be saved and stopped; you can continue ${live > 1 ? "them" : "it"} later.` : "Quit the app?")) return;
+  try { await api("/api/quit", {}); } catch { /* already gone */ }
+  document.body.innerHTML = `<div class="closed"><h2>AE2 Controller Optimizer has closed</h2>
+    <p>${live ? "Your runs are being saved. " : ""}You can close this tab. Start the app again to come back.</p></div>`;
+}
+
 async function boot() {
   try { S.server = await api("/api/state"); }
   catch (err) { document.body.innerHTML = `<div class="empty"><h2>Can't reach the app server</h2><p>${esc(err.message)}. Start it with <code>python -m ae2opt gui</code>.</p></div>`; return; }
   setProfiles(S.server.profiles);
+  $("#appVersion").textContent = `v${S.server.version}`;
   $("#profileSelect").onchange = e => useProfile(e.target.value);
+  // Tells the server a page is open; with none open (and no run going) it exits.
+  setInterval(() => api("/api/heartbeat", {}).catch(() => {}), 20000);
+  $("#btnQuit").onclick = quitApp;
   $$(".tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
   Design.init();
   initDesignBar();
@@ -1194,8 +1271,8 @@ async function boot() {
   const draft = store.get("draft", null);
   if (draft?.layout?.blocks?.length) setLayout(draft.layout, { title: draft.title });
   else {
-    const ex = S.server.examples.find(x => x.id === "best_3x3x3.json");
-    if (ex) setLayout(await api(`/api/layout?src=example:${encodeURIComponent(ex.id)}`), { title: "Coloured 3×3×3 (74 tunnels)" });
+    const e = (S.server.library || []).find(x => x.id === "3x3x3");
+    if (e) setLayout(await api(`/api/layout?src=${encodeURIComponent(libSrc(e))}`), { title: libTitle(e) });
     else setLayout({ blocks: [] });
   }
   showTab(store.get("tab", "design"));

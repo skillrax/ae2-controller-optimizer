@@ -4,6 +4,8 @@ See MECHANICS.md for the game rules this package implements and PLAN.md for
 the overall design.
 """
 
+__version__ = "1.0.0"
+
 from .profile import DEFAULT_PROFILE, Profile, ProfileError, ProfileStore
 from .geometry import Direction
 from .layout import (

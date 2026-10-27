@@ -1,8 +1,10 @@
 [project]
 name = "ae2opt"
-version = "0.1.0"
+version = "1.0.0"
 description = "Offline builder, simulator and optimizer for AE2 1.12.2 ME controller / P2P builds"
 requires-python = ">=3.11"
+license = "MIT"
+readme = "README.md"
 dependencies = []
 
 [project.optional-dependencies]
@@ -13,7 +15,7 @@ optimize = ["ortools==9.15.6755"]  # pinned: see requirements.txt
 ae2opt = "ae2opt.__main__:main"
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -21,3 +23,4 @@ packages = ["ae2opt", "ae2opt.gui"]
 
 [tool.setuptools.package-data]
 "ae2opt.gui" = ["static/*"]
+"ae2opt" = ["library/*.json"]
