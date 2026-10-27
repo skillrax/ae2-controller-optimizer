@@ -170,6 +170,23 @@ The earlier plan treated the objective as "maximize exposed faces". R7–R8 chan
 
 ---
 
+## 5b. Wiring without anchors (coloured groups, dense trunks)
+
+AE2 picks routes greedily (§4). So the optimizer uses wiring where **any** route stays
+within capacity. That removes the need to force routes with anchors.
+
+| # | Rule | Why it's safe |
+|---|---|---|
+| W1 | **Smart group:** a connected set of same-colour smart cables, with at most the normal capacity (8) of tunnels in total. | Every channel in a smart cable belongs to one of the group's own tunnels, so no smart cable can exceed 8. |
+| W2 | A group touches dense cable **only at its own attachment** (one smart cell, one dense parent), or leaves the build directly. | Nothing can route *through* a group, so W1 holds. |
+| W3 | **Dense trunk:** fluix dense smart cables in a tree with one exit, at most the dense capacity (32) in total, **never next to a controller**, and only touching other dense cable as parent/child. | Every dense cable carries at most its trunk's total; trunks never merge, and a dense cable never connects to a controller. |
+| W4 | **Groups that touch get different dyes.** Fluix connects to every colour, so dense cable may only touch its own groups (W2). | Cables of different dyes don't connect (`AEColor.matches`, §2), so groups stay separate without anchors. Controllers are uncoloured, so W5 is still needed. |
+| W5 | **Anchor-free** (default): a smart cable next to a controller face carries a tunnel on that face. | R6 without anchors. |
+
+In-game status: R6, the 8-channel cable limit, 32 per dense cable, and tunnel behaviour are
+confirmed (examples/ingame/RESULTS.md). Colour separation is standard AE2 behaviour and is in
+the source, but isn't yet confirmed by an in-game test of a coloured build.
+
 ## 6. AE2 Unofficial Extended Life differences
 
 The mechanics are the same, but these are config-driven (`core/AEConfig.java`):

@@ -3,20 +3,25 @@
 The model places, inside a box (default: the profile's max controller size):
   * controller blocks             x[c]
   * input tunnels on their faces  f[c, d]   (tunnel in cell c+d, facing c)
-  * tunnel-network cable cells    k[n]      (box gaps and a 1-block margin)
+  * tunnel-network cable cells    k[n] = s[n] (smart) + d[n] (dense)
+                                  (box gaps and a `margin`-block layer around it)
 and routes every tunnel's tunnel-network channel to the outside with an
-integer flow that respects cable capacities. Rules from MECHANICS.md section 5:
+integer flow that respects cable capacities. Rules from MECHANICS.md section 5
+(wiring rules W1-W4 from section 5b):
 
   R1  box size                    by construction
   R2  one connected structure     single-commodity flow from a root controller
   R3  cross rule                  at most one full opposite pair per controller
   R4  a face counts only with a tunnel on it      objective counts f
   R5  tunnel cells hold a normal cable            f <= k, cells next to a face are normal
-  R6  uncapped faces merge networks               every non-tunnel face next to a
-                                                  cable cell gets a cable anchor
+  R6  uncapped faces merge networks               anchor_free (default): a smart cable
+                                                  next to a controller face carries a
+                                                  tunnel on it; otherwise an anchor
   R7  tunnel cells need an exit   flow conservation: channels must leave the cell
   R8  normal cable carries <= normal capacity     node capacity on the flow
   R9-R11  hold for generated builds (no nesting, separate powered networks)
+  W1-W4  coloured groups of <= normal capacity, fluix dense trunks of <= dense
+         capacity that never touch controllers, single attachments: see section 5b
 
 The flow model is an upper bound on AE2's greedy pathing, so every solution is
 re-checked with the simulator. If the simulator delivers fewer tunnels, that
@@ -56,6 +61,12 @@ class OptimizeSpec:
     exterior_tunnels: bool = True
     # Allow tunnel cells and cable corridors in gaps inside the box.
     interior_tunnels: bool = True
+    # Layers of cable space around the box (1 = tunnel cells only; 2 adds a layer
+    # where dense collectors can merge groups into fuller trunks).
+    margin: int = 2
+    # Every controller face next to a cable carries a tunnel, so the build needs no
+    # cable anchors at all. Off: unused faces next to cables get anchors instead.
+    anchor_free: bool = True
     # Among layouts with the most tunnels, prefer fewer controller blocks.
     minimize_controllers: bool = True
     # If set: use the fewest controllers that still reach this many tunnels.
@@ -141,12 +152,14 @@ def _cells(size) -> list[Pos]:
 
 
 class _Region:
-    def __init__(self, size, exterior: bool):
+    def __init__(self, size, exterior: bool, margin: int = 1):
         self.size = size
+        self.margin = margin if exterior else 0
         self.box = _cells(size)
         self.box_set = set(self.box)
         if exterior:
-            m = [(x - 1, y - 1, z - 1) for x, y, z in _cells((size[0] + 2, size[1] + 2, size[2] + 2))]
+            g = margin
+            m = [(x - g, y - g, z - g) for x, y, z in _cells((size[0] + 2 * g, size[1] + 2 * g, size[2] + 2 * g))]
             self.cells = m
         else:
             self.cells = list(self.box)
@@ -164,7 +177,7 @@ class _Region:
 class _Model:
     def __init__(self, spec: OptimizeSpec, profile: Profile, size):
         self.spec, self.profile = spec, profile
-        self.r = r = _Region(size, spec.exterior_tunnels)
+        self.r = r = _Region(size, spec.exterior_tunnels, spec.margin)
         self.m = m = cp_model.CpModel()
         N = len(r.box)
         normal, dense = profile.normal_channel_capacity, profile.dense_channel_capacity
@@ -184,15 +197,21 @@ class _Model:
         def X(p):
             return self.x.get(p)
 
-        # cable cells
-        self.k = {}
+        # cable cells: k = smart (s, normal capacity, holds tunnels) or dense (d)
+        self.k, self.s, self.d = {}, {}, {}
         for n in r.cells:
             v = m.NewBoolVar(f"k{n}")
+            sv, dv = m.NewBoolVar(f"s{n}"), m.NewBoolVar(f"d{n}")
+            m.Add(v == sv + dv)
             if n in blocked or (r.in_box(n) and not spec.interior_tunnels):
                 m.Add(v == 0)
             if X(n) is not None:
                 m.AddImplication(v, X(n).Not())
-            self.k[n] = v
+            # A dense cable next to a controller would connect to it (no anchors).
+            for d in Direction:
+                if X(step(n, d)) is not None:
+                    m.AddImplication(dv, X(step(n, d)).Not())
+            self.k[n], self.s[n], self.d[n] = v, sv, dv
 
         # tunnels on faces
         self.f = {}
@@ -204,7 +223,10 @@ class _Model:
                     continue
                 v = m.NewBoolVar(f"f{c}{d.name}")
                 m.AddImplication(v, self.x[c])
-                m.AddImplication(v, self.k[n])
+                m.AddImplication(v, self.s[n])
+                if spec.anchor_free:
+                    # a smart cable next to a controller face carries a tunnel on it
+                    m.AddBoolOr([self.x[c].Not(), self.s[n].Not(), v])
                 self.f[(c, d)] = v
                 into[n].append(v)
 
@@ -259,15 +281,14 @@ class _Model:
             inn = [gflow[(n, c)] for _, n in ((d, step(c, d)) for d in Direction) if (n, c) in gflow]
             m.Add(sum(out) - sum(inn) == supply[c] - self.x[c])
 
-        # R5/R7/R8: tunnel-network routing flow from tunnel cells to outside the region
-        self.cap = {}
-        for n in r.cells:
-            touches_box = any(step(n, d) in r.box_set for d in Direction)
-            self.cap[n] = normal if touches_box else dense
+        # R5/R7/R8: tunnel-network routing flow from tunnel cells to outside the region.
         # Routing is a forest: every cable cell has exactly one parent (a neighbouring
-        # cable cell, or the outside). Extraction caps every other cable-to-cable
-        # side with an anchor, so AE2's greedy BFS has exactly one route per
-        # tunnel and the simulator agrees with the model.
+        # cable cell, or the outside). A smart cell's subtree of smart cells is a
+        # "group" (at most the normal capacity in total); a dense cell's tree is a
+        # trunk (at most the dense capacity). Wiring rules below make every group
+        # touch dense cable only at its own attachment and keep trunks apart, and
+        # extraction gives touching groups different colours, so whatever route
+        # AE2's pathing picks, no cable can exceed its capacity. No cable anchors.
         self.h, self.par = {}, {}
         for n in r.cells:
             for d in Direction:
@@ -276,20 +297,25 @@ class _Model:
                     p = m.NewBoolVar(f"par{n}{d.name}")
                     m.AddImplication(p, self.k[o])
                     v = m.NewIntVar(0, dense, f"h{n}{d.name}")
-                    # cut "cap": an edge carries at most what either end node can hold
-                    m.Add(v <= (min(self.cap[n], self.cap[o]) if "cap" in cuts else dense) * p)
+                    m.Add(v <= dense * p)
                     self.h[(n, o)] = v
                     self.par[(n, o)] = p
         for (n, o), p in self.par.items():
             if n < o:
                 m.AddBoolOr([p.Not(), self.par[(o, n)].Not()])
+                # dense next to dense only as parent/child (trunks never touch)
+                m.AddBoolOr([self.d[n].Not(), self.d[o].Not(), p, self.par[(o, n)]])
+            # smart next to dense only at the smart cell's own attachment
+            m.AddBoolOr([self.s[n].Not(), self.d[o].Not(), p])
+            # a dense cell's parent is dense (or the outside)
+            m.AddBoolOr([self.d[n].Not(), p.Not(), self.d[o]])
         self.sink, self.par_sink = {}, {}
         for n in r.cells:
             outs = r.outward(n)
             if outs:
                 p = m.NewBoolVar(f"parsink{n}")
                 v = m.NewIntVar(0, dense * len(outs), f"sink{n}")
-                m.Add(v <= (self.cap[n] if "cap" in cuts else dense * len(outs)) * p)
+                m.Add(v <= dense * p)
                 self.sink[n], self.par_sink[n] = v, p
         for n in r.cells:
             parents = [self.par[(n, step(n, d))] for d in Direction if (n, step(n, d)) in self.par]
@@ -306,8 +332,7 @@ class _Model:
                 sink = self.sink[n] if n in self.sink else 0
                 m.Add(sum(out) + sink - sum(inn) == t)
             if inn or into[n]:
-                # cut "cap": scale by k so a fractional cable cell gets fractional capacity
-                m.Add(t + sum(inn) <= self.cap[n] * (self.k[n] if "cap" in cuts else 1))
+                m.Add(t + sum(inn) <= normal * self.s[n] + dense * self.d[n])
             if "exit" in cuts and into[n]:
                 # a tunnel cell keeps one side free for its parent
                 m.Add(t <= 5 * self.k[n])
@@ -417,23 +442,64 @@ class _Model:
 
 # --------------------------------------------------------------------------- extraction
 
+DYES = ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+        "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black")
+
+
+def _colour_groups(groups: dict, adjacent: dict) -> dict:
+    """Give every smart group a dye so touching groups differ (largest degree
+    first, smallest free colour). Returns {group: dye or None if it ran out}."""
+    colour = {}
+    for g in sorted(groups, key=lambda g: (-len(adjacent.get(g, ())), g)):
+        used = {colour[o] for o in adjacent.get(g, ()) if o in colour}
+        colour[g] = next((c for c in DYES if c not in used), None)
+    return colour
+
+
 def _extract(model: _Model, val) -> tuple[Layout, Layout, set, list[Pos]]:
-    """Build the layout from a solution; `val(var)` reads a variable's value."""
+    """Build the layout from a solution; `val(var)` reads a variable's value.
+
+    Smart cells become normal smart cable coloured per group; dense cells become
+    fluix dense smart cable. Touching groups get different dyes, so the only cable
+    anchors left are on controller faces without a tunnel (none when anchor_free)."""
     r = model.r
     xs = {c for c, v in model.x.items() if val(v)}
     faces = {k for k, v in model.f.items() if val(v)}
-    # The model may switch on cable cells it does not need; keep only cells that
-    # hold a tunnel or carry routing flow.
-    busy = {k[1] for k, v in model.h.items() if val(v)} | \
-           {k[0] for k, v in model.h.items() if val(v)} | \
-           {n for n, v in model.sink.items() if val(v)} | \
-           {step(c, d) for c, d in faces}
-    cables = {n for n, v in model.k.items() if val(v) and n in busy}
+    # Keep only cables on a tunnel's route to the outside: start at every tunnel
+    # cell and follow parents to an exit. The model may switch on other cells, and
+    # may even leave a loop of parents circulating flow that no tunnel uses
+    # (conservation allows it); neither is part of the build.
+    all_parent = {n: o for (n, o), p in model.par.items() if val(p)}
+    roots = {n for n, p in model.par_sink.items() if val(p)}
+    cables = set()
+    for start in {step(c, d) for c, d in faces}:
+        n, path = start, []
+        while n not in cables and n not in path:
+            path.append(n)
+            if n in roots or n not in all_parent:
+                break
+            n = all_parent[n]
+        cables.update(path)
+    dense = {n for n in cables if val(model.d[n])}
     root = min(xs)
+    parent = {n: o for n, o in all_parent.items() if n in cables and o in cables}
+    exits = sorted(n for n in cables if n in roots)
 
-    tree = {(n, o) for (n, o), p in model.par.items()
-            if val(p) and n in cables and o in cables}
-    exits = sorted(n for n in cables if n in model.par_sink and val(model.par_sink[n]))
+    # Smart groups: follow parents while they stay smart.
+    def group_of(n):
+        seen = set()
+        while n in parent and parent[n] not in dense and n not in seen:
+            seen.add(n)
+            n = parent[n]
+        return n
+    group = {n: group_of(n) for n in cables if n not in dense}
+    adjacent: dict = {}
+    for n in group:
+        for d in Direction:
+            o = step(n, d)
+            if o in group and group[o] != group[n]:
+                adjacent.setdefault(group[n], set()).add(group[o])
+    colour = _colour_groups(set(group.values()), adjacent)
 
     lay = Layout()
     for c in sorted(xs):
@@ -446,15 +512,13 @@ def _extract(model: _Model, val) -> tuple[Layout, Layout, set, list[Pos]]:
             if o in xs:
                 # R6: every controller face next to a cable cell holds a part.
                 parts[d] = P2PTunnel(next(freq)) if (o, d.opposite) in faces else CableAnchor()
-            elif o in cables and (n, o) not in tree and (o, n) not in tree and n < o:
-                # Not a routing edge: cap it so AE2 cannot path through it.
-                parts[d] = CableAnchor()
-            elif o not in r.cell_set and n not in exits:
-                # Only exit cells may touch the outside (where the tunnel network is).
-                parts[d] = CableAnchor()
-        has_bus_parts = any(not isinstance(p, CableAnchor) for p in parts.values())
-        dense_ok = not has_bus_parts and model.cap[n] > model.profile.normal_channel_capacity
-        lay.cable(n, CableType.DENSE if dense_ok else CableType.NORMAL, parts=parts)
+            elif n in group and o in group and group[o] != group[n] \
+                    and (colour[group[n]] is None or colour[group[o]] is None) and n < o:
+                parts[d] = CableAnchor()   # out of dyes (very rare): separate with an anchor
+        if n in dense:
+            lay.cable(n, CableType.DENSE, "transparent", parts)
+        else:
+            lay.cable(n, CableType.NORMAL, colour[group[n]] or "transparent", parts)
 
     return lay, _harness(lay, r, exits), faces, exits
 
@@ -724,18 +788,23 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
     # 3b. Polish: same controllers and tunnels, fewest cable cells (shorter routes,
     #     fewer anchors). Cannot change the score, so it never affects results.
     if spec.polish_time > 0 and not search.stop.is_set():
-        search.emit("phase", phase="polish: shortening cable routes")
+        search.emit("phase", phase="polish: fewest trunks, then fewest cables")
         target = model.clone()
         model.fix_shape(target, best.xs(model))
         for v in model.f.values():
             target.Add(v == best.vec[v.Index()])
-        target.Minimize(sum(model.k.values()))
-        _, _, vec, score = search.run(target, spec.polish_time, hint=best, phase="polish")
+        # Fewest trunks (exits to the tunnel network) first, then fewest cables.
+        target.Minimize((len(model.k) + 1) * sum(model.par_sink.values()) + sum(model.k.values()))
+        # Scale with the search: quick problems get a quick polish (2 s minimum).
+        seconds = min(spec.polish_time, max(2.0, time.monotonic() - search.started))
+        _, _, vec, score = search.run(target, seconds, hint=best, phase="polish")
         if vec is not None and score == best.score:
-            before = sum(best.vec[v.Index()] for v in model.k.values())
-            after = sum(vec[v.Index()] for v in model.k.values())
-            if after < before:
-                notes.append(f"polish: cable cells {before} -> {after}")
+            def count(v_, vars_):
+                return sum(v_[x.Index()] for x in vars_)
+            b_t, a_t = count(best.vec, model.par_sink.values()), count(vec, model.par_sink.values())
+            b_c, a_c = count(best.vec, model.k.values()), count(vec, model.k.values())
+            if (a_t, a_c) < (b_t, b_c):
+                notes.append(f"polish: trunks {b_t} -> {a_t}, cable cells {b_c} -> {a_c}")
             best = _Incumbent(vec, score, best.source)
 
     # 4. Build, simulate, and repair anything AE2's pathing would not channel.

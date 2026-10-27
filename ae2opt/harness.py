@@ -31,6 +31,7 @@ from .layout import (
     CableAnchor, CableBus, CableType, Controller, DevicePart, EnergyAcceptor, Layout,
     P2PTunnel, TunnelPort,
 )
+from .graph import color_matches
 from .profile import DEFAULT_PROFILE, Profile
 from .rules import Report, check
 from .sim import ONLINE
@@ -58,6 +59,7 @@ class TestRig:
     tunnel_controllers: list[Pos]
     outputs: list[OutputRig]
     removed_tunnel: tuple[Pos, Direction] | None
+    margin: int = 1
     collector_roots: list[Pos] = field(default_factory=list)
     exits: list[Pos] = field(default_factory=list)
     expected: dict = field(default_factory=dict)
@@ -90,12 +92,12 @@ def _connected_cable_sides(lay: Layout, pos: Pos) -> list[Direction]:
         o = lay.get(step(pos, d))
         if d in b.parts:
             continue
-        if isinstance(o, CableBus) and d.opposite not in o.parts:
+        if isinstance(o, CableBus) and d.opposite not in o.parts and color_matches(b.color, o.color):
             out.append(d)
     return out
 
 
-def _tree_load(lay: Layout, exit_pos: Pos, size) -> int:
+def _tree_load(lay: Layout, exit_pos: Pos, size, margin: int = 1) -> int:
     """Input tunnels in the cable component (inside the build) that leaves via this exit."""
     seen, todo, tunnels = set(), [exit_pos], 0
     while todo:
@@ -107,7 +109,7 @@ def _tree_load(lay: Layout, exit_pos: Pos, size) -> int:
         tunnels += sum(1 for p in b.parts.values() if isinstance(p, P2PTunnel) and not p.output)
         for d in _connected_cable_sides(lay, n):
             o = step(n, d)
-            if _layer(o, size) <= 1:
+            if _layer(o, size) <= margin:
                 todo.append(o)
     return tunnels
 
@@ -118,7 +120,7 @@ class _Forest:
     load: dict = field(default_factory=dict)      # cell -> channels passing through it
 
 
-def _collector(attach, contacts: set, size, cap: int, blocked: set) -> _Forest:
+def _collector(attach, contacts: set, size, cap: int, blocked: set, layers=(2, 3)) -> _Forest:
     """Connect every attach cell to a snake contact with dense-cable trees in the
     layers 2 and 3 blocks out from the box (minus `blocked` cells), keeping
     each cell's load within `cap`.
@@ -144,7 +146,7 @@ def _collector(attach, contacts: set, size, cap: int, blocked: set) -> _Forest:
             n = q.popleft()
             for d in Direction:
                 o = step(n, d)
-                if o in prev or _layer(o, size) not in (2, 3) or o in reserved or o in blocked:
+                if o in prev or _layer(o, size) not in layers or o in reserved or o in blocked:
                     continue
                 if o in f.parent:
                     if all(f.load[c] + load <= cap for c in root_path(o)):
@@ -191,10 +193,9 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
                 raise ValueError(f"controller {pos} is outside the box {size}")
             lay.controller(pos)  # power comes from a real cell below, not a flag
         else:
-            if _layer(pos, size) > 1:
-                raise ValueError(f"{pos} is more than one block outside the box; "
-                                 "test rigs need builds made with exterior tunnel cells")
             lay.place(pos, b)
+    # The build's cable space reaches `m` blocks out; the rig starts beyond it.
+    m = max([_layer(p, size) for p, b in lay.blocks.items() if not isinstance(b, Controller)] + [1])
 
     # 1. Main-network power.
     removed = None
@@ -208,13 +209,15 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
         if main_power:
             break
     if main_power is None:
-        # Sacrifice one outer tunnel cell that routes nothing but itself.
+        # Sacrifice one outer tunnel cell at the end of its group: one tunnel, at
+        # most one connected cable, and no side open to the outside (not an exit).
         for pos in lay.positions():
             b = lay.get(pos)
             if not (isinstance(b, CableBus) and _layer(pos, size) == 1):
                 continue
             tunnels = [(d, p) for d, p in b.parts.items() if isinstance(p, P2PTunnel)]
-            if len(tunnels) == 1 and not _connected_cable_sides(lay, pos):
+            exit_side = any(_layer(step(pos, d), size) == m + 1 and d not in b.parts for d in Direction)
+            if len(tunnels) == 1 and len(_connected_cable_sides(lay, pos)) <= 1 and not exit_side:
                 removed = (pos, tunnels[0][0])
                 main_power = pos
                 lay.remove(pos)
@@ -224,10 +227,10 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     lay.energy(main_power)
     _anchor_neighbours(lay, main_power)
 
-    lo, hi = [-2, -2, -2], [s + 1 for s in size]
+    lo, hi = [-(m + 1)] * 3, [s + m for s in size]
 
     # 2. Tunnel-network controller: a snake under the collector, plus its power cell.
-    w, depth = min(7, size[0] + 4), min(7, size[2] + 4)
+    w, depth = min(7, size[0] + 2 * m + 2), min(7, size[2] + 2 * m + 2)
     snake = []
     for row, dz in enumerate(range(0, depth, 2)):
         snake += [(lo[0] + dx, lo[1] - 1, lo[2] + dz) for dx in range(w)]
@@ -262,9 +265,9 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     exits: dict[Pos, Pos] = {}
     for pos in lay.positions():
         b = lay.get(pos)
-        if not (isinstance(b, CableBus) and _layer(pos, size) == 1):
+        if not (isinstance(b, CableBus) and _layer(pos, size) == m):
             continue
-        open_out = [d for d in Direction if _layer(step(pos, d), size) == 2 and d not in b.parts]
+        open_out = [d for d in Direction if _layer(step(pos, d), size) == m + 1 and d not in b.parts]
         if not open_out:
             continue
         keep = D.DOWN if D.DOWN in open_out else open_out[0]
@@ -278,7 +281,7 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     outputs = []
     attach: list[tuple[Pos, int, str]] = []   # (collector cell, channels, what)
     for e, p in exits.items():
-        attach.append((p, _tree_load(lay, e, size), f"exit {e}"))
+        attach.append((p, _tree_load(lay, e, size, m), f"exit {e}"))
     # Rig spots on the top face: not an exit's collector cell, and 3+ blocks apart.
     top = hi[1] + 1
     taken = set(exits.values())
@@ -307,12 +310,12 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     # rigs, or the power cells.
     blocked = set()
     for pos, b in lay.blocks.items():
-        if _layer(pos, size) >= 2:
+        if _layer(pos, size) >= m + 1:
             blocked.add(pos)
             blocked.update(step(pos, d) for d in Direction)
     blocked -= contacts
     blocked -= {p for p, _, _ in attach}
-    tree = _collector(attach, contacts, size, profile.dense_channel_capacity, blocked)
+    tree = _collector(attach, contacts, size, profile.dense_channel_capacity, blocked, layers=(m + 1, m + 2))
     cells = set(tree.parent)
     for n in cells:
         lay.cable(n, CableType.DENSE)
@@ -324,7 +327,7 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
             if o in cells:
                 if not linked and n < o:
                     parts[d] = CableAnchor()
-            elif _layer(o, size) == 1 and lay.get(o) is not None:
+            elif _layer(o, size) <= m and lay.get(o) is not None:
                 if exits.get(o) != n:
                     parts[d] = CableAnchor()          # a margin cell that is not this cell's exit
             elif lay.is_controller(o):
@@ -336,7 +339,7 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     collector = {"roots": sorted(r for r in cells if tree.parent.get(r) is None), "cells": len(cells)}
 
     report = check(lay, profile)
-    rig = TestRig(name, lay, report, size, main_power, tunnel_power, snake, outputs, removed,
+    rig = TestRig(name, lay, report, size, main_power, tunnel_power, snake, outputs, removed, margin=m,
                   collector_roots=collector["roots"], exits=sorted(exits))
     rig.expected = expectations(rig, profile)
     return rig
@@ -358,7 +361,7 @@ def expectations(rig: TestRig, profile: Profile) -> dict:
         x, _, z = o.output_at[0]
         o.devices_active = sum(1 for n, ok in device_nodes if ok and n.pos[0] == x and abs(n.pos[2] - z) <= 1)
     loads = [n.used for n in g.nodes if n.kind == "cable" and n.capacity == profile.normal_channel_capacity
-             and n.pos in rig.layout.blocks and _layer(n.pos, rig.size) <= 1]
+             and n.pos in rig.layout.blocks and _layer(n.pos, rig.size) <= rig.margin]
 
     # What WAILA / The One Probe shows on a smart cable: the busiest of its
     # connections (PartCable.writeToNBT "usedChannels").

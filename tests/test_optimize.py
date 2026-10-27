@@ -83,8 +83,33 @@ class OptimizeTests(unittest.TestCase):
         self.assertEqual(sum(1 for p in centre.parts.values() if p.kind == "p2p_me"), 4)
 
     def test_normal_capacity_limits_gap_cells(self):
-        sol = self.solve(profile=Profile(name="cap3", normal_channel_capacity=3), **self.ring())
+        cap3 = Profile(name="cap3", normal_channel_capacity=3)
+        # With anchors allowed, the centre gap uses 3 of its 4 faces and anchors the 4th.
+        sol = self.solve(profile=cap3, anchor_free=False, **self.ring())
         self.assertEqual(sol.tunnels_validated, 31)
+        self.assertEqual(sol.anchors, 1)
+        # Anchor-free: a cable there would need tunnels on all 4 faces, over capacity, so it stays empty.
+        sol = self.solve(profile=cap3, **self.ring())
+        self.assertEqual((sol.tunnels_validated, sol.anchors), (28, 0))
+
+    def test_wiring_is_anchor_free_and_colour_safe(self):
+        from ae2opt.graph import color_matches
+        from ae2opt.layout import CableType
+        sol = self.solve(size=(3, 3, 3), time_limit=60)
+        self.assertEqual((sol.tunnels_validated, sol.anchors), (74, 0))
+        self.assertEqual(len(sol.exit_cells), 3)            # 74 tunnels need at least 3 trunks of 32
+        lay = sol.layout
+        for pos, b in lay.blocks.items():
+            if b.kind != "cable":
+                continue
+            for d in Direction:
+                o = lay.get(step(pos, d))
+                if o is None or o.kind != "cable":
+                    continue
+                if b.cable is CableType.DENSE:
+                    self.assertEqual(b.color, "transparent")
+                    for dd in Direction:                     # dense never touches a controller
+                        self.assertFalse(lay.is_controller(step(pos, dd)))
 
     def test_target_minimizes_controllers(self):
         sol = self.solve(size=(2, 2, 2), target_tunnels=20)

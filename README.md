@@ -33,10 +33,15 @@ It places three things in the box (default: the profile's controller size limit)
 Every tunnel's tunnel-network channel must be routed out of that region, through cable
 cells capped at the normal capacity (rules R5–R8).
 
-**Routes are trees.** Each cable cell has exactly one parent. The exported build puts a
-cable anchor on every cable-to-cable side that isn't a route, so AE2's greedy pathing
-can only follow the planned routes. Controller faces next to a cable cell that carry no
-tunnel get an anchor too (R6).
+**Wiring: coloured groups and dense trunks, no anchors.** Tunnels sit on smart cables in
+**groups** of at most 8 tunnels (one colour per group). Each group touches dense cable only
+at its own attachment point. **Dense trunks** are fluix, carry at most 32, never touch a
+controller, and have one exit each. Groups that touch get different colours, so they
+don't connect. With these rules no cable can exceed its capacity, whatever route AE2's
+pathing picks (MECHANICS.md §5b). By default every controller face next to a cable carries
+a tunnel, so builds need **no cable anchors**. A final polish step picks the **fewest
+trunks**, then the fewest cables. Example: the proven 3×3×3 optimum has 74 tunnels, 0
+anchors, 3 trunks, and two cable colours plus fluix ([examples/best_3x3x3.html](examples/best_3x3x3.html)).
 
 **Exit cells** are where your tunnel network (its own controller, dense trunks) must
 connect. Every other outer side is anchored. The simulator models the tunnel network as

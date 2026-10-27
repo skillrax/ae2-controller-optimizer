@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3x3x3 optimum, coloured wiring (74 tunnels)</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--ink:#1d2330;--muted:#5d6678;--line:#dde1e8;--accent:#6b46c1;
+--ctrl:#2d3446;--ctrl-ink:#e9ecf3;--cable:#13a3a3;--dense:#7d4fd6;--tunnel:#f08c00;--anchor:#8a93a6;
+--exit:#2f9e44;--output:#d6336c;--sel:#ffd43b;--done:#e6f4ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#11141b;--panel:#1a1f2a;--ink:#e6e9f0;
+--muted:#9aa3b5;--line:#2c3342;--ctrl:#c9cfdc;--ctrl-ink:#11141b;--anchor:#6b7385;--done:#1f3326}}
+:root[data-theme=dark]{--bg:#11141b;--panel:#1a1f2a;--ink:#e6e9f0;--muted:#9aa3b5;--line:#2c3342;--ctrl:#c9cfdc;
+--ctrl-ink:#11141b;--anchor:#6b7385;--done:#1f3326}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:.2em 0}h2{font-size:1.15rem;margin:1.6em 0 .5em}
+.muted{color:var(--muted)}.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat b{display:block;font-size:1.4rem}.stat span{color:var(--muted);font-size:.85rem}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-size:.9rem}
+th{color:var(--muted);font-weight:600}tr.done td{background:var(--done)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+button,input,select{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+button{cursor:pointer}button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+input.coord{width:5.2em}
+.viewer{display:grid;grid-template-columns:minmax(0,auto) minmax(220px,1fr);gap:14px;align-items:start}
+@media (max-width:760px){.viewer{grid-template-columns:1fr}}
+.gridwrap{overflow:auto;max-width:100%}
+svg.grid{display:block}svg.grid text{font:600 11px system-ui,sans-serif}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.85rem;color:var(--muted)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.detail h3{margin:.1em 0 .4em;font-size:1rem}.detail ul{margin:.2em 0;padding-left:1.2em}
+.layerbtns button{min-width:2.6em}.ok{color:var(--exit)}.warn{color:var(--output)}
+details summary{cursor:pointer;color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"></h1>
+<div class="muted" id="subtitle"></div>
+<div class="panel stats" id="stats"></div>
+<div id="notes"></div>
+
+<h2>1. Bill of materials</h2>
+<div class="panel"><table id="bom"></table>
+<p class="muted">Counts are AE2 parts and blocks. Their crafting cost depends on your pack's recipes (check JEI).
+Colour cables with dye in a crafting grid (8 cables + 1 dye).</p></div>
+
+<h2>2. Build it layer by layer</h2>
+<div class="panel">
+<ol>
+<li>Start at layer 0 and work up. On each layer, place the <b>cable cells first</b>, with all their parts, then the <b>controllers</b>.</li>
+<li>Put each part on the side shown. Hold the part and right-click that side of the cable, or right-click the neighbouring controller's face.</li>
+<li>Parts on a cell's <b>up</b> side face the next layer: place them before you build that layer.</li>
+<li>Every controller face next to a cable cell needs a part: a <b>tunnel</b> (or a <b>cable anchor</b>, if shown). An empty face merges the two networks.</li>
+<li><b>Use the cable colour shown.</b> Touching cables of different colours don't connect, which keeps each group of at most 8 tunnels separate. Fluix (dense) collectors connect to every colour that touches them, by design.</li>
+<li><span class="ok">Exit</span> sides stay open. That's where your tunnel network's cable connects.</li>
+</ol>
+<div class="legend">
+<span><i class="sw" style="background:var(--ctrl)"></i>controller</span>
+<span>smart cable cell, in its colour</span>
+<span><i class="sw" style="background:var(--dense)"></i>dense smart cable (fluix)</span>
+<span><i class="sw" style="background:var(--tunnel)"></i>P2P tunnel on that side</span>
+<span><i class="sw" style="background:var(--anchor)"></i>cable anchor</span>
+<span><i class="sw" style="background:var(--exit)"></i>exit (leave open)</span>
+<span>▲/▼ part on the up/down side &nbsp; number = tunnels in the cell</span>
+</div>
+<div id="viewer-main"></div>
+</div>
+
+<h2>3. Tunnel network</h2>
+<div class="panel" id="tn"></div>
+<div id="viewer-tc"></div>
+</main>
+
+<script>
+const PLAN = {"title":"3x3x3 optimum, coloured wiring (74 tunnels)","profile":{"name":"Default (8/32/7x7x7)","normal":8,"dense":32,"size":[7,7,7]},"origin":[-1,-2,-2],"size":[5,6,7],"cells":[{"pos":[0,1,3],"kind":"cable","cable":"normal","color":"white","sides":{}},{"pos":[0,2,2],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":1}}},{"pos":[0,2,3],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":2}}},{"pos":[0,2,4],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":3}}},{"pos":[0,3,3],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":4}}},{"pos":[0,4,2],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":5}}},{"pos":[0,4,3],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":6}}},{"pos":[0,4,4],"kind":"cable","cable":"normal","color":"white","sides":{"east":{"part":"tunnel","freq":7}}},{"pos":[1,1,2],"kind":"cable","cable":"normal","color":"orange","sides":{"up":{"part":"tunnel","freq":8}}},{"pos":[1,1,3],"kind":"cable","cable":"normal","color":"white","sides":{"up":{"part":"tunnel","freq":9}}},{"pos":[1,1,4],"kind":"cable","cable":"normal","color":"orange","sides":{"up":{"part":"tunnel","freq":10}}},{"pos":[1,2,1],"kind":"cable","cable":"normal","color":"orange","sides":{"south":{"part":"tunnel","freq":11}}},{"pos":[1,2,2],"kind":"controller"},{"pos":[1,2,3],"kind":"controller"},{"pos":[1,2,4],"kind":"controller"},{"pos":[1,2,5],"kind":"cable","cable":"normal","color":"white","sides":{"north":{"part":"tunnel","freq":12}}},{"pos":[1,3,1],"kind":"cable","cable":"normal","color":"orange","sides":{}},{"pos":[1,3,2],"kind":"cable","cable":"normal","color":"orange","sides":{"down":{"part":"tunnel","freq":13},"up":{"part":"tunnel","freq":14},"south":{"part":"tunnel","freq":15},"east":{"part":"tunnel","freq":16}}},{"pos":[1,3,3],"kind":"controller"},{"pos":[1,3,4],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":17},"up":{"part":"tunnel","freq":18},"north":{"part":"tunnel","freq":19},"east":{"part":"tunnel","freq":20}}},{"pos":[1,3,5],"kind":"cable","cable":"normal","color":"white","sides":{}},{"pos":[1,4,1],"kind":"cable","cable":"normal","color":"white","sides":{"south":{"part":"tunnel","freq":21}}},{"pos":[1,4,2],"kind":"controller"},{"pos":[1,4,3],"kind":"controller"},{"pos":[1,4,4],"kind":"controller"},{"pos":[1,4,5],"kind":"cable","cable":"normal","color":"white","sides":{"north":{"part":"tunnel","freq":22}}},{"pos":[1,5,2],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":23}}},{"pos":[1,5,3],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":24}}},{"pos":[1,5,4],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":25}}},{"pos":[2,1,2],"kind":"cable","cable":"normal","color":"orange","sides":{"up":{"part":"tunnel","freq":26}}},{"pos":[2,1,3],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[2,1,4],"kind":"cable","cable":"normal","color":"orange","sides":{"up":{"part":"tunnel","freq":27}}},{"pos":[2,2,1],"kind":"cable","cable":"normal","color":"orange","sides":{"south":{"part":"tunnel","freq":28}}},{"pos":[2,2,2],"kind":"controller"},{"pos":[2,2,3],"kind":"cable","cable":"normal","color":"white","sides":{"north":{"part":"tunnel","freq":29},"south":{"part":"tunnel","freq":30},"west":{"part":"tunnel","freq":31}}},{"pos":[2,2,4],"kind":"controller"},{"pos":[2,2,5],"kind":"cable","cable":"normal","color":"white","sides":{"north":{"part":"tunnel","freq":32}}},{"pos":[2,3,1],"kind":"cable","cable":"normal","color":"orange","sides":{"south":{"part":"tunnel","freq":33}}},{"pos":[2,3,2],"kind":"controller"},{"pos":[2,3,3],"kind":"cable","cable":"normal","color":"white","sides":{"up":{"part":"tunnel","freq":34},"north":{"part":"tunnel","freq":35},"south":{"part":"tunnel","freq":36},"west":{"part":"tunnel","freq":37},"east":{"part":"tunnel","freq":38}}},{"pos":[2,3,4],"kind":"controller"},{"pos":[2,3,5],"kind":"cable","cable":"normal","color":"white","sides":{"north":{"part":"tunnel","freq":39}}},{"pos":[2,4,0],"kind":"cable","cable":"dense","color":"transparent","sides":{"north":{"part":"exit"}}},{"pos":[2,4,1],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[2,4,2],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":40},"south":{"part":"tunnel","freq":41},"west":{"part":"tunnel","freq":42},"east":{"part":"tunnel","freq":43}}},{"pos":[2,4,3],"kind":"controller"},{"pos":[2,4,4],"kind":"cable","cable":"normal","color":"orange","sides":{"down":{"part":"tunnel","freq":44},"north":{"part":"tunnel","freq":45},"west":{"part":"tunnel","freq":46},"east":{"part":"tunnel","freq":47}}},{"pos":[2,4,5],"kind":"cable","cable":"normal","color":"orange","sides":{}},{"pos":[2,5,3],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":48}}},{"pos":[3,0,3],"kind":"cable","cable":"dense","color":"transparent","sides":{"down":{"part":"exit"}}},{"pos":[3,1,2],"kind":"cable","cable":"normal","color":"white","sides":{"up":{"part":"tunnel","freq":49}}},{"pos":[3,1,3],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[3,1,4],"kind":"cable","cable":"normal","color":"white","sides":{"up":{"part":"tunnel","freq":50}}},{"pos":[3,2,1],"kind":"cable","cable":"normal","color":"orange","sides":{"south":{"part":"tunnel","freq":51}}},{"pos":[3,2,2],"kind":"controller"},{"pos":[3,2,3],"kind":"cable","cable":"normal","color":"orange","sides":{"up":{"part":"tunnel","freq":52},"north":{"part":"tunnel","freq":53},"south":{"part":"tunnel","freq":54}}},{"pos":[3,2,4],"kind":"controller"},{"pos":[3,2,5],"kind":"cable","cable":"normal","color":"orange","sides":{"north":{"part":"tunnel","freq":55}}},{"pos":[3,3,2],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":56},"up":{"part":"tunnel","freq":57},"south":{"part":"tunnel","freq":58},"west":{"part":"tunnel","freq":59}}},{"pos":[3,3,3],"kind":"controller"},{"pos":[3,3,4],"kind":"cable","cable":"normal","color":"orange","sides":{"down":{"part":"tunnel","freq":60},"up":{"part":"tunnel","freq":61},"north":{"part":"tunnel","freq":62},"west":{"part":"tunnel","freq":63}}},{"pos":[3,3,5],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[3,3,6],"kind":"cable","cable":"dense","color":"transparent","sides":{"south":{"part":"exit"}}},{"pos":[3,4,1],"kind":"cable","cable":"normal","color":"white","sides":{"south":{"part":"tunnel","freq":64}}},{"pos":[3,4,2],"kind":"controller"},{"pos":[3,4,3],"kind":"controller"},{"pos":[3,4,4],"kind":"controller"},{"pos":[3,4,5],"kind":"cable","cable":"normal","color":"orange","sides":{"north":{"part":"tunnel","freq":65}}},{"pos":[3,5,1],"kind":"cable","cable":"normal","color":"white","sides":{}},{"pos":[3,5,2],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":66}}},{"pos":[3,5,3],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":67}}},{"pos":[3,5,4],"kind":"cable","cable":"normal","color":"white","sides":{"down":{"part":"tunnel","freq":68}}},{"pos":[4,1,2],"kind":"cable","cable":"normal","color":"white","sides":{}},{"pos":[4,2,2],"kind":"cable","cable":"normal","color":"white","sides":{"west":{"part":"tunnel","freq":69}}},{"pos":[4,2,4],"kind":"cable","cable":"normal","color":"orange","sides":{"west":{"part":"tunnel","freq":70}}},{"pos":[4,3,2],"kind":"cable","cable":"normal","color":"white","sides":{}},{"pos":[4,3,3],"kind":"cable","cable":"normal","color":"orange","sides":{"west":{"part":"tunnel","freq":71}}},{"pos":[4,3,4],"kind":"cable","cable":"normal","color":"orange","sides":{}},{"pos":[4,4,2],"kind":"cable","cable":"normal","color":"white","sides":{"west":{"part":"tunnel","freq":72}}},{"pos":[4,4,3],"kind":"cable","cable":"normal","color":"orange","sides":{"west":{"part":"tunnel","freq":73}}},{"pos":[4,4,4],"kind":"cable","cable":"normal","color":"orange","sides":{"west":{"part":"tunnel","freq":74}}}],"bom":{"controllers":18,"smart_cable":56,"dense_smart_cable":7,"p2p_input":74,"p2p_output":0,"cable_anchor":0,"other":0},"colours":{"smart":{"white":35,"orange":21},"dense":{"fluix":7}},"inputs":[{"label":"I1","pos":[1,1,2],"side":"up","freq":8,"faces_controller":true},{"label":"I2","pos":[2,1,2],"side":"up","freq":26,"faces_controller":true},{"label":"I3","pos":[3,1,2],"side":"up","freq":49,"faces_controller":true},{"label":"I4","pos":[1,1,3],"side":"up","freq":9,"faces_controller":true},{"label":"I5","pos":[1,1,4],"side":"up","freq":10,"faces_controller":true},{"label":"I6","pos":[2,1,4],"side":"up","freq":27,"faces_controller":true},{"label":"I7","pos":[3,1,4],"side":"up","freq":50,"faces_controller":true},{"label":"I8","pos":[1,2,1],"side":"south","freq":11,"faces_controller":true},{"label":"I9","pos":[2,2,1],"side":"south","freq":28,"faces_controller":true},{"label":"I10","pos":[3,2,1],"side":"south","freq":51,"faces_controller":true},{"label":"I11","pos":[0,2,2],"side":"east","freq":1,"faces_controller":true},{"label":"I12","pos":[4,2,2],"side":"west","freq":69,"faces_controller":true},{"label":"I13","pos":[0,2,3],"side":"east","freq":2,"faces_controller":true},{"label":"I14","pos":[2,2,3],"side":"north","freq":29,"faces_controller":true},{"label":"I15","pos":[2,2,3],"side":"south","freq":30,"faces_controller":true},{"label":"I16","pos":[2,2,3],"side":"west","freq":31,"faces_controller":true},{"label":"I17","pos":[3,2,3],"side":"up","freq":52,"faces_controller":true},{"label":"I18","pos":[3,2,3],"side":"north","freq":53,"faces_controller":true},{"label":"I19","pos":[3,2,3],"side":"south","freq":54,"faces_controller":true},{"label":"I20","pos":[0,2,4],"side":"east","freq":3,"faces_controller":true},{"label":"I21","pos":[4,2,4],"side":"west","freq":70,"faces_controller":true},{"label":"I22","pos":[1,2,5],"side":"north","freq":12,"faces_controller":true},{"label":"I23","pos":[2,2,5],"side":"north","freq":32,"faces_controller":true},{"label":"I24","pos":[3,2,5],"side":"north","freq":55,"faces_controller":true},{"label":"I25","pos":[2,3,1],"side":"south","freq":33,"faces_controller":true},{"label":"I26","pos":[1,3,2],"side":"down","freq":13,"faces_controller":true},{"label":"I27","pos":[1,3,2],"side":"up","freq":14,"faces_controller":true},{"label":"I28","pos":[1,3,2],"side":"south","freq":15,"faces_controller":true},{"label":"I29","pos":[1,3,2],"side":"east","freq":16,"faces_controller":true},{"label":"I30","pos":[3,3,2],"side":"down","freq":56,"faces_controller":true},{"label":"I31","pos":[3,3,2],"side":"up","freq":57,"faces_controller":true},{"label":"I32","pos":[3,3,2],"side":"south","freq":58,"faces_controller":true},{"label":"I33","pos":[3,3,2],"side":"west","freq":59,"faces_controller":true},{"label":"I34","pos":[0,3,3],"side":"east","freq":4,"faces_controller":true},{"label":"I35","pos":[2,3,3],"side":"up","freq":34,"faces_controller":true},{"label":"I36","pos":[2,3,3],"side":"north","freq":35,"faces_controller":true},{"label":"I37","pos":[2,3,3],"side":"south","freq":36,"faces_controller":true},{"label":"I38","pos":[2,3,3],"side":"west","freq":37,"faces_controller":true},{"label":"I39","pos":[2,3,3],"side":"east","freq":38,"faces_controller":true},{"label":"I40","pos":[4,3,3],"side":"west","freq":71,"faces_controller":true},{"label":"I41","pos":[1,3,4],"side":"down","freq":17,"faces_controller":true},{"label":"I42","pos":[1,3,4],"side":"up","freq":18,"faces_controller":true},{"label":"I43","pos":[1,3,4],"side":"north","freq":19,"faces_controller":true},{"label":"I44","pos":[1,3,4],"side":"east","freq":20,"faces_controller":true},{"label":"I45","pos":[3,3,4],"side":"down","freq":60,"faces_controller":true},{"label":"I46","pos":[3,3,4],"side":"up","freq":61,"faces_controller":true},{"label":"I47","pos":[3,3,4],"side":"north","freq":62,"faces_controller":true},{"label":"I48","pos":[3,3,4],"side":"west","freq":63,"faces_controller":true},{"label":"I49","pos":[2,3,5],"side":"north","freq":39,"faces_controller":true},{"label":"I50","pos":[1,4,1],"side":"south","freq":21,"faces_controller":true},{"label":"I51","pos":[3,4,1],"side":"south","freq":64,"faces_controller":true},{"label":"I52","pos":[0,4,2],"side":"east","freq":5,"faces_controller":true},{"label":"I53","pos":[2,4,2],"side":"down","freq":40,"faces_controller":true},{"label":"I54","pos":[2,4,2],"side":"south","freq":41,"faces_controller":true},{"label":"I55","pos":[2,4,2],"side":"west","freq":42,"faces_controller":true},{"label":"I56","pos":[2,4,2],"side":"east","freq":43,"faces_controller":true},{"label":"I57","pos":[4,4,2],"side":"west","freq":72,"faces_controller":true},{"label":"I58","pos":[0,4,3],"side":"east","freq":6,"faces_controller":true},{"label":"I59","pos":[4,4,3],"side":"west","freq":73,"faces_controller":true},{"label":"I60","pos":[0,4,4],"side":"east","freq":7,"faces_controller":true},{"label":"I61","pos":[2,4,4],"side":"down","freq":44,"faces_controller":true},{"label":"I62","pos":[2,4,4],"side":"north","freq":45,"faces_controller":true},{"label":"I63","pos":[2,4,4],"side":"west","freq":46,"faces_controller":true},{"label":"I64","pos":[2,4,4],"side":"east","freq":47,"faces_controller":true},{"label":"I65","pos":[4,4,4],"side":"west","freq":74,"faces_controller":true},{"label":"I66","pos":[1,4,5],"side":"north","freq":22,"faces_controller":true},{"label":"I67","pos":[3,4,5],"side":"north","freq":65,"faces_controller":true},{"label":"I68","pos":[1,5,2],"side":"down","freq":23,"faces_controller":true},{"label":"I69","pos":[3,5,2],"side":"down","freq":66,"faces_controller":true},{"label":"I70","pos":[1,5,3],"side":"down","freq":24,"faces_controller":true},{"label":"I71","pos":[2,5,3],"side":"down","freq":48,"faces_controller":true},{"label":"I72","pos":[3,5,3],"side":"down","freq":67,"faces_controller":true},{"label":"I73","pos":[1,5,4],"side":"down","freq":25,"faces_controller":true},{"label":"I74","pos":[3,5,4],"side":"down","freq":68,"faces_controller":true}],"exits":[{"pos":[2,4,0],"sides":["north"],"channels":21,"trunk":"T3"},{"pos":[3,0,3],"sides":["down"],"channels":31,"trunk":"T1"},{"pos":[3,3,6],"sides":["south"],"channels":22,"trunk":"T2"}],"trunks":[{"label":"T1","channels":31,"exits":[[3,0,3]]},{"label":"T2","channels":22,"exits":[[3,3,6]]},{"label":"T3","channels":21,"exits":[[2,4,0]]}],"tunnel_network":{"inputs":74,"outputs":74,"channels":148,"input_trunks":3,"output_trunks":3,"outlets":6,"main_channels":2368},"tunnel_controller":{"outlets":6,"needed":6,"channels":192,"size":[7,4,4],"cells":[{"pos":[0,2,2],"kind":"cable","cable":"dense","color":"white","sides":{"west":{"part":"exit"}}},{"pos":[0,3,2],"kind":"cable","cable":"dense","color":"orange","sides":{"west":{"part":"exit"}}},{"pos":[1,2,2],"kind":"cable","cable":"dense","color":"white","sides":{"east":{"part":"outlet"}}},{"pos":[1,3,2],"kind":"cable","cable":"dense","color":"orange","sides":{}},{"pos":[2,0,2],"kind":"cable","cable":"dense","color":"white","sides":{"down":{"part":"exit"}}},{"pos":[2,0,3],"kind":"cable","cable":"dense","color":"orange","sides":{"down":{"part":"exit"}}},{"pos":[2,1,2],"kind":"cable","cable":"dense","color":"white","sides":{"up":{"part":"outlet"}}},{"pos":[2,1,3],"kind":"cable","cable":"dense","color":"orange","sides":{}},{"pos":[2,2,0],"kind":"cable","cable":"dense","color":"transparent","sides":{"north":{"part":"exit"}}},{"pos":[2,2,1],"kind":"cable","cable":"dense","color":"white","sides":{"south":{"part":"outlet"}}},{"pos":[2,2,2],"kind":"controller"},{"pos":[2,2,3],"kind":"cable","cable":"dense","color":"orange","sides":{"north":{"part":"outlet"}}},{"pos":[2,3,2],"kind":"cable","cable":"dense","color":"orange","sides":{"down":{"part":"outlet"}}},{"pos":[3,2,2],"kind":"cable","cable":"dense","color":"white","sides":{"west":{"part":"outlet"}}},{"pos":[4,2,2],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[5,1,2],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[5,2,2],"kind":"cable","cable":"dense","color":"transparent","sides":{}},{"pos":[6,0,2],"kind":"cable","cable":"dense","color":"transparent","sides":{"down":{"part":"exit"}}},{"pos":[6,1,2],"kind":"cable","cable":"dense","color":"transparent","sides":{}}],"bom":{"controllers":1,"smart_cable":0,"dense_smart_cable":18,"p2p_input":0,"p2p_output":0,"cable_anchor":0,"other":0}},"notes":[]};
+const SIDES = ["north","east","south","west"];
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d){ try { const v = localStorage.getItem("ae2opt:" + PLAN.title + ":" + k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("ae2opt:" + PLAN.title + ":" + k, JSON.stringify(v)); } catch(e){} }
+};
+const fmt = (p) => p.join(", ");
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+$("title").textContent = PLAN.title;
+const pr = PLAN.profile;
+$("subtitle").textContent = `Profile ${pr.name}: normal cable ${pr.normal}, dense ${pr.dense}, controller size ${pr.size.join("×")}. Build is ${PLAN.size.join(" × ")} blocks (x × layers × z).`;
+const tn = PLAN.tunnel_network;
+$("stats").innerHTML = [
+  [PLAN.inputs.length, "input tunnels"],
+  [(PLAN.inputs.length * pr.dense).toLocaleString(), "channels for your main network"],
+  [PLAN.bom.controllers, "controllers"],
+  [tn.channels.toLocaleString(), "tunnel-network channels needed"],
+].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+$("notes").innerHTML = PLAN.notes.map(n => `<div class="panel warn">Note: ${n}</div>`).join("");
+const DYE = {white:"#e9ecef", orange:"#f08c00", magenta:"#c2255c", light_blue:"#4dabf7", yellow:"#fcc419",
+  lime:"#82c91e", pink:"#f783ac", gray:"#868e96", light_gray:"#ced4da", cyan:"#15aabf", purple:"#7048e8",
+  blue:"#1c7ed6", brown:"#8d5524", green:"#2f9e44", red:"#e03131", black:"#343a40", transparent:"#13a3a3"};
+const BOM_LABELS = {controllers:"ME Controller", smart_cable:"ME Smart Cable, one per cable cell (colours below)",
+  dense_smart_cable:"ME Dense Smart Cable", p2p_input:"ME P2P Tunnel: inputs (in the build)",
+  p2p_output:"ME P2P Tunnel: outputs", cable_anchor:"Cable Anchor", other:"Other blocks"};
+function bomRows(b){ return Object.entries(b).filter(([k,v]) => v).map(([k,v]) => `<tr><td>${BOM_LABELS[k]||k}</td><td>${v.toLocaleString()}</td></tr>`).join(""); }
+const colourRows = (kind, label) => Object.entries(PLAN.colours[kind] || {}).sort((a, b) => b[1] - a[1])
+  .map(([c, n]) => `<tr><td>&nbsp;&nbsp;<i class="sw" style="background:${DYE[c === "fluix" ? "transparent" : c]}"></i>${label}: ${c.replace("_", " ")}</td><td>${n}</td></tr>`).join("");
+$("bom").innerHTML = "<tr><th>Item</th><th>Count</th></tr>" + bomRows(PLAN.bom) +
+  colourRows("smart", "smart cable") + colourRows("dense", "dense smart cable") +
+  `<tr><td>ME P2P Tunnel: outputs to place where you need channels (1 per input)</td><td>${PLAN.inputs.length.toLocaleString()}</td></tr>` +
+  `<tr><td>Memory Card (for linking)</td><td>1</td></tr>`;
+
+// ------------------------------------------------------------------ layer viewer
+function makeViewer(host, cells, size, key){
+  const byLayer = new Map();
+  for (const c of cells){ const y = c.pos[1]; if (!byLayer.has(y)) byLayer.set(y, []); byLayer.get(y).push(c); }
+  const ys = [...byLayer.keys()].sort((a,b) => a-b);
+  const xs = cells.map(c => c.pos[0]), zs = cells.map(c => c.pos[2]);
+  const minx = Math.min(...xs), maxx = Math.max(...xs), minz = Math.min(...zs), maxz = Math.max(...zs);
+  let layer = store.get(key + ":layer", ys[0]); if (!byLayer.has(layer)) layer = ys[0];
+  let selected = null;
+  host.innerHTML = `<div class="toolbar"><span>Layer</span><span class="layerbtns"></span>
+    <button data-step="-1">◀</button><button data-step="1">▶</button>
+    <label><input type="checkbox" class="donebox"> layer done</label><span class="muted lp"></span></div>
+    <div class="viewer"><div class="gridwrap"><svg class="grid"></svg></div><div class="detail panel"></div></div>`;
+  const btns = host.querySelector(".layerbtns"), svg = host.querySelector("svg"), detail = host.querySelector(".detail");
+  const donebox = host.querySelector(".donebox"), lp = host.querySelector(".lp");
+  btns.innerHTML = ys.map(y => `<button data-y="${y}">${y}</button>`).join("");
+  btns.addEventListener("click", e => { if (e.target.dataset.y !== undefined){ layer = +e.target.dataset.y; selected = null; draw(); }});
+  host.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => {
+    const i = ys.indexOf(layer) + (+b.dataset.step); if (i >= 0 && i < ys.length){ layer = ys[i]; selected = null; draw(); }}));
+  donebox.addEventListener("change", () => { const d = store.get(key + ":done", {}); d[layer] = donebox.checked; store.set(key + ":done", d); draw(); });
+  const S = 34, PAD = 26;
+  function cellAt(x, z){ return (byLayer.get(layer) || []).find(c => c.pos[0] === x && c.pos[2] === z); }
+  function draw(){
+    store.set(key + ":layer", layer);
+    btns.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.y === layer));
+    const done = store.get(key + ":done", {}); donebox.checked = !!done[layer];
+    lp.textContent = `${Object.values(done).filter(Boolean).length} of ${ys.length} layers done`;
+    const W = (maxx - minx + 1) * S + PAD, H = (maxz - minz + 1) * S + PAD;
+    svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    let s = "";
+    for (let x = minx; x <= maxx; x++) s += `<text x="${PAD + (x-minx)*S + S/2}" y="14" text-anchor="middle" fill="${css("--muted")}">${x}</text>`;
+    for (let z = minz; z <= maxz; z++) s += `<text x="10" y="${PAD + (z-minz)*S + S/2 + 4}" text-anchor="middle" fill="${css("--muted")}">${z}</text>`;
+    s += `<text x="${W-4}" y="14" text-anchor="end" fill="${css("--muted")}">x →  N ↑</text>`;
+    for (let x = minx; x <= maxx; x++) for (let z = minz; z <= maxz; z++){
+      const c = cellAt(x, z), X = PAD + (x-minx)*S, Y = PAD + (z-minz)*S;
+      s += `<rect x="${X+1}" y="${Y+1}" width="${S-2}" height="${S-2}" rx="4" fill="none" stroke="${css("--line")}"/>`;
+      if (!c) continue;
+      const sel = selected && selected.pos[0] === x && selected.pos[2] === z;
+      if (c.kind === "controller"){
+        s += `<rect data-x="${x}" data-z="${z}" x="${X+3}" y="${Y+3}" width="${S-6}" height="${S-6}" rx="3" fill="${css("--ctrl")}" stroke="${sel ? css("--sel") : "none"}" stroke-width="3"/>`;
+        continue;
+      }
+      if (c.kind !== "cable"){
+        s += `<rect data-x="${x}" data-z="${z}" x="${X+6}" y="${Y+6}" width="${S-12}" height="${S-12}" rx="3" fill="${css("--muted")}"/>`;
+        continue;
+      }
+      const col = c.cable === "dense" ? css("--dense") : (DYE[c.color] || css("--cable"));
+      s += `<rect data-x="${x}" data-z="${z}" x="${X+8}" y="${Y+8}" width="${S-16}" height="${S-16}" rx="5" fill="${col}" stroke="${sel ? css("--sel") : "none"}" stroke-width="3"/>`;
+      const partCol = (p) => p.part === "tunnel" ? css("--tunnel") : p.part === "anchor" ? css("--anchor") : p.part === "exit" ? css("--exit") : css("--output");
+      const sd = c.sides || {};
+      const bar = {north:[X+8,Y+2,S-16,5], south:[X+8,Y+S-7,S-16,5], west:[X+2,Y+8,5,S-16], east:[X+S-7,Y+8,5,S-16]};
+      for (const k of SIDES) if (sd[k]) { const [a,b,w,h] = bar[k]; s += `<rect x="${a}" y="${b}" width="${w}" height="${h}" rx="2" fill="${partCol(sd[k])}"/>`; }
+      if (sd.up) s += `<text x="${X+S-5}" y="${Y+13}" text-anchor="end" fill="${partCol(sd.up)}">▲</text>`;
+      if (sd.down) s += `<text x="${X+5}" y="${Y+S-4}" fill="${partCol(sd.down)}">▼</text>`;
+      const n = Object.values(sd).filter(p => p.part === "tunnel").length;
+      if (n) s += `<text x="${X+S/2}" y="${Y+S/2+4}" text-anchor="middle" fill="#fff">${n}</text>`;
+    }
+    svg.innerHTML = s;
+    showDetail();
+  }
+  function showDetail(){
+    if (!selected){ detail.innerHTML = `<h3>Layer ${layer}</h3><p class="muted">Click a cell for its parts.</p>` + layerSummary(); return; }
+    const c = selected;
+    let h = `<h3>${c.kind === "controller" ? "Controller" : c.kind === "cable" ? (c.cable === "dense" ? "Dense smart cable" : "Smart cable") : c.kind}</h3>
+      <div>Cell x ${c.pos[0]}, layer ${c.pos[1]}, z ${c.pos[2]}</div>`;
+    if (c.sides){
+      const names = {tunnel:"P2P tunnel (input)", output:"P2P tunnel (output)", anchor:"cable anchor", exit:"exit: leave open", outlet:"outlet: leave open toward the controller", device:"device"};
+      h += "<ul>" + ["up","down","north","south","west","east"].filter(k => c.sides[k]).map(k => {
+        const p = c.sides[k];
+        return `<li><b>${k}</b>: ${names[p.part] || p.part}</li>`; }).join("") + "</ul>";
+      const ex = PLAN.exits.find(e => e.pos.join() === c.pos.join());
+      if (ex) h += `<div class="ok">Exit: carries ${ex.channels} tunnel-network channel(s), trunk ${ex.trunk}</div>`;
+    }
+    detail.innerHTML = h;
+  }
+  function layerSummary(){
+    const cs = byLayer.get(layer) || [];
+    const n = (f) => cs.filter(f).length;
+    const tunnels = cs.reduce((a, c) => a + Object.values(c.sides || {}).filter(p => p.part === "tunnel").length, 0);
+    const anchors = cs.reduce((a, c) => a + Object.values(c.sides || {}).filter(p => p.part === "anchor").length, 0);
+    return `<ul><li>${n(c => c.kind === "controller")} controllers</li><li>${n(c => c.kind === "cable" && c.cable !== "dense")} smart cable cells</li>` +
+      `${n(c => c.cable === "dense") ? `<li>${n(c => c.cable === "dense")} dense cable cells</li>` : ""}<li>${tunnels} tunnels, ${anchors} anchors</li></ul>`;
+  }
+  svg.addEventListener("click", e => {
+    const t = e.target.closest("[data-x]"); if (!t) return;
+    selected = cellAt(+t.dataset.x, +t.dataset.z); draw();
+  });
+  draw();
+  return { refresh: draw };
+}
+
+// ------------------------------------------------------------------ tunnel network
+function drawTN(){
+  let h = `<p>Every input tunnel and every output tunnel needs <b>one tunnel-network channel</b>:
+    ${tn.inputs.toLocaleString()} inputs + ${tn.outputs.toLocaleString()} outputs = <b>${tn.channels.toLocaleString()} channels</b>.
+    The tunnel network is a <b>separate</b> AE2 network with its own controller and power. It must never touch the main controllers.</p>
+    <ul><li><b>${tn.input_trunks}</b> dense trunk(s) collect the build's ${PLAN.exits.length} exits (each trunk ≤ ${pr.dense} channels).</li>
+    <li><b>${tn.output_trunks}</b> dense trunk(s) feed the outputs (${pr.dense} outputs per trunk).</li>
+    <li>That's <b>${tn.outlets}</b> outlets of ${pr.dense} channels on the tunnel network's controller.</li></ul>`;
+  if (PLAN.trunks.length){
+    h += `<details><summary>Exit grouping (${PLAN.exits.length} exits → ${PLAN.trunks.length} trunks)</summary><table>
+      <tr><th>Trunk</th><th>Channels</th><th>Exits (x, layer, z)</th></tr>` +
+      PLAN.trunks.map(t => `<tr><td>${t.label}</td><td>${t.channels}</td><td>${t.exits.map(fmt).map(s => "(" + s + ")").join(" ")}</td></tr>`).join("") +
+      `</table><p class="muted">Connect each exit's open side with smart or dense cable to its trunk. Exits in different trunks
+      must not touch: use different cable colours or cable anchors. Each exit cable carries at most ${pr.normal}.</p></details>`;
+  }
+  const tc = PLAN.tunnel_controller;
+  if (tc){
+    h += `<h3>Suggested tunnel-network controller</h3>
+      <p>${tc.bom.controllers} controllers in a ${tc.size.join(" × ")} block area give <b>${tc.outlets} outlets</b>
+      (${tc.channels.toLocaleString()} channels; ${tc.needed} needed). Each outlet is a dense smart cable on one controller face,
+      with cable anchors on every other controller face it touches. Every outlet has its own route out to an <span class="ok">exit</span>.
+      Connect each exit to one trunk. Power this controller separately.</p>
+      <p class="muted">Bill of materials: ${Object.entries(tc.bom).filter(([k,v]) => v).map(([k,v]) => `${v} × ${BOM_LABELS[k]||k}`).join(", ")}.</p>`;
+  }
+  $("tn").innerHTML = h;
+}
+
+const viewers = [makeViewer($("viewer-main"), PLAN.cells, PLAN.size, "main")];
+if (PLAN.tunnel_controller){
+  $("viewer-tc").className = "panel";
+  viewers.push(makeViewer($("viewer-tc"), PLAN.tunnel_controller.cells, PLAN.tunnel_controller.size, "tc"));
+}
+drawTN();
+</script>
+</body>
+</html>

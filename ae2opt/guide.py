@@ -48,6 +48,7 @@ class Plan:
     trunks: list[dict]
     tunnel_network: dict
     tunnel_controller: dict | None = None   # recommended tunnel-network controller (its own cells)
+    colours: dict = field(default_factory=dict)  # cable counts per colour
     notes: list[str] = field(default_factory=list)
 
 
@@ -74,6 +75,17 @@ def _cell_record(pos: Pos, b, origin: Pos, ports: set[Pos], blocks: dict) -> dic
                 sides[SIDE_NAMES[d]] = {"part": "outlet"}   # open toward a controller face
         rec["sides"] = sides
     return rec
+
+
+def cable_colours(lay: Layout) -> dict:
+    """{"smart": {colour: n}, "dense": {colour: n}} for the shopping list."""
+    out = {"smart": {}, "dense": {}}
+    for b in lay.blocks.values():
+        if isinstance(b, CableBus) and b.cable is not CableType.NONE:
+            kind = "dense" if b.cable is CableType.DENSE else "smart"
+            name = "fluix" if b.color == "transparent" else b.color
+            out[kind][name] = out[kind].get(name, 0) + 1
+    return out
 
 
 def bill_of_materials(lay: Layout) -> dict:
@@ -124,20 +136,46 @@ def build_plan(layout: Layout, profile: Profile = DEFAULT_PROFILE, title: str = 
     xs, ys, zs = zip(*build_cells)
     origin = (min(xs), min(ys), min(zs))
     size = (max(xs) - origin[0] + 1, max(ys) - origin[1] + 1, max(zs) - origin[2] + 1)
-    if not ports:
-        # No saved ports: an exit is a cable side left open toward outside the build.
-        inside = lambda p: all(origin[i] <= p[i] < origin[i] + size[i] for i in range(3))
-        for pos, b in build_cells.items():
-            if isinstance(b, CableBus) and b.cable is not CableType.NONE:
-                ports.update(step(pos, d) for d in Direction
-                             if d not in b.parts and not inside(step(pos, d)))
-        layout = Layout()
-        layout.blocks = dict(build_cells)
-        for p in ports:
-            layout.port(p)
     build = Layout()
     build.blocks = dict(build_cells)
     notes = []
+    if not ports:
+        # No saved ports. Only safe to infer when every connected cable network has
+        # exactly one side open toward outside the build (older, anchored builds).
+        # Anchor-free builds leave many outer sides open, and the tunnel network
+        # must connect only at the real exits, so then the exits are unknown.
+        from .harness import _connected_cable_sides
+        inside = lambda p: all(origin[i] <= p[i] < origin[i] + size[i] for i in range(3))
+        seen: set = set()
+        candidate: set = set()
+        ambiguous = False
+        for start, b in build_cells.items():
+            if not isinstance(b, CableBus) or b.cable is CableType.NONE or start in seen:
+                continue
+            component, todo = [], [start]
+            while todo:
+                n = todo.pop()
+                if n in seen:
+                    continue
+                seen.add(n)
+                component.append(n)
+                todo.extend(step(n, d) for d in _connected_cable_sides(build, n) if inside(step(n, d)))
+            opens = {n: {step(n, d) for d in Direction
+                         if d not in build_cells[n].parts and not inside(step(n, d))} for n in component}
+            open_cells = [n for n, sides in opens.items() if sides]
+            if len(open_cells) > 1:      # one exit cell per network (it may have several open sides)
+                ambiguous = True
+            for n in open_cells:
+                candidate |= opens[n]
+        layout = Layout()
+        layout.blocks = dict(build_cells)
+        if ambiguous:
+            notes.append("this layout was saved without its tunnel-network connection points (P), "
+                         "so its exits are unknown; save layouts with `optimize --out` to include them")
+        else:
+            ports = candidate
+            for p in ports:
+                layout.port(p)
 
     cells = [_cell_record(p, b, origin, ports, build_cells) for p, b in sorted(build_cells.items())]
     bom = bill_of_materials(build)
@@ -176,8 +214,9 @@ def build_plan(layout: Layout, profile: Profile = DEFAULT_PROFILE, title: str = 
             notes.append("the layout does not pass the rules check: " +
                          "; ".join(str(v) for v in report.errors()[:3]))
     else:
-        notes.append("this layout has no tunnel-network ports (P), so exit loads are unknown; "
-                     "save layouts with `optimize --out` to include them")
+        if not any("exits are unknown" in n for n in notes):
+            notes.append("this layout has no tunnel-network ports (P), so exit loads are unknown; "
+                         "save layouts with `optimize --out` to include them")
 
     dense = profile.dense_channel_capacity
     n_in = len(inputs)
@@ -198,7 +237,8 @@ def build_plan(layout: Layout, profile: Profile = DEFAULT_PROFILE, title: str = 
         "main_channels": n_in * dense,
     }
 
-    plan = Plan(title, profile, origin, size, cells, bom, inputs, exits, trunks, tunnel_network, notes=notes)
+    plan = Plan(title, profile, origin, size, cells, bom, inputs, exits, trunks, tunnel_network, notes=notes,
+                colours=cable_colours(build))
     if design_tunnel_controller and tunnel_network["outlets"]:
         try:
             plan.tunnel_controller = design_outlet_controller(tunnel_network["outlets"], profile,
@@ -281,6 +321,7 @@ def plan_json(plan: Plan) -> dict:
                     "dense": plan.profile.dense_channel_capacity,
                     "size": list(plan.profile.max_controller_size)},
         "origin": list(plan.origin), "size": list(plan.size), "cells": plan.cells, "bom": plan.bom,
+        "colours": plan.colours,
         "inputs": plan.inputs, "exits": plan.exits, "trunks": plan.trunks,
         "tunnel_network": plan.tunnel_network, "tunnel_controller": tc, "notes": plan.notes,
     }
@@ -344,7 +385,7 @@ details summary{cursor:pointer;color:var(--accent)}
 <h2>1. Bill of materials</h2>
 <div class="panel"><table id="bom"></table>
 <p class="muted">Counts are AE2 parts and blocks. Their crafting cost depends on your pack's recipes (check JEI).
-Use fluix (uncoloured) cables unless noted.</p></div>
+Colour cables with dye in a crafting grid (8 cables + 1 dye).</p></div>
 
 <h2>2. Build it layer by layer</h2>
 <div class="panel">
@@ -352,13 +393,14 @@ Use fluix (uncoloured) cables unless noted.</p></div>
 <li>Start at layer 0 and work up. On each layer, place the <b>cable cells first</b>, with all their parts, then the <b>controllers</b>.</li>
 <li>Put each part on the side shown. Hold the part and right-click that side of the cable, or right-click the neighbouring controller's face.</li>
 <li>Parts on a cell's <b>up</b> side face the next layer: place them before you build that layer.</li>
-<li>Every controller face next to a cable cell needs a part: a <b>tunnel</b> or a <b>cable anchor</b>. A missing anchor merges the two networks.</li>
+<li>Every controller face next to a cable cell needs a part: a <b>tunnel</b> (or a <b>cable anchor</b>, if shown). An empty face merges the two networks.</li>
+<li><b>Use the cable colour shown.</b> Touching cables of different colours don't connect, which keeps each group of at most 8 tunnels separate. Fluix (dense) collectors connect to every colour that touches them, by design.</li>
 <li><span class="ok">Exit</span> sides stay open. That's where your tunnel network's cable connects.</li>
 </ol>
 <div class="legend">
 <span><i class="sw" style="background:var(--ctrl)"></i>controller</span>
-<span><i class="sw" style="background:var(--cable)"></i>smart cable cell</span>
-<span><i class="sw" style="background:var(--dense)"></i>dense smart cable</span>
+<span>smart cable cell, in its colour</span>
+<span><i class="sw" style="background:var(--dense)"></i>dense smart cable (fluix)</span>
 <span><i class="sw" style="background:var(--tunnel)"></i>P2P tunnel on that side</span>
 <span><i class="sw" style="background:var(--anchor)"></i>cable anchor</span>
 <span><i class="sw" style="background:var(--exit)"></i>exit (leave open)</span>
@@ -394,11 +436,17 @@ $("stats").innerHTML = [
   [tn.channels.toLocaleString(), "tunnel-network channels needed"],
 ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
 $("notes").innerHTML = PLAN.notes.map(n => `<div class="panel warn">Note: ${n}</div>`).join("");
-const BOM_LABELS = {controllers:"ME Controller", smart_cable:"ME Smart Cable (fluix), one per cable cell",
-  dense_smart_cable:"ME Dense Smart Cable (fluix)", p2p_input:"ME P2P Tunnel: inputs (in the build)",
+const DYE = {white:"#e9ecef", orange:"#f08c00", magenta:"#c2255c", light_blue:"#4dabf7", yellow:"#fcc419",
+  lime:"#82c91e", pink:"#f783ac", gray:"#868e96", light_gray:"#ced4da", cyan:"#15aabf", purple:"#7048e8",
+  blue:"#1c7ed6", brown:"#8d5524", green:"#2f9e44", red:"#e03131", black:"#343a40", transparent:"#13a3a3"};
+const BOM_LABELS = {controllers:"ME Controller", smart_cable:"ME Smart Cable, one per cable cell (colours below)",
+  dense_smart_cable:"ME Dense Smart Cable", p2p_input:"ME P2P Tunnel: inputs (in the build)",
   p2p_output:"ME P2P Tunnel: outputs", cable_anchor:"Cable Anchor", other:"Other blocks"};
 function bomRows(b){ return Object.entries(b).filter(([k,v]) => v).map(([k,v]) => `<tr><td>${BOM_LABELS[k]||k}</td><td>${v.toLocaleString()}</td></tr>`).join(""); }
+const colourRows = (kind, label) => Object.entries(PLAN.colours[kind] || {}).sort((a, b) => b[1] - a[1])
+  .map(([c, n]) => `<tr><td>&nbsp;&nbsp;<i class="sw" style="background:${DYE[c === "fluix" ? "transparent" : c]}"></i>${label}: ${c.replace("_", " ")}</td><td>${n}</td></tr>`).join("");
 $("bom").innerHTML = "<tr><th>Item</th><th>Count</th></tr>" + bomRows(PLAN.bom) +
+  colourRows("smart", "smart cable") + colourRows("dense", "dense smart cable") +
   `<tr><td>ME P2P Tunnel: outputs to place where you need channels (1 per input)</td><td>${PLAN.inputs.length.toLocaleString()}</td></tr>` +
   `<tr><td>Memory Card (for linking)</td><td>1</td></tr>`;
 
@@ -448,7 +496,7 @@ function makeViewer(host, cells, size, key){
         s += `<rect data-x="${x}" data-z="${z}" x="${X+6}" y="${Y+6}" width="${S-12}" height="${S-12}" rx="3" fill="${css("--muted")}"/>`;
         continue;
       }
-      const col = c.cable === "dense" ? css("--dense") : css("--cable");
+      const col = c.cable === "dense" ? css("--dense") : (DYE[c.color] || css("--cable"));
       s += `<rect data-x="${x}" data-z="${z}" x="${X+8}" y="${Y+8}" width="${S-16}" height="${S-16}" rx="5" fill="${col}" stroke="${sel ? css("--sel") : "none"}" stroke-width="3"/>`;
       const partCol = (p) => p.part === "tunnel" ? css("--tunnel") : p.part === "anchor" ? css("--anchor") : p.part === "exit" ? css("--exit") : css("--output");
       const sd = c.sides || {};

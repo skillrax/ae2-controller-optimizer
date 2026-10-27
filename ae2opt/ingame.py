@@ -51,7 +51,7 @@ def _existing_build(out: Path, tid: str, size) -> Layout | None:
         old = Layout.load(out / f"{name}.json")
         build = Layout()
         build.blocks = {p: b for p, b in old.blocks.items()
-                        if _layer(p, size) <= 1 and b.kind != "energy_acceptor"}
+                        if _layer(p, size) <= 2 and b.kind != "energy_acceptor"}
         return build
     return None
 

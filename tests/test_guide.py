@@ -59,7 +59,9 @@ class GuideWithOptimizer(unittest.TestCase):
         n = sol.tunnels_validated
         self.assertEqual(len(plan.inputs), n)
         self.assertEqual(sum(e["channels"] for e in plan.exits), n)      # every tunnel leaves via an exit
-        self.assertTrue(all(e["channels"] <= 8 for e in plan.exits))
+        self.assertTrue(all(e["channels"] <= 32 for e in plan.exits))
+        self.assertEqual(plan.bom["cable_anchor"], 0)
+        self.assertNotIn("fluix", plan.colours["smart"])            # smart groups are dyed
         self.assertTrue(all(t["channels"] <= 32 for t in plan.trunks))
         self.assertEqual(plan.tunnel_network["channels"], 2 * n)
         tc = plan.tunnel_controller
@@ -67,14 +69,23 @@ class GuideWithOptimizer(unittest.TestCase):
         self.assertGreaterEqual(tc["outlets"], plan.tunnel_network["outlets"])
         self.assertEqual(check_outlets(tc["layout"], DEFAULT_PROFILE)[1], [])
 
-    def test_exits_inferred_without_ports(self):
+    def test_exits_without_ports(self):
         from ae2opt.optimize import OptimizeSpec, optimize
         sol = optimize(DEFAULT_PROFILE, OptimizeSpec(size=(2, 2, 2), time_limit=20))
         with_ports = build_plan(sol.harness, DEFAULT_PROFILE, design_tunnel_controller=False)
+        self.assertEqual(sum(e["channels"] for e in with_ports.exits), sol.tunnels_validated)
+        # Anchor-free builds leave outer sides open: without ports the exits are unknown,
+        # and the guide says so instead of guessing.
         without = build_plan(sol.layout, DEFAULT_PROFILE, design_tunnel_controller=False)
-        self.assertEqual(sorted(map(tuple, (e["pos"] for e in with_ports.exits))),
-                         sorted(map(tuple, (e["pos"] for e in without.exits))))
-        self.assertEqual(sum(e["channels"] for e in without.exits), sol.tunnels_validated)
+        self.assertEqual(without.exits, [])
+        self.assertTrue(any("exits are unknown" in n for n in without.notes))
+
+    def test_exits_inferred_for_anchored_builds(self):
+        # Older builds anchor every outer side except the exits, so inference is safe.
+        from pathlib import Path
+        build = Layout.load(Path(__file__).parent.parent / "examples" / "ingame" / "ae2opt_t3_build.json")
+        plan = build_plan(build, DEFAULT_PROFILE, design_tunnel_controller=False)
+        self.assertEqual(sum(e["channels"] for e in plan.exits), len(plan.inputs))
 
 
 if __name__ == "__main__":
