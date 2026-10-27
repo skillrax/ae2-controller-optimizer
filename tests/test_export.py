@@ -110,6 +110,29 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(e["main_network_channels"], 64)
         to_structure(rig.layout)  # exportable
 
+        # Collector: the roots' WAILA readings add up to every tunnel-network channel,
+        # no root is over capacity, and no collector cable touches a main controller.
+        self.assertEqual(e["probe_roots_total"], e["tunnel_network_channels"])
+        self.assertTrue(all(r["channels"] <= 32 for r in e["probe_roots"]))
+        self.assertEqual([r["trunk_channels"] for r in e["rigs"]], [32, 32])
+        from ae2opt.harness import _layer
+        main = {p for p in rig.layout.controllers() if _layer(p, (2, 2, 2)) == 0}
+        collector = [p for p, b in rig.layout.blocks.items() if b.kind == "cable" and _layer(p, (2, 2, 2)) >= 2]
+        for p in collector:
+            for d in D:
+                n = (p[0] + d.offset[0], p[1] + d.offset[1], p[2] + d.offset[2])
+                self.assertNotIn(n, main)
+
+    def test_existing_builds_are_reused(self):
+        from ae2opt.ingame import _existing_build
+        from ae2opt.optimize import OptimizeSpec, optimize
+        sol = optimize(DEFAULT_PROFILE, OptimizeSpec(size=(2, 2, 2), time_limit=20))
+        with tempfile.TemporaryDirectory() as tmp:
+            sol.harness.save(Path(tmp) / "ae2opt_t1_build.json")
+            build = _existing_build(Path(tmp), "T1", (2, 2, 2))
+            self.assertEqual(set(build.controllers()), set(sol.layout.controllers()))
+            self.assertIsNone(_existing_build(Path(tmp), "T2", (3, 1, 3)))
+
     def test_negative_tests_fail_as_designed(self):
         from ae2opt.harness import build_rig, standalone_rig
         from ae2opt.ingame import capacity_overload, uncapped_face

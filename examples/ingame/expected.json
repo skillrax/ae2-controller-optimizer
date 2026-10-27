@@ -30,13 +30,385 @@
     {
      "freq": 9,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      8,
+      1
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      9,
+      1
+     ],
+     "trunk_channels": 32
     },
     {
      "freq": 1,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      8,
+      4
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      9,
+      4
+     ],
+     "trunk_channels": 32
     }
+   ],
+   "probe_roots": [
+    {
+     "pos": [
+      -1,
+      -2,
+      -2
+     ],
+     "rel": [
+      1,
+      2,
+      0
+     ],
+     "channels": 4
+    },
+    {
+     "pos": [
+      0,
+      -2,
+      2
+     ],
+     "rel": [
+      2,
+      2,
+      4
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      -2
+     ],
+     "rel": [
+      4,
+      2,
+      0
+     ],
+     "channels": 6
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      0
+     ],
+     "rel": [
+      4,
+      2,
+      2
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      2
+     ],
+     "rel": [
+      4,
+      2,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      0
+     ],
+     "rel": [
+      5,
+      2,
+      2
+     ],
+     "channels": 6
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      2
+     ],
+     "rel": [
+      5,
+      2,
+      4
+     ],
+     "channels": 3
+    }
+   ],
+   "probe_roots_total": 25,
+   "probe_exits": [
+    {
+     "pos": [
+      0,
+      0,
+      2
+     ],
+     "rel": [
+      2,
+      4,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      1,
+      -1
+     ],
+     "rel": [
+      2,
+      5,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      2,
+      0
+     ],
+     "rel": [
+      2,
+      6,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      -1
+     ],
+     "rel": [
+      4,
+      3,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      0
+     ],
+     "rel": [
+      4,
+      3,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      1
+     ],
+     "rel": [
+      4,
+      3,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      2
+     ],
+     "rel": [
+      4,
+      3,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      0,
+      -1
+     ],
+     "rel": [
+      4,
+      4,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      0,
+      0
+     ],
+     "rel": [
+      4,
+      4,
+      2
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      2,
+      0,
+      1
+     ],
+     "rel": [
+      4,
+      4,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      0,
+      2
+     ],
+     "rel": [
+      4,
+      4,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      1,
+      -1
+     ],
+     "rel": [
+      4,
+      5,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      1,
+      0
+     ],
+     "rel": [
+      4,
+      5,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      1,
+      1
+     ],
+     "rel": [
+      4,
+      5,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      1,
+      2
+     ],
+     "rel": [
+      4,
+      5,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      2,
+      -1
+     ],
+     "rel": [
+      4,
+      6,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      2,
+      0
+     ],
+     "rel": [
+      4,
+      6,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      2,
+      1
+     ],
+     "rel": [
+      4,
+      6,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      2,
+      2
+     ],
+     "rel": [
+      4,
+      6,
+      4
+     ],
+     "channels": 3
+    }
+   ],
+   "origin": [
+    -2,
+    -4,
+    -2
    ],
    "valid": true,
    "errors": []
@@ -51,14 +423,7 @@
    -4,
    -2
   ],
-  "removed_tunnel": [
-   [
-    0,
-    -1,
-    1
-   ],
-   "Direction.UP"
-  ]
+  "removed_tunnel": null
  },
  {
   "id": "T2",
@@ -91,13 +456,541 @@
     {
      "freq": 15,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      7,
+      1
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      8,
+      1
+     ],
+     "trunk_channels": 32
     },
     {
      "freq": 1,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      7,
+      4
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      8,
+      4
+     ],
+     "trunk_channels": 32
     }
+   ],
+   "probe_roots": [
+    {
+     "pos": [
+      0,
+      -2,
+      -2
+     ],
+     "rel": [
+      2,
+      2,
+      0
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      0,
+      -2,
+      4
+     ],
+     "rel": [
+      2,
+      2,
+      6
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      1,
+      -2,
+      0
+     ],
+     "rel": [
+      3,
+      2,
+      2
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      1,
+      -2,
+      2
+     ],
+     "rel": [
+      3,
+      2,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      -2
+     ],
+     "rel": [
+      4,
+      2,
+      0
+     ],
+     "channels": 17
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      -2
+     ],
+     "rel": [
+      5,
+      2,
+      0
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      0
+     ],
+     "rel": [
+      5,
+      2,
+      2
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      2
+     ],
+     "rel": [
+      5,
+      2,
+      4
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      4
+     ],
+     "rel": [
+      5,
+      2,
+      6
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      4,
+      -2,
+      0
+     ],
+     "rel": [
+      6,
+      2,
+      2
+     ],
+     "channels": 3
+    }
+   ],
+   "probe_roots_total": 33,
+   "probe_exits": [
+    {
+     "pos": [
+      0,
+      0,
+      -1
+     ],
+     "rel": [
+      2,
+      4,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      0,
+      3
+     ],
+     "rel": [
+      2,
+      4,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      1,
+      0
+     ],
+     "rel": [
+      2,
+      5,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      1,
+      1
+     ],
+     "rel": [
+      2,
+      5,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      1,
+      2
+     ],
+     "rel": [
+      2,
+      5,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      -1,
+      0
+     ],
+     "rel": [
+      3,
+      3,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      -1,
+      1
+     ],
+     "rel": [
+      3,
+      3,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      -1,
+      2
+     ],
+     "rel": [
+      3,
+      3,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      0,
+      -1
+     ],
+     "rel": [
+      3,
+      4,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      0,
+      3
+     ],
+     "rel": [
+      3,
+      4,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      1,
+      0
+     ],
+     "rel": [
+      3,
+      5,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      1,
+      1
+     ],
+     "rel": [
+      3,
+      5,
+      3
+     ],
+     "channels": 4
+    },
+    {
+     "pos": [
+      1,
+      1,
+      2
+     ],
+     "rel": [
+      3,
+      5,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      -1
+     ],
+     "rel": [
+      5,
+      3,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      0
+     ],
+     "rel": [
+      5,
+      3,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      1
+     ],
+     "rel": [
+      5,
+      3,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      2
+     ],
+     "rel": [
+      5,
+      3,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      3
+     ],
+     "rel": [
+      5,
+      3,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      0,
+      -1
+     ],
+     "rel": [
+      5,
+      4,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      0,
+      0
+     ],
+     "rel": [
+      5,
+      4,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      0,
+      1
+     ],
+     "rel": [
+      5,
+      4,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      0,
+      2
+     ],
+     "rel": [
+      5,
+      4,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      0,
+      3
+     ],
+     "rel": [
+      5,
+      4,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      1,
+      -1
+     ],
+     "rel": [
+      5,
+      5,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      1,
+      0
+     ],
+     "rel": [
+      5,
+      5,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      1,
+      1
+     ],
+     "rel": [
+      5,
+      5,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      1,
+      2
+     ],
+     "rel": [
+      5,
+      5,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      1,
+      3
+     ],
+     "rel": [
+      5,
+      5,
+      5
+     ],
+     "channels": 1
+    }
+   ],
+   "origin": [
+    -2,
+    -4,
+    -2
    ],
    "valid": true,
    "errors": []
@@ -112,14 +1005,7 @@
    -4,
    -2
   ],
-  "removed_tunnel": [
-   [
-    0,
-    -1,
-    2
-   ],
-   "Direction.UP"
-  ]
+  "removed_tunnel": null
  },
  {
   "id": "T3",
@@ -152,13 +1038,632 @@
     {
      "freq": 14,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      9,
+      1
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      10,
+      1
+     ],
+     "trunk_channels": 32
     },
     {
      "freq": 1,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      9,
+      4
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      10,
+      4
+     ],
+     "trunk_channels": 32
     }
+   ],
+   "probe_roots": [
+    {
+     "pos": [
+      -2,
+      -2,
+      1
+     ],
+     "rel": [
+      0,
+      2,
+      3
+     ],
+     "channels": 12
+    },
+    {
+     "pos": [
+      -1,
+      -2,
+      0
+     ],
+     "rel": [
+      1,
+      2,
+      2
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      0,
+      -2,
+      2
+     ],
+     "rel": [
+      2,
+      2,
+      4
+     ],
+     "channels": 7
+    },
+    {
+     "pos": [
+      0,
+      -2,
+      4
+     ],
+     "rel": [
+      2,
+      2,
+      6
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      1,
+      -2,
+      -2
+     ],
+     "rel": [
+      3,
+      2,
+      0
+     ],
+     "channels": 14
+    },
+    {
+     "pos": [
+      1,
+      -2,
+      2
+     ],
+     "rel": [
+      3,
+      2,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      -2
+     ],
+     "rel": [
+      4,
+      2,
+      0
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      0
+     ],
+     "rel": [
+      4,
+      2,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      2
+     ],
+     "rel": [
+      4,
+      2,
+      4
+     ],
+     "channels": 5
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      0
+     ],
+     "rel": [
+      5,
+      2,
+      2
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      2
+     ],
+     "rel": [
+      5,
+      2,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      4
+     ],
+     "rel": [
+      5,
+      2,
+      6
+     ],
+     "channels": 9
+    },
+    {
+     "pos": [
+      4,
+      -2,
+      0
+     ],
+     "rel": [
+      6,
+      2,
+      2
+     ],
+     "channels": 16
+    }
+   ],
+   "probe_roots_total": 75,
+   "probe_exits": [
+    {
+     "pos": [
+      -1,
+      -1,
+      0
+     ],
+     "rel": [
+      1,
+      3,
+      2
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      -1,
+      0,
+      2
+     ],
+     "rel": [
+      1,
+      4,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      -1,
+      1,
+      2
+     ],
+     "rel": [
+      1,
+      5,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      -1,
+      2,
+      0
+     ],
+     "rel": [
+      1,
+      6,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      -1,
+      2,
+      1
+     ],
+     "rel": [
+      1,
+      6,
+      3
+     ],
+     "channels": 6
+    },
+    {
+     "pos": [
+      -1,
+      2,
+      2
+     ],
+     "rel": [
+      1,
+      6,
+      4
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      0,
+      -1,
+      2
+     ],
+     "rel": [
+      2,
+      3,
+      4
+     ],
+     "channels": 7
+    },
+    {
+     "pos": [
+      0,
+      0,
+      3
+     ],
+     "rel": [
+      2,
+      4,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      1,
+      -1
+     ],
+     "rel": [
+      2,
+      5,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      2,
+      -1
+     ],
+     "rel": [
+      2,
+      6,
+      1
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      0,
+      3,
+      -1
+     ],
+     "rel": [
+      2,
+      7,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      0,
+      3,
+      1
+     ],
+     "rel": [
+      2,
+      7,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      -1,
+      2
+     ],
+     "rel": [
+      3,
+      3,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      1,
+      -1
+     ],
+     "rel": [
+      3,
+      5,
+      1
+     ],
+     "channels": 5
+    },
+    {
+     "pos": [
+      1,
+      1,
+      3
+     ],
+     "rel": [
+      3,
+      5,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      1,
+      2,
+      3
+     ],
+     "rel": [
+      3,
+      6,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      -1
+     ],
+     "rel": [
+      4,
+      3,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      0
+     ],
+     "rel": [
+      4,
+      3,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      1,
+      -1
+     ],
+     "rel": [
+      4,
+      5,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      2,
+      3,
+      2
+     ],
+     "rel": [
+      4,
+      7,
+      4
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      0
+     ],
+     "rel": [
+      5,
+      3,
+      2
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      1
+     ],
+     "rel": [
+      5,
+      3,
+      3
+     ],
+     "channels": 5
+    },
+    {
+     "pos": [
+      3,
+      -1,
+      2
+     ],
+     "rel": [
+      5,
+      3,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      0,
+      3
+     ],
+     "rel": [
+      5,
+      4,
+      5
+     ],
+     "channels": 8
+    },
+    {
+     "pos": [
+      3,
+      1,
+      1
+     ],
+     "rel": [
+      5,
+      5,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      2,
+      -1
+     ],
+     "rel": [
+      5,
+      6,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      2,
+      1
+     ],
+     "rel": [
+      5,
+      6,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      2,
+      2
+     ],
+     "rel": [
+      5,
+      6,
+      4
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      2,
+      3
+     ],
+     "rel": [
+      5,
+      6,
+      5
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      3,
+      -1
+     ],
+     "rel": [
+      5,
+      7,
+      1
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      3,
+      3,
+      1
+     ],
+     "rel": [
+      5,
+      7,
+      3
+     ],
+     "channels": 7
+    },
+    {
+     "pos": [
+      3,
+      3,
+      3
+     ],
+     "rel": [
+      5,
+      7,
+      5
+     ],
+     "channels": 1
+    }
+   ],
+   "origin": [
+    -2,
+    -4,
+    -2
    ],
    "valid": true,
    "errors": []
@@ -173,14 +1678,7 @@
    -4,
    -2
   ],
-  "removed_tunnel": [
-   [
-    -1,
-    0,
-    1
-   ],
-   "Direction.EAST"
-  ]
+  "removed_tunnel": null
  },
  {
   "id": "T4",
@@ -188,7 +1686,7 @@
   "title": "4x4x3 optimum",
   "kind": "positive",
   "size": [
-   8,
+   9,
    15,
    7
   ],
@@ -213,13 +1711,463 @@
     {
      "freq": 13,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      10,
+      1
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      11,
+      1
+     ],
+     "trunk_channels": 32
     },
     {
      "freq": 1,
      "devices": 40,
-     "active": 32
+     "active": 32,
+     "output_cable": [
+      1,
+      10,
+      4
+     ],
+     "output_cable_channels": 1,
+     "trunk": [
+      1,
+      11,
+      4
+     ],
+     "trunk_channels": 32
     }
+   ],
+   "probe_roots": [
+    {
+     "pos": [
+      -2,
+      -2,
+      0
+     ],
+     "rel": [
+      0,
+      2,
+      2
+     ],
+     "channels": 7
+    },
+    {
+     "pos": [
+      -1,
+      -2,
+      -2
+     ],
+     "rel": [
+      1,
+      2,
+      0
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      -1,
+      -2,
+      2
+     ],
+     "rel": [
+      1,
+      2,
+      4
+     ],
+     "channels": 13
+    },
+    {
+     "pos": [
+      1,
+      -2,
+      4
+     ],
+     "rel": [
+      3,
+      2,
+      6
+     ],
+     "channels": 18
+    },
+    {
+     "pos": [
+      2,
+      -2,
+      -2
+     ],
+     "rel": [
+      4,
+      2,
+      0
+     ],
+     "channels": 17
+    },
+    {
+     "pos": [
+      3,
+      -2,
+      4
+     ],
+     "rel": [
+      5,
+      2,
+      6
+     ],
+     "channels": 32
+    },
+    {
+     "pos": [
+      4,
+      -2,
+      -2
+     ],
+     "rel": [
+      6,
+      2,
+      0
+     ],
+     "channels": 32
+    },
+    {
+     "pos": [
+      4,
+      -2,
+      0
+     ],
+     "rel": [
+      6,
+      2,
+      2
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      4,
+      -2,
+      4
+     ],
+     "rel": [
+      6,
+      2,
+      6
+     ],
+     "channels": 5
+    }
+   ],
+   "probe_roots_total": 128,
+   "probe_exits": [
+    {
+     "pos": [
+      -1,
+      -1,
+      3
+     ],
+     "rel": [
+      1,
+      3,
+      5
+     ],
+     "channels": 13
+    },
+    {
+     "pos": [
+      -1,
+      0,
+      -1
+     ],
+     "rel": [
+      1,
+      4,
+      1
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      -1,
+      3,
+      0
+     ],
+     "rel": [
+      1,
+      7,
+      2
+     ],
+     "channels": 3
+    },
+    {
+     "pos": [
+      -1,
+      3,
+      1
+     ],
+     "rel": [
+      1,
+      7,
+      3
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      1,
+      1,
+      3
+     ],
+     "rel": [
+      3,
+      5,
+      5
+     ],
+     "channels": 8
+    },
+    {
+     "pos": [
+      1,
+      2,
+      3
+     ],
+     "rel": [
+      3,
+      6,
+      5
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      1,
+      4,
+      -1
+     ],
+     "rel": [
+      3,
+      8,
+      1
+     ],
+     "channels": 7
+    },
+    {
+     "pos": [
+      1,
+      4,
+      1
+     ],
+     "rel": [
+      3,
+      8,
+      3
+     ],
+     "channels": 5
+    },
+    {
+     "pos": [
+      2,
+      -1,
+      -1
+     ],
+     "rel": [
+      4,
+      3,
+      1
+     ],
+     "channels": 17
+    },
+    {
+     "pos": [
+      2,
+      0,
+      -1
+     ],
+     "rel": [
+      4,
+      4,
+      1
+     ],
+     "channels": 2
+    },
+    {
+     "pos": [
+      2,
+      1,
+      -1
+     ],
+     "rel": [
+      4,
+      5,
+      1
+     ],
+     "channels": 6
+    },
+    {
+     "pos": [
+      2,
+      1,
+      3
+     ],
+     "rel": [
+      4,
+      5,
+      5
+     ],
+     "channels": 8
+    },
+    {
+     "pos": [
+      3,
+      4,
+      0
+     ],
+     "rel": [
+      5,
+      8,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      3,
+      4,
+      3
+     ],
+     "rel": [
+      5,
+      8,
+      5
+     ],
+     "channels": 11
+    },
+    {
+     "pos": [
+      4,
+      0,
+      0
+     ],
+     "rel": [
+      6,
+      4,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      4,
+      1,
+      1
+     ],
+     "rel": [
+      6,
+      5,
+      3
+     ],
+     "channels": 6
+    },
+    {
+     "pos": [
+      4,
+      1,
+      3
+     ],
+     "rel": [
+      6,
+      5,
+      5
+     ],
+     "channels": 5
+    },
+    {
+     "pos": [
+      4,
+      2,
+      -1
+     ],
+     "rel": [
+      6,
+      6,
+      1
+     ],
+     "channels": 8
+    },
+    {
+     "pos": [
+      4,
+      2,
+      0
+     ],
+     "rel": [
+      6,
+      6,
+      2
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      4,
+      2,
+      1
+     ],
+     "rel": [
+      6,
+      6,
+      3
+     ],
+     "channels": 1
+    },
+    {
+     "pos": [
+      4,
+      2,
+      3
+     ],
+     "rel": [
+      6,
+      6,
+      5
+     ],
+     "channels": 8
+    },
+    {
+     "pos": [
+      4,
+      3,
+      0
+     ],
+     "rel": [
+      6,
+      7,
+      2
+     ],
+     "channels": 5
+    },
+    {
+     "pos": [
+      4,
+      3,
+      2
+     ],
+     "rel": [
+      6,
+      7,
+      4
+     ],
+     "channels": 5
+    }
+   ],
+   "origin": [
+    -2,
+    -4,
+    -2
    ],
    "valid": true,
    "errors": []
@@ -234,14 +2182,7 @@
    -4,
    -2
   ],
-  "removed_tunnel": [
-   [
-    1,
-    3,
-    -1
-   ],
-   "Direction.SOUTH"
-  ]
+  "removed_tunnel": null
  },
  {
   "id": "N1",
@@ -293,9 +2234,9 @@
    "errors": [
     "[R2 error] one network contains 2 separate controller structures (joined through cable or tunnels): controller conflict, 0 channels  at (-2, -3, -2), (0, 0, 0)",
     "[R6 error] tunnel network and main network are the same network here  at (-1, 0, 0), (-1, 1, 0), (0, -1, 0), (0, 0, -1), (0, 0, 2), (0, 1, -1)...",
-    "[R10 error] tunnel network is in controller conflict: 6 controller block(s) on this network are not face-connected to the rest (more than one controller structure)  at (-1, 0, 0), (-1, 1, 0), (-1, 4, 0), (0, -1, 0), (0, 0, -1), (0, 0, 2)...",
-    "[R11 error] a network has no power source (energy acceptor or powered controller)  at (-1, 5, -1), (-1, 5, 1), (-1, 6, -1), (-1, 6, 1), (-1, 7, -1), (-1, 7, 1)...",
-    "[R11 error] a network has no power source (energy acceptor or powered controller)  at (3, 5, -1), (3, 5, 1), (3, 6, -1), (3, 6, 1), (3, 7, -1), (3, 7, 1)..."
+    "[R10 error] tunnel network is in controller conflict: 6 controller block(s) on this network are not face-connected to the rest (more than one controller structure)  at (-1, 0, 0), (-1, 1, 0), (-1, 4, -1), (-1, 4, 2), (0, -1, 0), (0, 0, -1)...",
+    "[R11 error] a network has no power source (energy acceptor or powered controller)  at (-1, 5, -2), (-1, 5, 0), (-1, 6, -2), (-1, 6, 0), (-1, 7, -2), (-1, 7, 0)...",
+    "[R11 error] a network has no power source (energy acceptor or powered controller)  at (-1, 5, 1), (-1, 5, 3), (-1, 6, 1), (-1, 6, 3), (-1, 7, 1), (-1, 7, 3)..."
    ]
   }
  }

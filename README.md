@@ -146,12 +146,15 @@ python -m ae2opt export best.json best.nbt --rig --box 7 7 7
 ```
 
 `--rig` wraps the build in a self-contained test rig:
-- a dense-cable shell connecting every exit
-- a snake-shaped tunnel-network controller
+- a few separate trees of dense smart cable that collect the exits, each ending in one
+  "root" cable on a snake-shaped tunnel-network controller
 - creative energy cells
 - two output tunnels feeding 40 terminals each
 
-It also prints what the simulator expects the game to show.
+The build stays visible. The rig also prints what the simulator expects the game to show.
+Results are read with WAILA/HWYLA or The One Probe (AE2 shows `X of 32 Channels` on smart
+cables, and `Device Online` / `Device Missing Channel` on tunnels and terminals). The roots'
+readings add up to the tunnel network's channel total.
 
 ## In-game validation
 

@@ -2,18 +2,18 @@
 
 For a build occupying box [0, size) with tunnel cells in the 1-block margin:
 
-  * shell      -- every cell 2 blocks out from the box is dense fluix cable. It
-                  touches the margin only where exit cells left a side open (all
-                  other outer sides carry anchors), so it joins every exit to
-                  the tunnel network.
+  * collector  -- separate trees of dense smart cable in the layers 2-3 blocks out
+                  from the box, one per exit group, each ending in one root cable
+                  that sits on a tunnel-network controller. Cells that touch but
+                  are not parent/child get anchors, so routes are fixed, and the
+                  build stays visible. WAILA on the roots reads each tree's total.
   * tunnel net -- a snake-shaped controller (rows + end connectors, valid under
-                  the cross rule, <= 7 wide) under the shell, touching it from
-                  below, powered by a creative energy cell under the snake.
+                  the cross rule, <= 7 wide) under the collector roots, powered by a creative energy cell under the snake.
   * main power -- a creative energy cell on a main-controller face: a free face
                   if there is one, otherwise it replaces one outer tunnel cell.
                   Every cable next to it gets an anchor on that side so it can
                   only touch the controller (otherwise it would merge networks).
-  * output rigs -- on top of the shell: a normal cable with an output tunnel on
+  * output rigs -- on top: a normal cable with an output tunnel on
                   the same frequency as a chosen input, feeding a dense trunk with
                   40 terminals. Exactly 32 should get channels (one face = one
                   tunnel = 32).
@@ -58,6 +58,8 @@ class TestRig:
     tunnel_controllers: list[Pos]
     outputs: list[OutputRig]
     removed_tunnel: tuple[Pos, Direction] | None
+    collector_roots: list[Pos] = field(default_factory=list)
+    exits: list[Pos] = field(default_factory=list)
     expected: dict = field(default_factory=dict)
 
 
@@ -91,6 +93,90 @@ def _connected_cable_sides(lay: Layout, pos: Pos) -> list[Direction]:
         if isinstance(o, CableBus) and d.opposite not in o.parts:
             out.append(d)
     return out
+
+
+def _tree_load(lay: Layout, exit_pos: Pos, size) -> int:
+    """Input tunnels in the cable component (inside the build) that leaves via this exit."""
+    seen, todo, tunnels = set(), [exit_pos], 0
+    while todo:
+        n = todo.pop()
+        if n in seen:
+            continue
+        seen.add(n)
+        b = lay.get(n)
+        tunnels += sum(1 for p in b.parts.values() if isinstance(p, P2PTunnel) and not p.output)
+        for d in _connected_cable_sides(lay, n):
+            o = step(n, d)
+            if _layer(o, size) <= 1:
+                todo.append(o)
+    return tunnels
+
+
+@dataclass
+class _Forest:
+    parent: dict = field(default_factory=dict)   # cell -> next cell toward its root (None at a root)
+    load: dict = field(default_factory=dict)      # cell -> channels passing through it
+
+
+def _collector(attach, contacts: set, size, cap: int, blocked: set) -> _Forest:
+    """Connect every attach cell to a snake contact with dense-cable trees in the
+    layers 2 and 3 blocks out from the box (minus `blocked` cells), keeping
+    each cell's load within `cap`.
+    Heaviest attach points go first; each takes the shortest path that either
+    starts a new tree at a free contact or joins an existing tree with room."""
+    from collections import deque
+    f = _Forest()
+    reserved = {p for p, _, _ in attach}
+
+    def root_path(n):
+        while n is not None:
+            yield n
+            n = f.parent[n]
+
+    for start, load, what in sorted(attach, key=lambda a: (-a[1], a[0])):
+        if start in f.parent:
+            raise ValueError(f"{what}: collector cell {start} is already used")
+        reserved.discard(start)
+        prev = {start: None}
+        q = deque([start])
+        found = None
+        while q and found is None:
+            n = q.popleft()
+            for d in Direction:
+                o = step(n, d)
+                if o in prev or _layer(o, size) not in (2, 3) or o in reserved or o in blocked:
+                    continue
+                if o in f.parent:
+                    if all(f.load[c] + load <= cap for c in root_path(o)):
+                        prev[o] = n
+                        found = o
+                        break
+                    continue                          # full tree: do not route through it
+                prev[o] = n
+                if o in contacts:
+                    found = o
+                    break
+                q.append(o)
+        if start in contacts and start not in f.parent:
+            found, prev = start, {start: None}
+        if found is None:
+            raise ValueError(f"{what}: no room to connect it to the tunnel network")
+        # Walk back from the junction / contact to the start, linking cells.
+        joined = found in f.parent
+        path = []
+        n = found
+        while n is not None:
+            path.append(n)
+            n = prev[n]
+        # path = [found, ..., start]
+        if not joined:
+            f.parent[found], f.load[found] = None, 0
+        for i in range(1, len(path)):
+            f.parent[path[i]] = path[i - 1]
+            f.load[path[i]] = 0
+        for c in root_path(start):
+            f.load[c] += load
+    return f
 
 
 def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE,
@@ -138,17 +224,9 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     lay.energy(main_power)
     _anchor_neighbours(lay, main_power)
 
-    # 2. Dense shell two blocks out.
     lo, hi = [-2, -2, -2], [s + 1 for s in size]
-    for x in range(lo[0], hi[0] + 1):
-        for y in range(lo[1], hi[1] + 1):
-            for z in range(lo[2], hi[2] + 1):
-                p = (x, y, z)
-                if _layer(p, size) == 2:
-                    lay.cable(p, CableType.DENSE)
-    _anchor_neighbours(lay, main_power)  # the shell cell beside the cell too
 
-    # 3. Tunnel-network controller: a snake under the shell, plus its power cell.
+    # 2. Tunnel-network controller: a snake under the collector, plus its power cell.
     w, depth = min(7, size[0] + 4), min(7, size[2] + 4)
     snake = []
     for row, dz in enumerate(range(0, depth, 2)):
@@ -159,8 +237,9 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
         lay.controller(p)
     tunnel_power = (lo[0], lo[1] - 2, lo[2])
     lay.energy(tunnel_power)
+    contacts = {(x, y + 1, z) for x, y, z in snake}  # collector cells sitting on a snake block
 
-    # 4. Output rigs on top of the shell, for inputs that face a controller.
+    # 3. Output rigs on top (placed below, after the exits), for inputs that face a controller.
     inputs = []
     for pos in lay.positions():
         b = lay.get(pos)
@@ -178,21 +257,87 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
             break
         if t not in chosen:
             chosen.append(t)
+    # 3b. Exits: margin cable cells with a side open to the outside. Each keeps one
+    #    open side (down if possible); the rest get anchors.
+    exits: dict[Pos, Pos] = {}
+    for pos in lay.positions():
+        b = lay.get(pos)
+        if not (isinstance(b, CableBus) and _layer(pos, size) == 1):
+            continue
+        open_out = [d for d in Direction if _layer(step(pos, d), size) == 2 and d not in b.parts]
+        if not open_out:
+            continue
+        keep = D.DOWN if D.DOWN in open_out else open_out[0]
+        parts = dict(b.parts)
+        for d in open_out:
+            if d is not keep:
+                parts[d] = CableAnchor()
+        lay.cable(pos, b.cable, b.color, parts)
+        exits[pos] = step(pos, keep)
+
     outputs = []
+    attach: list[tuple[Pos, int, str]] = []   # (collector cell, channels, what)
+    for e, p in exits.items():
+        attach.append((p, _tree_load(lay, e, size), f"exit {e}"))
+    # Rig spots on the top face: not an exit's collector cell, and 3+ blocks apart.
     top = hi[1] + 1
+    taken = set(exits.values())
+    spots = []
+    for x in range(lo[0] + 1, hi[0]):
+        for z in range(lo[2] + 1, hi[2]):
+            if (x, hi[1], z) in taken or any(abs(x - a) < 3 and abs(z - c) < 3 for a, c in spots):
+                continue
+            spots.append((x, z))
     for j, (_, pos, d, freq) in enumerate(chosen[:output_rigs]):
-        x, z = lo[0] + 1 + 4 * j, 0
-        if x > hi[0]:
+        if j >= len(spots):
             break
+        x, z = spots[j]
         lay.cable((x, top, z), CableType.NORMAL, parts={D.UP: P2PTunnel(freq, output=True)})
         for i in range(1, 5):
             lay.cable((x, top + i, z), CableType.DENSE)
             lay.cable((x, top + i, z - 1), CableType.NORMAL, parts=_devices_except(D.SOUTH))
             lay.cable((x, top + i, z + 1), CableType.NORMAL, parts=_devices_except(D.NORTH))
         outputs.append(OutputRig(freq, (pos, d), ((x, top, z), D.UP), devices=40))
+        attach.append(((x, hi[1], z), 1, f"output rig {j + 1}"))
+
+    # 5. Collector: one dense-cable tree per snake contact, built greedily, each
+    #    carrying at most the dense capacity. Cells that touch but are not
+    #    parent/child get anchors, so every route is fixed and readable.
+    # Collector cells must not touch the snake (except contacts, from above), the
+    # rigs, or the power cells.
+    blocked = set()
+    for pos, b in lay.blocks.items():
+        if _layer(pos, size) >= 2:
+            blocked.add(pos)
+            blocked.update(step(pos, d) for d in Direction)
+    blocked -= contacts
+    blocked -= {p for p, _, _ in attach}
+    tree = _collector(attach, contacts, size, profile.dense_channel_capacity, blocked)
+    cells = set(tree.parent)
+    for n in cells:
+        lay.cable(n, CableType.DENSE)
+    for n in sorted(cells):
+        parts = {}
+        for d in Direction:
+            o = step(n, d)
+            linked = tree.parent.get(n) == o or tree.parent.get(o) == n
+            if o in cells:
+                if not linked and n < o:
+                    parts[d] = CableAnchor()
+            elif _layer(o, size) == 1 and lay.get(o) is not None:
+                if exits.get(o) != n:
+                    parts[d] = CableAnchor()          # a margin cell that is not this cell's exit
+            elif lay.is_controller(o):
+                if not (n in contacts and tree.parent.get(n) is None and d is D.DOWN):
+                    parts[d] = CableAnchor()
+        if parts:
+            lay.cable(n, CableType.DENSE, parts=parts)
+    _anchor_neighbours(lay, main_power)
+    collector = {"roots": sorted(r for r in cells if tree.parent.get(r) is None), "cells": len(cells)}
 
     report = check(lay, profile)
-    rig = TestRig(name, lay, report, size, main_power, tunnel_power, snake, outputs, removed)
+    rig = TestRig(name, lay, report, size, main_power, tunnel_power, snake, outputs, removed,
+                  collector_roots=collector["roots"], exits=sorted(exits))
     rig.expected = expectations(rig, profile)
     return rig
 
@@ -214,6 +359,27 @@ def expectations(rig: TestRig, profile: Profile) -> dict:
         o.devices_active = sum(1 for n, ok in device_nodes if ok and n.pos[0] == x and abs(n.pos[2] - z) <= 1)
     loads = [n.used for n in g.nodes if n.kind == "cable" and n.capacity == profile.normal_channel_capacity
              and n.pos in rig.layout.blocks and _layer(n.pos, rig.size) <= 1]
+
+    # What WAILA / The One Probe shows on a smart cable: the busiest of its
+    # connections (PartCable.writeToNBT "usedChannels").
+    xs, ys, zs = zip(*rig.layout.blocks)
+    origin = (min(xs), min(ys), min(zs))
+
+    def reading(pos):
+        node = g.centers[pos]
+        return max((c.used for c in node.conns), default=0)
+
+    def rel(pos):
+        return tuple(c - o for c, o in zip(pos, origin))
+
+    probe_roots = [{"pos": r, "rel": rel(r), "channels": reading(r)} for r in rig.collector_roots]
+    probe_exits = [{"pos": e, "rel": rel(e), "channels": reading(e)} for e in rig.exits]
+    rig_probe = []
+    for o in rig.outputs:
+        c = o.output_at[0]
+        trunk = (c[0], c[1] + 1, c[2])
+        rig_probe.append({"output_cable": rel(c), "output_cable_channels": reading(c),
+                          "trunk": rel(trunk), "trunk_channels": reading(trunk)})
     return {
         "main_controllers": len(main_ctrl),
         "main_network": main_grid.state if main_grid else None,
@@ -226,7 +392,12 @@ def expectations(rig: TestRig, profile: Profile) -> dict:
         "tunnel_network_channels": tunnel_grid.channels_in_use,
         "main_network_channels": main_grid.channels_in_use if main_grid else 0,
         "busiest_tunnel_cable": max(loads) if loads else 0,
-        "rigs": [{"freq": o.freq, "devices": o.devices, "active": o.devices_active} for o in rig.outputs],
+        "rigs": [{"freq": o.freq, "devices": o.devices, "active": o.devices_active, **p}
+                 for o, p in zip(rig.outputs, rig_probe)],
+        "probe_roots": probe_roots,
+        "probe_roots_total": sum(r["channels"] for r in probe_roots),
+        "probe_exits": probe_exits,
+        "origin": origin,
         "valid": rig.report.ok,
         "errors": [str(v) for v in rig.report.errors()],
     }

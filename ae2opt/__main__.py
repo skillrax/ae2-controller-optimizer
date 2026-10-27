@@ -151,6 +151,8 @@ def main(argv: list[str] | None = None) -> int:
     t.add_argument("--out", default="examples/ingame")
     t.add_argument("--time", type=float, default=60.0, help="optimizer seconds per test build")
     t.add_argument("--workers", type=int, default=8)
+    t.add_argument("--fresh", action="store_true",
+                   help="re-optimize the test builds instead of reusing the ones already in --out")
 
     s = sub.add_parser("show", help="print a layout layer by layer")
     s.add_argument("layout")
@@ -211,7 +213,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.cmd == "export-tests":
             from .ingame import write_suite
-            out = write_suite(args.out, _profile_from_args(args), args.time, args.workers)
+            out = write_suite(args.out, _profile_from_args(args), args.time, args.workers, fresh=args.fresh)
             print(f"wrote the in-game test suite to {out} (start with {out / 'TESTING.md'})")
             return 0
         if args.cmd == "show":
