@@ -183,9 +183,8 @@ within capacity. That removes the need to force routes with anchors.
 | W4 | **Groups that touch get different dyes.** Fluix connects to every colour, so dense cable may only touch its own groups (W2). | Cables of different dyes don't connect (`AEColor.matches`, §2), so groups stay separate without anchors. Controllers are uncoloured, so W5 is still needed. |
 | W5 | **Anchor-free** (default): a smart cable next to a controller face carries a tunnel on that face. | R6 without anchors. |
 
-In-game status: R6, the 8-channel cable limit, 32 per dense cable, and tunnel behaviour are
-confirmed (examples/ingame/RESULTS.md). Colour separation is standard AE2 behaviour and is in
-the source, but isn't yet confirmed by an in-game test of a coloured build.
+In-game status: confirmed (examples/ingame/RESULTS.md, run 3). Dyed groups stay apart (C1),
+fluix merges them (C2), and the coloured anchor-free 3x3x3 reads exactly as predicted (T5).
 
 ## 6. AE2 Unofficial Extended Life differences
 

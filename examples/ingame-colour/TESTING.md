@@ -10,8 +10,8 @@ A controller, then one **white** smart cable, then group **A**: 2 white cable ce
 
 | Check | Expected | In game |
 |---|---|---|
-| Group A tunnels (over gold) | **8 of 8** `Device Online` | |
-| Group B tunnels (over lapis) | **8 of 8** `Device Offline` (cut off: no power, no channel) | |
+| Group A tunnels (over gold) | **8 of 8** `Device Online` | yes |
+| Group B tunnels (over lapis) | **8 of 8** `Device Offline` (cut off: no power, no channel) | yes |
 
 ## C2: control, same build with B in fluix (`ae2opt_c2`)
 
@@ -19,8 +19,8 @@ Fluix connects to every colour, so A and B merge and 16 tunnels share the one wh
 
 | Check | Expected | In game |
 |---|---|---|
-| Tunnels online, A and B together | **8 of 16** `Device Online`, the rest `Device Missing Channel` | |
-| The white cable next to the controller | `8 of 8 Channels` | |
+| Tunnels online, A and B together | **8 of 16** `Device Online`, the rest `Device Missing Channel` | yes |
+| The white cable next to the controller | `8 of 8 Channels` | yes |
 
 If C1 shows B online, or C2 shows all 16 online, colours don't behave as the model assumes. Stop there and tell me.
 
@@ -30,10 +30,10 @@ The coloured 3x3x3 optimum in the same kind of test rig as before. The optimizer
 
 | Check | Expected | In game |
 |---|---|---|
-| All controllers (build and snake) | online, none red | |
-| WAILA on the cable next to each of the 3 **gold** blocks | `23`, `30`, `22` (any order), adding up to **75** | |
-| WAILA on the cable next to each **emerald** block | `32 of 32 Channels` | |
-| Any tunnel you can see showing `Device Missing Channel` | **none** | |
+| All controllers (build and snake) | online, none red | yes |
+| WAILA on the cable next to each of the 3 **gold** blocks | `23`, `30`, `22` (any order), adding up to **75** | yes |
+| WAILA on the cable next to each **emerald** block | `32 of 32 Channels` | yes |
+| Any tunnel you can see showing `Device Missing Channel` | **none** | none |
 
 - The main network's power cell replaces one outer tunnel, so the build has 73 inputs. The total is those plus the 2 rig outputs.
 - Cable colours in the build: smart cables 35 white, 21 orange; 7 dense cables, all fluix. The rig's own cables (collector, outputs, terminals) are fluix too.

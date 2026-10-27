@@ -67,3 +67,21 @@ TESTING.md at the commit that records this run.
 **Tester feedback:** finding blocks by relative coordinate is far too slow. The useful checks
 are the totals, the rigs (once per rig design is enough), "any `Device Missing Channel`?",
 and the negative tests.
+
+## Run 3: colour wiring suite (commit 0e1118a)
+
+**Setup:** plain AE2 rv6 with JEI and WAILA. Checklist: `examples/ingame-colour/TESTING.md`.
+Marker blocks (gold, lapis, emerald) replaced relative coordinates.
+
+| Test | Result |
+|---|---|
+| C1 orange group B touching white group A | **Matches.** A 8 of 8 `Device Online`; B 8 of 8 `Device Offline` (cut off). |
+| C2 control: B in fluix | **Matches.** 8 of 16 online, the rest `Device Missing Channel`; white cable `8 of 8 Channels`. |
+| T5 coloured anchor-free 3x3x3 | **Matches.** All controllers online; the three gold-marked roots read 23, 30, 22 (= 75); both emerald-marked rig cables 32 of 32; no visible tunnel missing a channel. |
+
+**What this confirms:**
+- **Colours separate cable groups:** touching cables of different dyes stay apart, while fluix connects to everything.
+- **The coloured, anchor-free wiring works in game,** with exactly the predicted per-trunk counts.
+- **Rules W1–W5 hold** (MECHANICS.md §5b).
+
+**Tester feedback:** the marker-block structure is much easier to test than coordinates, and the colours visibly cut cable clutter.
