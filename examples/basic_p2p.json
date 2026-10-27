@@ -1,0 +1,90 @@
+{
+ "schema": 1,
+ "blocks": [
+  {
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "type": "controller",
+   "powered": true
+  },
+  {
+   "pos": [
+    1,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "west": {
+     "type": "p2p_me",
+     "freq": 1,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "device"
+    },
+    "up": {
+     "type": "device"
+    },
+    "north": {
+     "type": "device"
+    },
+    "west": {
+     "type": "device"
+    },
+    "east": {
+     "type": "device"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 1,
+     "output": true
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    0
+   ],
+   "type": "controller",
+   "powered": true
+  }
+ ]
+}

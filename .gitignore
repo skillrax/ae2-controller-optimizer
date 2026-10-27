@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# Optimizer run folders (checkpoints, logs) and temp files
+runs/
+*.tmp
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

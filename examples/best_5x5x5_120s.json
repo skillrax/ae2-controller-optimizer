@@ -1,0 +1,5993 @@
+{
+ "schema": 1,
+ "blocks": [
+  {
+   "pos": [
+    -2,
+    0,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    0,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    0,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    0,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    1,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    1,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    1,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    2,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    2,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    2,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    2,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    3,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    3,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    3,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    3,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    3,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    4,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    4,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    4,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -2,
+    5,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    -1,
+    -1,
+    4
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 1,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    0,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 2,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    0,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 3,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    0,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 4,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    0,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 5,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 6,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 7,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    2,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 8,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    2,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    2,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 9,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    2,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    2,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 10,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    3,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 11,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    3,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 12,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    3,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    3,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 13,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    3,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 14,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    4,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "p2p_me",
+     "freq": 15,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    4,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 16,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    4,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 17,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    4,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "west": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    -1,
+    5,
+    1
+   ],
+   "type": "cable",
+   "cable": "dense"
+  },
+  {
+   "pos": [
+    -1,
+    6,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    -2,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    -2,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    -2,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    -2,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    -2,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    -1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 18,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    -1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 19,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    -1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 20,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    -1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 21,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    -1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 22,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    0,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "p2p_me",
+     "freq": 23,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "type": "controller",
+   "powered": true
+  },
+  {
+   "pos": [
+    0,
+    0,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 24,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    0,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 25,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 26,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 27,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    1,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 28,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 29,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 30,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 31,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 32,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    1,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 33,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 34,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 35,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 36,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    2,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    2,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 37,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    2,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    2,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 38,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 39,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 40,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 41,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    2,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    2,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 42,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 43,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 44,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 45,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    2,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    2,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 46,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    2,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    3,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    3,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 47,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    3,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    3,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    3,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 48,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 49,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 50,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 51,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    3,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    3,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    3,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 52,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    3,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    4,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    4,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "p2p_me",
+     "freq": 53,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    4,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    4,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 54,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 55,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 56,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    4,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    4,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    0,
+    4,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 57,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 58,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 59,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    5,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 60,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    5,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    5,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 61,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    5,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 62,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    5,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    0,
+    6,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    0,
+    6,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    -2,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    -2,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    -2,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    -2,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    -1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 63,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    -1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    -1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 64,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    -1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    -1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 65,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    0,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 66,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    0,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    0,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 67,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 68,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 69,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 70,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    0,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    0,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 71,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 72,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 73,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 74,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    0,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    0,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 75,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    0,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    1,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    1,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 76,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 77,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 78,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 79,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 80,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 81,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    1,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 82,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 83,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 84,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 85,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    1,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    1,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 86,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    1,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    2,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 87,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    2,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    2,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 88,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 89,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 90,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 91,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    2,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    2,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 92,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 93,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 94,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    2,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    2,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 95,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    3,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    3,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 96,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 97,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 98,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 99,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    3,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    3,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 100,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 101,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 102,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 103,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    3,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    3,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 104,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 105,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 106,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 107,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 108,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    3,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    3,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    4,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 109,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    4,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    4,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 110,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 111,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 112,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    4,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    4,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 113,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 114,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 115,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 116,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 117,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    4,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 118,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    4,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    5,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 119,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    5,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    5,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 120,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    5,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    5,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 121,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    1,
+    6,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    6,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    6,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    6,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    1,
+    6,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    -2,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    -2,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    -2,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    -1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 122,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    -1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    -1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 123,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    -1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 124,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 125,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 126,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 127,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    0,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 128,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 129,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 130,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    0,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 131,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 132,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 133,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 134,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    1,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    1,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 135,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    1,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    1,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 136,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 137,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 138,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 139,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 140,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    1,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    1,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    1,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 141,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    2,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    2,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    2,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 142,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 143,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 144,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    2,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    2,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    2,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 145,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 146,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 147,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 148,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    2,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 149,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 150,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 151,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 152,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    2,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    2,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    3,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    3,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    3,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 153,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 154,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 155,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    3,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    3,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 156,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 157,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 158,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    3,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    3,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    3,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 159,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    3,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    4,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    4,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "p2p_me",
+     "freq": 160,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    4,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    4,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 161,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 162,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 163,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    4,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "p2p_me",
+     "freq": 164,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 165,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    4,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    4,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    2,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 166,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    4,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    5,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 167,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    5,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    5,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 168,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    5,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 169,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    6,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    2,
+    6,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    -2,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    -2,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    -2,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    -1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 170,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    -1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 171,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    -1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    -1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    -1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 172,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    0,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 173,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    0,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    0,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    0,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 174,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 175,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 176,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    0,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 177,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 178,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 179,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 180,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    0,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    0,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 181,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    1,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 182,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 183,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 184,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 185,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 186,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 187,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 188,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    1,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    1,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 189,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 190,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 191,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 192,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 193,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    1,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    1,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    2,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    2,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    2,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 194,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 195,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    2,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 196,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    2,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 197,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 198,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 199,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 200,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    2,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    2,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    2,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 201,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    3,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    3,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 202,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    3,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    3,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 203,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 204,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 205,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 206,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    3,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "p2p_me",
+     "freq": 207,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 208,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    3,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    3,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 209,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 210,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 211,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 212,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 213,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    3,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    3,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    4,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 214,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    4,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    4,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    4,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 215,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 216,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    4,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 217,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 218,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 219,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 220,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    4,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    3,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 221,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    5,
+    -1
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    5,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 222,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    5,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 223,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    5,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    5,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    5,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 224,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    6,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    6,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    6,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    3,
+    6,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    -2,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    -2,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    -2,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    -1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 225,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    -1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    -1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 226,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    -1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 227,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    -1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "anchor"
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 228,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    0,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 229,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    0,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 230,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 231,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 232,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 233,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    0,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 234,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    0,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    1,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    1,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 235,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    1,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    1,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 236,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 237,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 238,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 239,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 240,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 241,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 242,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 243,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    1,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    1,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 244,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    1,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    2,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 245,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    2,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    2,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 246,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 247,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 248,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 249,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    2,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    2,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    2,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    2,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 250,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    2,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    3,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    3,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    3,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 251,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 252,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 253,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 254,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    3,
+    1
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    3,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    3,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 255,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 256,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 257,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 258,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 259,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    3,
+    4
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    3,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "north": {
+     "type": "p2p_me",
+     "freq": 260,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    4,
+    -2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    4,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "p2p_me",
+     "freq": 261,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    4,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    4,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 262,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 263,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 264,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 265,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    4,
+    2
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    4,
+    3
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    4,
+    4,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 266,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 267,
+     "output": false
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 268,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    4,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    5,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 269,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    5,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    5,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 270,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    5,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 271,
+     "output": false
+    },
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    5,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    6,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    6,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    4,
+    6,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    5,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 272,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    0,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 273,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    0,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 274,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    0,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 275,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    0,
+    5
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    1,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 276,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    1,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 277,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    1,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    1,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    1,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 278,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    1,
+    5
+   ],
+   "type": "cable",
+   "cable": "dense"
+  },
+  {
+   "pos": [
+    5,
+    1,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    5,
+    2,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 279,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    2,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    2,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 280,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    2,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 281,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    2,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 282,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    3,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    3,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 283,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    3,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 284,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    3,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    3,
+    4
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "west": {
+     "type": "p2p_me",
+     "freq": 285,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    4,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "west": {
+     "type": "p2p_me",
+     "freq": 286,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    4,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    4,
+    2
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "south": {
+     "type": "anchor"
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 287,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    4,
+    3
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "west": {
+     "type": "p2p_me",
+     "freq": 288,
+     "output": false
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    4,
+    5
+   ],
+   "type": "cable",
+   "cable": "dense"
+  },
+  {
+   "pos": [
+    5,
+    4,
+    6
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    5,
+    5,
+    0
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    5,
+    3
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    5,
+    4
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    5,
+    5
+   ],
+   "type": "cable",
+   "cable": "dense",
+   "parts": {
+    "up": {
+     "type": "anchor"
+    },
+    "south": {
+     "type": "anchor"
+    },
+    "east": {
+     "type": "anchor"
+    }
+   }
+  },
+  {
+   "pos": [
+    6,
+    0,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    0,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    0,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    1,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    1,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    1,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    1,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    1,
+    5
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    2,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    2,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    2,
+    4
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    3,
+    0
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    3,
+    1
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    3,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    3,
+    3
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    4,
+    2
+   ],
+   "type": "port"
+  },
+  {
+   "pos": [
+    6,
+    4,
+    5
+   ],
+   "type": "port"
+  }
+ ]
+}
