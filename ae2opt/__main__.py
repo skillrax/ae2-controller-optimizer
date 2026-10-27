@@ -11,6 +11,7 @@
   show LAYOUT.json                      print a layout layer by layer
   import-cfg CONFIG [--save NAME]       show what a config file imports as
   profiles                              list saved profiles
+  gui [--port N] [--no-browser]         open the app (3D designer, optimizer runs, profiles) in your browser
 
 Profile options (later ones override earlier ones):
   --profile NAME      a saved profile
@@ -176,6 +177,11 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("profiles", help="list saved profiles")
 
+    gu = sub.add_parser("gui", help="open the app in your browser (local only, works offline)")
+    gu.add_argument("--port", type=int, default=0, help="port on 127.0.0.1 (default: any free port)")
+    gu.add_argument("--no-browser", action="store_true", help="don't open a browser window")
+    gu.add_argument("--runs-dir", help="folder for optimizer runs (default: %%APPDATA%%/ae2opt/runs)")
+
     args = ap.parse_args(argv)
     try:
         if args.cmd == "check":
@@ -262,6 +268,11 @@ def main(argv: list[str] | None = None) -> int:
             if args.save:
                 print(f"saved to {ProfileStore().save(result.profile)}")
             return 0
+        if args.cmd == "gui":
+            from pathlib import Path
+            from .gui import serve
+            return serve(args.port, open_browser=not args.no_browser,
+                         runs_dir=Path(args.runs_dir) if args.runs_dir else None)
         if args.cmd == "profiles":
             for p in ProfileStore().list():
                 print(f"{p.name}: normal={p.normal_channel_capacity} dense={p.dense_channel_capacity} "

@@ -104,7 +104,7 @@ core/            pure Python, no UI
   search.py      top-K enumeration, Pareto sweeps, annealing refiner
   io.py          JSON layout format, .nbt structure / schematic export, BOM
 app/             local web UI (served offline by a tiny local server)
-  three.js 3D voxel editor: place/remove controllers, mark gaps/P2P
+  3D voxel editor (as built: a small hand-written WebGL viewer, no three.js): place/remove controllers, mark gaps/P2P
   live validity + channel overlay from sim.py
   "Optimize" panel: constraints, objective, progress, results gallery
 tests/
@@ -177,7 +177,7 @@ No rule constant is hardcoded. Every rule in MECHANICS.md reads from an active *
 | 1. Rules research | Close the open questions in §2. Write `RULES.md` with source citations. | Every rule has a code reference. |
 | 2. Core + sim | `rules.py`, `sim.py`, JSON format, unit tests | Hand-built layouts score correctly. Known-bad shapes are rejected. **Done: see README.md (57 tests).** |
 | 3. Optimizer | CP-SAT model, symmetry breaking, top-K, Pareto sweep (CLI) | Proven optimum for 7³ and smaller boxes, with solve time reported. **In progress:** the model, tree routing with anchors, simulator check and repair, target mode, and CLI are done; small boxes are proven optimal and cross-checked by brute force. Still to do: top-K, Pareto sweep, and faster solving on 7³. First results (16 workers, default profile): 5³ gives 288 tunnels in 120 s (bound 342); 7³ gives 685 tunnels in 300 s (bound 886). LNS then took 7³ to **708 tunnels = 22,656 channels, 179 controllers** (20 min, still improving; `examples/best_7x7x7.json`). Findings: the limit is routing, not shape (shapes with 806+ exposed faces exist). Lattice seeds and symmetry breaking didn't help on 5³, so both are off by default; LNS is what works. Proving optimality at 7³ looks out of reach: even the routing-free version keeps a large gap (806 found vs 1,125 bound). **Cuts** (cap / exit / tree / degree) plus symmetry breaking made 4×4×3 provable (77 s) and shrank the gaps: 4×4×4 is 164 vs at most 168; 5×5×5 is 298 vs at most 314, down from an ~18% gap to 5.4% (see README). |
-| 4. UI | 3D editor, live validation, optimize panel, layer-by-layer build view | Build, test, and optimize all work from the UI, offline. |
+| 4. UI | 3D editor, live validation, optimize panel, layer-by-layer build view | Build, test, and optimize all work from the UI, offline. **Done:** `python -m ae2opt gui`. A standard-library server plus a browser page with its own WebGL view (no three.js, so nothing to vendor). Design tab: hover tooltips, editing tools, live rules, X-ray, channel heat map, layer slider. Optimize tab: runs with pause/resume/continue and a live chart. Library and Profiles tabs. See README. |
 | 5. Game validation | `.nbt` export, golden in-game fixtures, optional dump mod | Sim matches the game on all fixtures. **In progress:** `.nbt` export, test rigs, and a 6-test suite with checklist (`examples/ingame/`) are done; waiting on the in-game results. |
 | 6. Extras | Bill of materials, P2P frequency plan, annealing for custom objectives, .exe packaging | **Build guide done:** HTML guide with bill of materials, layer viewer with world coordinates, input-linking checklist, exit-to-trunk grouping, and an optimizer-designed tunnel-network controller (outlet mode). Polish step trims cable routes. Packaging still to do. |
 

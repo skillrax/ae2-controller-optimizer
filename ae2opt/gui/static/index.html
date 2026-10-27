@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AE2 Controller Optimizer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 9v14L16 30 4 23V9z' fill='%23373e4a' stroke='%234de3ff' stroke-width='2'/%3E%3Cpath d='M16 9v14M9 13l7 4 7-4' stroke='%23a985ef' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14L16 30 4 23V9z" fill="var(--panel-2)" stroke="var(--cyan)" stroke-width="2"/><path d="M16 9v14M9 13l7 4 7-4" stroke="var(--fluix)" stroke-width="2" fill="none"/></svg>
+    <div><b>AE2 Controller Optimizer</b><small>ME controller + P2P builds for 1.12.2</small></div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button data-tab="design" class="active">Design</button>
+    <button data-tab="optimize">Optimize<span class="live-dot" id="liveDot" hidden></span></button>
+    <button data-tab="library">Library</button>
+    <button data-tab="profiles">Profiles</button>
+  </nav>
+  <div class="profile-chip" title="Game config used for every check and optimization">
+    <span class="label">Profile</span>
+    <select id="profileSelect"></select>
+    <span class="summary" id="profileSummary"></span>
+  </div>
+</header>
+
+<main>
+<!-- ======================================================== DESIGN -->
+<section class="tab active" id="tab-design">
+  <aside class="toolrail" id="toolrail"></aside>
+  <div class="stage" id="stage">
+    <div class="stagebar">
+      <input class="title-input" id="buildTitle" value="Untitled build" spellcheck="false" aria-label="Build name">
+      <div class="spacer"></div>
+      <button class="btn ghost" id="btnNew" title="Start an empty build">New</button>
+      <button class="btn ghost" id="btnOpen" title="Open a saved .json layout">Open…</button>
+      <button class="btn ghost" id="btnSave" title="Download this layout as .json">Save</button>
+      <div class="menu">
+        <button class="btn ghost" id="btnExport">Export .nbt ▾</button>
+        <div class="menu-pop" id="exportMenu" hidden>
+          <button data-rig="0"><b>Build only</b><small>Structure-block file of the build as shown</small></button>
+          <button data-rig="1"><b>Build + test rig</b><small>Adds power, a tunnel network and output rigs with marker blocks</small></button>
+        </div>
+      </div>
+      <div class="menu">
+        <button class="btn primary" id="btnGuide">Build guide ▾</button>
+        <div class="menu-pop" id="guideMenu" hidden>
+          <button data-tc="0"><b>Quick guide</b><small>Materials, layer-by-layer view, colours, tunnel-network size</small></button>
+          <button data-tc="1"><b>Guide + tunnel-network controller</b><small>Also designs the controller for your tunnel network (about 30 s)</small></button>
+        </div>
+      </div>
+    </div>
+    <canvas id="view" tabindex="0"></canvas>
+    <div class="tip" id="tip" hidden></div>
+    <div class="palette" id="palette" hidden></div>
+    <div class="viewctl">
+      <div class="seg" id="viewButtons">
+        <button data-view="iso" title="Isometric view">Iso</button>
+        <button data-view="top" title="Top-down view">Top</button>
+        <button data-view="front" title="From the south">Front</button>
+        <button data-view="side" title="From the east">Side</button>
+        <button data-view="fit" title="Fit the build (F, or double-click)">Fit</button>
+      </div>
+      <div class="seg">
+        <button id="tglXray" class="toggle" title="See through controllers (X)">X-ray</button>
+        <button id="tglHeat" class="toggle" title="Colour cables by channel load (H)">Channels</button>
+      </div>
+    </div>
+    <div class="slicer" id="slicer" hidden>
+      <span class="slicer-label">Layers</span>
+      <input type="range" id="sliceRange" orient="vertical" min="0" max="0" value="0" aria-label="Highest layer shown">
+      <span class="slicer-val" id="sliceVal">all</span>
+    </div>
+    <div class="legend" id="heatLegend" hidden>
+      <span>0</span><div class="ramp"></div><span>full</span>
+    </div>
+    <div class="hints" id="hints">
+      <span><kbd>Left-drag</kbd> orbit</span><span><kbd>Right-drag</kbd> pan</span><span><kbd>Wheel</kbd> zoom</span>
+      <span><kbd>Click</kbd> place</span><span><kbd>Right-click</kbd> remove</span><span><kbd>Ctrl Z</kbd> undo</span>
+    </div>
+    <div class="empty" id="emptyState" hidden>
+      <h2>Start a build</h2>
+      <p>Place controllers with the tool on the left, open an example from the Library,
+         or let the optimizer design one for you.</p>
+      <div class="row">
+        <button class="btn primary" data-goto="library">Browse examples</button>
+        <button class="btn" data-goto="optimize">Optimize a build</button>
+      </div>
+    </div>
+    <div class="busy" id="busy" hidden><div class="spinner"></div><span id="busyText">Working…</span></div>
+  </div>
+  <aside class="inspector" id="inspector">
+    <div class="card status" id="statusCard"></div>
+    <div class="card" id="selectionCard" hidden></div>
+    <div class="card" id="issuesCard"></div>
+    <div class="card" id="materialsCard"></div>
+  </aside>
+</section>
+
+<!-- ======================================================== OPTIMIZE -->
+<section class="tab" id="tab-optimize">
+  <div class="opt">
+    <div class="card settings">
+      <h2>New optimizer run</h2>
+      <p class="muted" id="optProfileNote"></p>
+      <div class="field">
+        <div class="field-head"><label>Box to fill</label><label class="check"><input type="checkbox" id="boxLock" checked> same on all sides</label></div>
+        <div class="box-sliders" id="boxSliders"></div>
+        <div class="box-preview" id="boxPreview"></div>
+      </div>
+      <div class="field">
+        <label>Goal</label>
+        <div class="seg wide" id="modeSeg">
+          <button data-mode="improve" class="active">Find a great build</button>
+          <button data-mode="prove">Prove the best</button>
+        </div>
+        <p class="muted small" id="modeNote"></p>
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="budget">Time budget</label><output id="budgetOut"></output></div>
+        <input type="range" id="budget" min="0" max="15" value="4">
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="workers">CPU threads</label><output id="workersOut"></output></div>
+        <input type="range" id="workers" min="1" max="8" value="8">
+      </div>
+      <div class="field toggles">
+        <label class="switch"><input type="checkbox" id="optExterior" checked><span></span>Tunnel cells outside the box</label>
+        <label class="switch"><input type="checkbox" id="optInterior" checked><span></span>Tunnel cells inside the box</label>
+        <label class="switch"><input type="checkbox" id="optAnchorFree" checked><span></span>Coloured wiring, no cable anchors</label>
+      </div>
+      <details class="field">
+        <summary>Advanced</summary>
+        <div class="field-head"><label for="mainSolve">Main solve before neighbourhood search</label><output id="mainOut"></output></div>
+        <input type="range" id="mainSolve" min="30" max="1800" step="30" value="300">
+        <label class="switch"><input type="checkbox" id="optSymmetry" checked><span></span>Symmetry breaking (faster proofs)</label>
+        <label class="switch"><input type="checkbox" id="optPriority"><span></span>Normal CPU priority (default: below normal, so the PC stays usable)</label>
+      </details>
+      <button class="btn primary big" id="btnStart">Start optimizing</button>
+      <p class="muted small" id="startNote"></p>
+    </div>
+
+    <div class="runpane">
+      <div class="card run" id="runCard">
+        <div class="run-empty" id="runEmpty">
+          <h2>No run selected</h2>
+          <p class="muted">Start a run on the left, or pick one from the list below. Runs keep going while you use
+          other tabs, can be paused to free the CPU, and can be continued later.</p>
+        </div>
+        <div id="runBody" hidden>
+          <div class="run-head">
+            <div>
+              <h2 id="runTitle"></h2>
+              <div class="muted small" id="runSub"></div>
+            </div>
+            <span class="pill" id="runState"></span>
+          </div>
+          <div class="stats" id="runStats"></div>
+          <div class="progress"><div class="bar" id="runBar"></div><span id="runBarText"></span></div>
+          <div class="run-grid">
+            <div class="chart-wrap"><canvas id="runChart"></canvas><div class="chart-legend"><span class="sw fluix"></span>best found<span class="sw cyan dashed"></span>proven maximum</div></div>
+            <div class="mini"><canvas id="runView"></canvas><span class="mini-label" id="runViewLabel">best so far</span></div>
+          </div>
+          <div class="phase" id="runPhase"></div>
+          <div class="row actions">
+            <button class="btn" id="btnPause">Pause</button>
+            <button class="btn" id="btnResume" hidden>Resume</button>
+            <button class="btn" id="btnStop">Save &amp; stop</button>
+            <button class="btn" id="btnContinue" hidden>Continue run</button>
+            <div class="spacer"></div>
+            <button class="btn primary" id="btnOpenBest">Open in designer</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Runs</h3>
+        <table class="runs" id="runsTable"><thead><tr><th>Box</th><th>Goal</th><th>Best</th><th>Proven max</th><th>Time</th><th>Status</th><th></th></tr></thead><tbody></tbody></table>
+        <p class="muted small" id="runsDir"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================== LIBRARY -->
+<section class="tab" id="tab-library">
+  <div class="lib">
+    <div class="lib-head">
+      <h2>Library</h2>
+      <div class="spacer"></div>
+      <button class="btn" id="btnLibOpen">Open a .json file…</button>
+    </div>
+    <h3>Your optimizer results</h3>
+    <div class="cards" id="libRuns"></div>
+    <h3>Examples</h3>
+    <div class="cards" id="libExamples"></div>
+  </div>
+</section>
+
+<!-- ======================================================== PROFILES -->
+<section class="tab" id="tab-profiles">
+  <div class="prof">
+    <div class="card">
+      <h3>Profiles</h3>
+      <div class="plist" id="profileList"></div>
+      <button class="btn" id="btnNewProfile">New profile</button>
+    </div>
+    <div class="card editor">
+      <h3 id="peTitle">Edit profile</h3>
+      <div class="field"><label for="peName">Name</label><input id="peName" type="text" spellcheck="false"></div>
+      <div class="field">
+        <div class="field-head"><label for="peNormal">Smart / normal cable channels</label><input class="num" id="peNormalNum" type="number" min="1"></div>
+        <input type="range" id="peNormal" min="1" max="256">
+      </div>
+      <div class="field">
+        <div class="field-head"><label for="peDense">Dense cable channels</label><input class="num" id="peDenseNum" type="number" min="1"></div>
+        <input type="range" id="peDense" min="1" max="256">
+      </div>
+      <div class="field">
+        <label>Largest controller structure</label>
+        <div class="box-sliders" id="peSize"></div>
+      </div>
+      <div class="field">
+        <label class="switch"><input type="checkbox" id="peChannels"><span></span>Channels enabled</label>
+      </div>
+      <div class="warnings" id="peWarnings"></div>
+      <div class="row">
+        <button class="btn primary" id="btnSaveProfile">Save profile</button>
+        <button class="btn" id="btnUseProfile">Use this profile</button>
+        <div class="spacer"></div>
+        <button class="btn danger" id="btnDeleteProfile">Delete</button>
+      </div>
+      <p class="muted small" id="peNote"></p>
+    </div>
+    <div class="card">
+      <h3>Import a config file</h3>
+      <p class="muted small">Point at your pack's AE2 config (for Extended Life: <code>config/appliedenergistics2/AppliedEnergistics2.cfg</code>).
+      Values are read into the editor for you to check; nothing is saved until you press Save.</p>
+      <label class="drop" id="cfgDrop">
+        <input type="file" id="cfgFile" accept=".cfg,.json,.toml,.properties,.txt,*/*">
+        <b>Choose a config file</b><span>or drop it here</span>
+      </label>
+      <div id="cfgResult"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<input type="file" id="openFile" accept=".json,application/json" hidden>
+<div class="toasts" id="toasts"></div>
+<canvas id="thumbCanvas" class="offscreen" width="320" height="200"></canvas>
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

@@ -17,4 +17,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["ae2opt"]
+packages = ["ae2opt", "ae2opt.gui"]
+
+[tool.setuptools.package-data]
+"ae2opt.gui" = ["static/*"]

@@ -9,8 +9,9 @@ Minecraft 1.12.2 (rv6 and Unofficial Extended Life).
 ## Status
 
 Working: config profiles, config-file import, layout model, channel simulator, rules
-checker, and the CP-SAT optimizer. There's no UI yet. The core is pure Python 3.11+;
-only the optimizer needs OR-Tools (`pip install ortools`).
+checker, the CP-SAT optimizer, `.nbt` export, the build guide, and a desktop GUI
+(`python -m ae2opt gui`). The core is pure Python 3.11+; only the optimizer needs OR-Tools
+(`pip install ortools`).
 
 | Module | What it does |
 |---|---|
@@ -22,6 +23,45 @@ only the optimizer needs OR-Tools (`pip install ortools`).
 | `ae2opt/rules.py` | R1–R11 plus frequency checks, and metrics (faces, tunnels, channels) |
 | `ae2opt/optimize.py` | CP-SAT model: controllers + tunnel faces + tunnel-network routing. Every result is re-checked by the simulator |
 | `ae2opt/render.py` | Text view of a layout, layer by layer |
+| `ae2opt/gui/` | The app: a local server (standard library only) and a browser page with its own WebGL 3D view |
+
+## The app
+
+```bash
+python -m ae2opt gui
+```
+
+This opens the app in your browser. It runs entirely on your PC (a small server on
+127.0.0.1) and needs no internet: the 3D view is written for this project, with nothing
+loaded from the web. Leave the console window open while you use it; Ctrl+C there quits
+and saves any running optimizer runs.
+
+- **Design:** a 3D view of a build.
+  - **Hover** any block or part for details: controller state and how many tunnels feed
+    it, cable colour and channel load (`7 / 8`), tunnel status (`Device Online` /
+    `Missing Channel` / `Offline`).
+  - **Edit** with the tools on the left. With the tunnel tool, clicking a controller face
+    adds a smart cable with a tunnel facing it. Right-click removes; Ctrl+Z undoes.
+  - **Live checking:** every edit re-runs the simulator and the rules. Click an issue to
+    outline the blocks involved.
+  - **Views:** X-ray (see through controllers), Channels (cables coloured by load), and a
+    layer slider.
+  - **Output:** the materials list; export `.nbt` (the build alone, or with a test rig);
+    open the build guide.
+- **Optimize:** start runs with sliders that stop at your profile's limits (box size,
+  CPU threads, time budget).
+  - **Goals:** "find a great build" (improve) or "prove the best".
+  - **Live view:** a chart of the best build found against the proven maximum, plus a 3D
+    preview of the best build so far.
+  - **Control:** pause (frees the CPU), resume, save and stop, and continue later. These
+    are the same run folders as `python -m ae2opt run`, so either can continue the other's
+    runs.
+- **Library:** the examples and your optimizer results, with 3D thumbnails.
+- **Profiles:** edit capacities and controller size with sliders, or import your pack's
+  `AppliedEnergistics2.cfg`. Each value shows where it came from; nothing is saved until
+  you press Save.
+
+Options: `--port N`, `--no-browser`, `--runs-dir DIR` (default `%APPDATA%e2optuns`).
 
 ## How the optimizer works
 
@@ -254,6 +294,12 @@ Preview what a config file imports as, and optionally save it as a named profile
 
 ```bash
 python -m ae2opt import-cfg path/to/AppliedEnergistics2.cfg --save "My pack"
+```
+
+Open the app:
+
+```bash
+python -m ae2opt gui
 ```
 
 Run the tests:
