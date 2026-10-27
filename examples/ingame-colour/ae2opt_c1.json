@@ -1,0 +1,177 @@
+{
+ "schema": 1,
+ "blocks": [
+  {
+   "pos": [
+    0,
+    -1,
+    0
+   ],
+   "type": "energy_acceptor"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "color": "white"
+  },
+  {
+   "pos": [
+    2,
+    -2,
+    0
+   ],
+   "type": "marker",
+   "block": "minecraft:gold_block"
+  },
+  {
+   "pos": [
+    2,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "color": "white",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 2,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 1,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 3,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 4,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    3,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "color": "white",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 6,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 5,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 7,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 8,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    4,
+    -2,
+    0
+   ],
+   "type": "marker",
+   "block": "minecraft:lapis_block"
+  },
+  {
+   "pos": [
+    4,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "color": "orange",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 10,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 9,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 11,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 12,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    5,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "color": "orange",
+   "parts": {
+    "up": {
+     "type": "p2p_me",
+     "freq": 13,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 15,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 16,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 17,
+     "output": false
+    }
+   }
+  }
+ ]
+}

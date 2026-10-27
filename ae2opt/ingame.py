@@ -264,3 +264,123 @@ def checklist(rows: list[dict], profile: Profile) -> str:
              "alone, and the `.json` is the full rig. `python -m ae2opt show <file>.json` prints "
              "either layer by layer.")
     return "\n".join(L) + "\n"
+
+
+# --------------------------------------------------------------------------- colour suite
+
+def colour_test(b_colour: str) -> Layout:
+    """C1/C2: a powered controller, one white smart cable, then group A (2 white
+    cells, 8 tunnels) and group B (2 cells of `b_colour`, 8 tunnels) touching A.
+    B has no route of its own. With a dye, B stays cut off (no power, offline);
+    with fluix it joins A and 16 tunnels share the one 8-channel cable."""
+    lay = Layout()
+    lay.controller((0, 0, 0))
+    lay.energy((0, -1, 0))
+    lay.cable((1, 0, 0), CableType.NORMAL, "white")
+    sides = [D.UP, D.DOWN, D.NORTH, D.SOUTH]
+    freq = itertools.count(1)
+    for x, colour in ((2, "white"), (3, "white"), (4, b_colour), (5, b_colour)):
+        parts = {d: P2PTunnel(next(freq)) for d in sides}
+        if x == 5:
+            parts[D.EAST] = P2PTunnel(next(freq))   # 5th tunnel on the far end
+            del parts[D.DOWN]
+        lay.cable((x, 0, 0), CableType.NORMAL, colour, parts)
+    # A gold block under group A, a lapis block under group B, to tell them apart.
+    lay.marker((2, -2, 0), "minecraft:gold_block")
+    lay.marker((4, -2, 0), "minecraft:lapis_block")
+    return lay
+
+
+def _tunnel_states(lay: Layout, profile: Profile) -> dict:
+    from .rules import check
+    sim = check(lay, profile).sim
+    out = {"A": {"online": 0, "missing": 0, "offline": 0}, "B": {"online": 0, "missing": 0, "offline": 0}}
+    for t in sim.tunnels():
+        group = "A" if t.key[0][0] <= 3 else "B"
+        state = "online" if t.active else ("missing" if t.powered else "offline")
+        out[group][state] += 1
+    return out
+
+
+def write_colour_suite(out_dir: str | Path, profile: Profile = DEFAULT_PROFILE, time_limit: float = 60,
+                       workers: int = 8) -> Path:
+    """C1/C2 colour tests plus T5, a coloured anchor-free 3x3x3 in a test rig."""
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    rows = []
+
+    for cid, colour, title in (("C1", "orange", "group B is orange: colours keep the groups apart"),
+                               ("C2", "transparent", "control: group B is fluix, which connects to everything")):
+        lay = colour_test(colour)
+        info = save_structure(lay, out / f"ae2opt_{cid.lower()}.nbt")
+        lay.save(out / f"ae2opt_{cid.lower()}.json")
+        rows.append(dict(id=cid, name=f"ae2opt_{cid.lower()}", title=title, size=info["size"],
+                         expected=_tunnel_states(lay, profile)))
+
+    build_path = out / "ae2opt_t5_build.json"
+    if build_path.exists():
+        build = Layout.load(build_path)
+    else:
+        build = _optimize((3, 3, 3), profile, time_limit, workers).harness
+        build.save(build_path)
+    rig = build_rig("T5", build, (3, 3, 3), profile)
+    if not rig.expected["valid"]:
+        raise RuntimeError(f"T5 test rig fails its own simulation: {rig.expected['errors']}")
+    info = save_structure(rig.layout, out / "ae2opt_t5.nbt")
+    rig.layout.save(out / "ae2opt_t5.json")
+    from .guide import cable_colours
+    rows.append(dict(id="T5", name="ae2opt_t5", title="coloured, anchor-free 3x3x3 optimum", size=info["size"],
+                     expected=rig.expected, colours=cable_colours(build),
+                     removed_tunnel=rig.removed_tunnel))
+
+    (out / "expected.json").write_text(json.dumps(rows, indent=1, default=str), "utf-8")
+    (out / "TESTING.md").write_text(colour_checklist(rows, profile), "utf-8")
+    return out
+
+
+def colour_checklist(rows: list[dict], profile: Profile) -> str:
+    c1, c2, t5 = rows
+    e = t5["expected"]
+    roots = e["probe_roots"]
+    L = ["# Colour wiring check\n",
+         "Three quick structures. Load each with a structure block as before (copy the `.nbt` files "
+         "into `saves/<world>/structures/`). Use WAILA: tunnels show `Device Online`, "
+         "`Device Missing Channel`, or `Device Offline` (no power).\n",
+         f"Profile: {profile.name}. Plain AE2 rv6 or Extended Life.\n",
+         "## C1: colours keep groups apart (`ae2opt_c1`)\n",
+         "A controller, then one **white** smart cable, then group **A**: 2 white cable cells with 8 "
+         "tunnels, above the **gold** block. Then group **B**: 2 **orange** cells with 8 tunnels, "
+         "above the **lapis** block. B touches A, but has no route of its own.\n",
+         "| Check | Expected | In game |", "|---|---|---|",
+         f"| Group A tunnels (over gold) | **{c1['expected']['A']['online']} of 8** `Device Online` | |",
+         f"| Group B tunnels (over lapis) | **{c1['expected']['B']['offline']} of 8** `Device Offline` "
+         "(cut off: no power, no channel) | |",
+         "", "## C2: control, same build with B in fluix (`ae2opt_c2`)\n",
+         "Fluix connects to every colour, so A and B merge and 16 tunnels share the one white "
+         "cable, which carries 8.\n",
+         "| Check | Expected | In game |", "|---|---|---|",
+         f"| Tunnels online, A and B together | **{c2['expected']['A']['online'] + c2['expected']['B']['online']} "
+         f"of 16** `Device Online`, the rest `Device Missing Channel` | |",
+         "| The white cable next to the controller | `8 of 8 Channels` | |",
+         "", "If C1 shows B online, or C2 shows all 16 online, colours don't behave as the model "
+         "assumes. Stop there and tell me.\n",
+         f"## T5: coloured, anchor-free 3x3x3 (`ae2opt_t5`, {'x'.join(map(str, t5['size']))})\n",
+         "The coloured 3x3x3 optimum in the same kind of test rig as before. The optimizer's build "
+         "has no cable anchors; the rig may add one or two where it attaches to the build. Gold "
+         "blocks mark the collector roots; emerald blocks mark each rig's dense cable.\n",
+         "| Check | Expected | In game |", "|---|---|---|",
+         "| All controllers (build and snake) | online, none red | |",
+         f"| WAILA on the cable next to each of the {len(roots)} **gold** blocks | "
+         + ", ".join(f"`{r['channels']}`" for r in roots)
+         + f" (any order), adding up to **{e['probe_roots_total']}** | |",
+         "| WAILA on the cable next to each **emerald** block | `32 of 32 Channels` | |",
+         "| Any tunnel you can see showing `Device Missing Channel` | **none** | |",
+         ""]
+    if t5.get("removed_tunnel"):
+        L.append(f"- The main network's power cell replaces one outer tunnel, so the build has "
+                 f"{e['input_tunnels']} inputs. The total is those plus the 2 rig outputs.")
+    colours = ", ".join(f"{n} {c.replace('_', ' ')}" for c, n in t5["colours"]["smart"].items())
+    dense = sum(t5["colours"]["dense"].values())
+    L.append(f"- Cable colours in the build: smart cables {colours}; {dense} dense cables, all fluix. "
+             "The rig's own cables (collector, outputs, terminals) are fluix too.")
+    return "\n".join(L) + "\n"

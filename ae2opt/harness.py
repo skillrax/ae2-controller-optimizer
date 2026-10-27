@@ -349,6 +349,21 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     _anchor_neighbours(lay, main_power)
     collector = {"roots": sorted(r for r in cells if tree.parent.get(r) is None), "cells": len(cells)}
 
+    # 6. Markers so a tester can find the cables to read without coordinates:
+    #    a gold block beside every collector root, an emerald block beside each
+    #    rig's dense cable. Plain vanilla blocks: no AE2 connection.
+    def mark(pos, block):
+        for d in (D.NORTH, D.SOUTH, D.WEST, D.EAST, D.UP):
+            spot = step(pos, d)
+            if spot not in lay.blocks:
+                lay.marker(spot, block)
+                return
+    for r in collector["roots"]:
+        mark(r, "minecraft:gold_block")
+    for o in outputs:
+        c = o.output_at[0]
+        mark((c[0], c[1] + 1, c[2]), "minecraft:emerald_block")
+
     report = check(lay, profile)
     rig = TestRig(name, lay, report, size, main_power, tunnel_power, snake, outputs, removed, margin=m,
                   collector_roots=collector["roots"], exits=sorted(exits))

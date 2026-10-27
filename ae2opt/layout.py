@@ -107,7 +107,14 @@ class TunnelPort:
     kind = "port"
 
 
-Block = Controller | CableBus | DeviceBlock | EnergyAcceptor | TunnelPort
+@dataclass(frozen=True)
+class Marker:
+    """A plain vanilla block that only marks a spot for a tester (no AE2 node)."""
+    block: str = "minecraft:gold_block"
+    kind = "marker"
+
+
+Block = Controller | CableBus | DeviceBlock | EnergyAcceptor | TunnelPort | Marker
 
 
 class Layout:
@@ -144,6 +151,9 @@ class Layout:
     def port(self, pos: Pos) -> "Layout":
         return self.place(pos, TunnelPort())
 
+    def marker(self, pos: Pos, block: str = "minecraft:gold_block") -> "Layout":
+        return self.place(pos, Marker(block))
+
     def remove(self, pos: Pos) -> "Layout":
         self.blocks.pop(tuple(pos), None)
         return self
@@ -169,6 +179,8 @@ class Layout:
             d: dict = {"pos": list(pos), "type": b.kind}
             if isinstance(b, Controller) and b.powered:
                 d["powered"] = True
+            if isinstance(b, Marker):
+                d["block"] = b.block
             if isinstance(b, CableBus):
                 d["cable"] = b.cable.value
                 if b.color != "transparent":
@@ -194,6 +206,8 @@ class Layout:
                 lay.device(pos)
             elif t == "energy_acceptor":
                 lay.energy(pos)
+            elif t == "marker":
+                lay.marker(pos, d.get("block", "minecraft:gold_block"))
             elif t == "port":
                 lay.port(pos)
             else:

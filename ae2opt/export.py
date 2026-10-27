@@ -28,7 +28,7 @@ from . import nbt
 from .geometry import Direction
 from .layout import (
     COLORS, CableAnchor, CableBus, CableType, Controller, DeviceBlock, DevicePart,
-    EnergyAcceptor, Layout, P2PTunnel, TunnelPort,
+    EnergyAcceptor, Layout, Marker, P2PTunnel, TunnelPort,
 )
 
 DATA_VERSION_1_12_2 = 1343
@@ -92,6 +92,8 @@ def _state(b) -> tuple[dict, dict | None]:
         return {"Name": f"{MOD}:creative_energy_cell"}, None
     if isinstance(b, DeviceBlock):
         return {"Name": f"{MOD}:interface"}, None
+    if isinstance(b, Marker):
+        return {"Name": b.block}, None
     if isinstance(b, TunnelPort):
         raise ExportError("layout still contains tunnel-network ports (P); build a test rig "
                           "(ae2opt.harness) or replace them with your tunnel network first")
