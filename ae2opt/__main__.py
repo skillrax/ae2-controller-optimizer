@@ -7,6 +7,7 @@
                                         long run: live panel, p/r/q pause/resume/stop, checkpoints
   export LAYOUT.json OUT.nbt [--rig]   structure file for a structure block (optionally with test rig)
   export-tests [--out DIR]              in-game validation suite: .nbt files + TESTING.md checklist
+  guide LAYOUT.json [--out FILE.html]   build guide: materials, layers, input list, tunnel network
   show LAYOUT.json                      print a layout layer by layer
   import-cfg CONFIG [--save NAME]       show what a config file imports as
   profiles                              list saved profiles
@@ -154,6 +155,16 @@ def main(argv: list[str] | None = None) -> int:
     t.add_argument("--fresh", action="store_true",
                    help="re-optimize the test builds instead of reusing the ones already in --out")
 
+    gd = sub.add_parser("guide", help="build guide (HTML): materials, layers, input list, tunnel-network sizing")
+    profile_options(gd)
+    gd.add_argument("layout")
+    gd.add_argument("--out", help="output .html (default: next to the layout)")
+    gd.add_argument("--title")
+    gd.add_argument("--no-tunnel-controller", action="store_true",
+                    help="skip designing the tunnel-network controller (no OR-Tools needed)")
+    gd.add_argument("--time", type=float, default=60.0, help="seconds for the tunnel-network controller design")
+    gd.add_argument("--workers", type=int, default=8)
+
     s = sub.add_parser("show", help="print a layout layer by layer")
     s.add_argument("layout")
 
@@ -215,6 +226,22 @@ def main(argv: list[str] | None = None) -> int:
             from .ingame import write_suite
             out = write_suite(args.out, _profile_from_args(args), args.time, args.workers, fresh=args.fresh)
             print(f"wrote the in-game test suite to {out} (start with {out / 'TESTING.md'})")
+            return 0
+        if args.cmd == "guide":
+            from pathlib import Path
+            from .guide import build_plan, save_html
+            src = Path(args.layout)
+            out = Path(args.out) if args.out else src.with_suffix(".html")
+            plan = build_plan(Layout.load(src), _profile_from_args(args), title=args.title or f"AE2 build: {src.stem}",
+                              design_tunnel_controller=not args.no_tunnel_controller,
+                              time_limit=args.time, workers=args.workers)
+            save_html(plan, out)
+            tn = plan.tunnel_network
+            print(f"{len(plan.inputs)} input tunnels, {plan.bom['controllers']} controllers, "
+                  f"tunnel network needs {tn['channels']} channels ({tn['outlets']} outlets)")
+            for n in plan.notes:
+                print(f"note: {n}")
+            print(f"saved {out}")
             return 0
         if args.cmd == "show":
             print(render_layers(Layout.load(args.layout)))

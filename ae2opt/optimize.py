@@ -87,6 +87,8 @@ class OptimizeSpec:
     lns_time: float = 0.0              # total seconds (0 = off)
     lns_step: float = 10.0             # seconds per neighbourhood
     random_seed: int = 0
+    # Final pass: keep controllers and tunnels, minimize cable cells (seconds; 0 = off).
+    polish_time: float = 10.0
     # A proven upper bound on tunnels from an earlier run of the same spec. Proven
     # bounds stay valid, so a resumed run reports min(this, its own bound).
     known_upper: int | None = None
@@ -718,6 +720,23 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
         best = _lns(search, best, spec.lns_time, notes)
     if search.stop.is_set():
         notes.append("stopped early; this is the best layout found so far")
+
+    # 3b. Polish: same controllers and tunnels, fewest cable cells (shorter routes,
+    #     fewer anchors). Cannot change the score, so it never affects results.
+    if spec.polish_time > 0 and not search.stop.is_set():
+        search.emit("phase", phase="polish: shortening cable routes")
+        target = model.clone()
+        model.fix_shape(target, best.xs(model))
+        for v in model.f.values():
+            target.Add(v == best.vec[v.Index()])
+        target.Minimize(sum(model.k.values()))
+        _, _, vec, score = search.run(target, spec.polish_time, hint=best, phase="polish")
+        if vec is not None and score == best.score:
+            before = sum(best.vec[v.Index()] for v in model.k.values())
+            after = sum(vec[v.Index()] for v in model.k.values())
+            if after < before:
+                notes.append(f"polish: cable cells {before} -> {after}")
+            best = _Incumbent(vec, score, best.source)
 
     # 4. Build, simulate, and repair anything AE2's pathing would not channel.
     search.emit("phase", phase="checking with the simulator")
