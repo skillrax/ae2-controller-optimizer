@@ -134,6 +134,37 @@ itself starts over each session. `best.json` is never replaced by a worse layout
 - `result.txt`: final summary
 - `worker.log`: solver output
 
+## Exporting to Minecraft (.nbt structures)
+
+`export` writes any layout as a 1.12.2 structure file, which you load with a structure block.
+The block and part IDs and the cable-bus data come from the AE2 source and are the same in
+rv6 and Extended Life. P2P tunnels keep their frequencies, so inputs and outputs pair up when
+loaded.
+
+```bash
+python -m ae2opt export best.json best.nbt --rig --box 7 7 7
+```
+
+`--rig` wraps the build in a self-contained test rig:
+- a dense-cable shell connecting every exit
+- a snake-shaped tunnel-network controller
+- creative energy cells
+- two output tunnels feeding 40 terminals each
+
+It also prints what the simulator expects the game to show.
+
+## In-game validation
+
+```bash
+python -m ae2opt export-tests --out examples/ingame
+```
+
+This generates six structures plus [examples/ingame/TESTING.md](examples/ingame/TESTING.md),
+a fill-in checklist. T1–T4 are builds that should work exactly as predicted (2×2×2, a
+3×1×3 ring, 3×3×3, 4×4×3). N1 and N2 should fail in specific ways: a capacity overload,
+and an uncapped controller face merging the networks. **Until these pass in game, optimizer
+results are unverified.**
+
 ## Usage
 
 Find a layout for the default 7×7×7 controller, then keep improving it with LNS:

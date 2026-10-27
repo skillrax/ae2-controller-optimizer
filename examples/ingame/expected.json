@@ -1,0 +1,302 @@
+[
+ {
+  "id": "T1",
+  "name": "ae2opt_t1",
+  "title": "2x2x2 optimum",
+  "kind": "positive",
+  "size": [
+   6,
+   13,
+   6
+  ],
+  "origin": [
+   -2,
+   -4,
+   -2
+  ],
+  "expected": {
+   "main_controllers": 6,
+   "main_network": "ONLINE",
+   "tunnel_controllers": 20,
+   "tunnel_network": "ONLINE",
+   "same_network": false,
+   "input_tunnels": 23,
+   "input_tunnels_active": 23,
+   "output_tunnels_active": 2,
+   "tunnel_network_channels": 25,
+   "main_network_channels": 64,
+   "busiest_tunnel_cable": 3,
+   "rigs": [
+    {
+     "freq": 9,
+     "devices": 40,
+     "active": 32
+    },
+    {
+     "freq": 1,
+     "devices": 40,
+     "active": 32
+    }
+   ],
+   "valid": true,
+   "errors": []
+  },
+  "main_power": [
+   0,
+   -1,
+   1
+  ],
+  "tunnel_power": [
+   -2,
+   -4,
+   -2
+  ],
+  "removed_tunnel": [
+   [
+    0,
+    -1,
+    1
+   ],
+   "Direction.UP"
+  ]
+ },
+ {
+  "id": "T2",
+  "name": "ae2opt_t2",
+  "title": "3x1x3 ring around one gap cell",
+  "kind": "positive",
+  "size": [
+   7,
+   12,
+   7
+  ],
+  "origin": [
+   -2,
+   -4,
+   -2
+  ],
+  "expected": {
+   "main_controllers": 8,
+   "main_network": "ONLINE",
+   "tunnel_controllers": 31,
+   "tunnel_network": "ONLINE",
+   "same_network": false,
+   "input_tunnels": 31,
+   "input_tunnels_active": 31,
+   "output_tunnels_active": 2,
+   "tunnel_network_channels": 33,
+   "main_network_channels": 64,
+   "busiest_tunnel_cable": 4,
+   "rigs": [
+    {
+     "freq": 15,
+     "devices": 40,
+     "active": 32
+    },
+    {
+     "freq": 1,
+     "devices": 40,
+     "active": 32
+    }
+   ],
+   "valid": true,
+   "errors": []
+  },
+  "main_power": [
+   0,
+   -1,
+   2
+  ],
+  "tunnel_power": [
+   -2,
+   -4,
+   -2
+  ],
+  "removed_tunnel": [
+   [
+    0,
+    -1,
+    2
+   ],
+   "Direction.UP"
+  ]
+ },
+ {
+  "id": "T3",
+  "name": "ae2opt_t3",
+  "title": "3x3x3 optimum",
+  "kind": "positive",
+  "size": [
+   7,
+   14,
+   7
+  ],
+  "origin": [
+   -2,
+   -4,
+   -2
+  ],
+  "expected": {
+   "main_controllers": 18,
+   "main_network": "ONLINE",
+   "tunnel_controllers": 31,
+   "tunnel_network": "ONLINE",
+   "same_network": false,
+   "input_tunnels": 73,
+   "input_tunnels_active": 73,
+   "output_tunnels_active": 2,
+   "tunnel_network_channels": 75,
+   "main_network_channels": 64,
+   "busiest_tunnel_cable": 7,
+   "rigs": [
+    {
+     "freq": 14,
+     "devices": 40,
+     "active": 32
+    },
+    {
+     "freq": 1,
+     "devices": 40,
+     "active": 32
+    }
+   ],
+   "valid": true,
+   "errors": []
+  },
+  "main_power": [
+   -1,
+   0,
+   1
+  ],
+  "tunnel_power": [
+   -2,
+   -4,
+   -2
+  ],
+  "removed_tunnel": [
+   [
+    -1,
+    0,
+    1
+   ],
+   "Direction.EAST"
+  ]
+ },
+ {
+  "id": "T4",
+  "name": "ae2opt_t4",
+  "title": "4x4x3 optimum",
+  "kind": "positive",
+  "size": [
+   8,
+   15,
+   7
+  ],
+  "origin": [
+   -2,
+   -4,
+   -2
+  ],
+  "expected": {
+   "main_controllers": 32,
+   "main_network": "ONLINE",
+   "tunnel_controllers": 31,
+   "tunnel_network": "ONLINE",
+   "same_network": false,
+   "input_tunnels": 126,
+   "input_tunnels_active": 126,
+   "output_tunnels_active": 2,
+   "tunnel_network_channels": 128,
+   "main_network_channels": 64,
+   "busiest_tunnel_cable": 8,
+   "rigs": [
+    {
+     "freq": 13,
+     "devices": 40,
+     "active": 32
+    },
+    {
+     "freq": 1,
+     "devices": 40,
+     "active": 32
+    }
+   ],
+   "valid": true,
+   "errors": []
+  },
+  "main_power": [
+   1,
+   3,
+   -1
+  ],
+  "tunnel_power": [
+   -2,
+   -4,
+   -2
+  ],
+  "removed_tunnel": [
+   [
+    1,
+    3,
+    -1
+   ],
+   "Direction.SOUTH"
+  ]
+ },
+ {
+  "id": "N1",
+  "name": "ae2opt_n1",
+  "title": "capacity overload: 9 tunnels through one normal cable",
+  "kind": "negative",
+  "size": [
+   3,
+   2,
+   3
+  ],
+  "origin": [
+   0,
+   -1,
+   -1
+  ],
+  "expected": {
+   "networks": [
+    "ONLINE"
+   ],
+   "input_tunnels": 9,
+   "input_tunnels_active": 8,
+   "errors": [
+    "[R8 error] 1 tunnel(s) got no channel because a cable on their route to the tunnel-network controller is full (bottleneck at [(1, 0, 0)])  at (2, 0, 1)"
+   ]
+  }
+ },
+ {
+  "id": "N2",
+  "name": "ae2opt_n2",
+  "title": "T1 with one tunnel removed (uncapped controller face)",
+  "kind": "negative",
+  "size": [
+   6,
+   13,
+   6
+  ],
+  "origin": [
+   -2,
+   -4,
+   -2
+  ],
+  "expected": {
+   "networks": [
+    "CONFLICT"
+   ],
+   "input_tunnels": 22,
+   "input_tunnels_active": 0,
+   "errors": [
+    "[R2 error] one network contains 2 separate controller structures (joined through cable or tunnels): controller conflict, 0 channels  at (-2, -3, -2), (0, 0, 0)",
+    "[R6 error] tunnel network and main network are the same network here  at (-1, 0, 0), (-1, 1, 0), (0, -1, 0), (0, 0, -1), (0, 0, 2), (0, 1, -1)...",
+    "[R10 error] tunnel network is in controller conflict: 6 controller block(s) on this network are not face-connected to the rest (more than one controller structure)  at (-1, 0, 0), (-1, 1, 0), (-1, 4, 0), (0, -1, 0), (0, 0, -1), (0, 0, 2)...",
+    "[R11 error] a network has no power source (energy acceptor or powered controller)  at (-1, 5, -1), (-1, 5, 1), (-1, 6, -1), (-1, 6, 1), (-1, 7, -1), (-1, 7, 1)...",
+    "[R11 error] a network has no power source (energy acceptor or powered controller)  at (3, 5, -1), (3, 5, 1), (3, 6, -1), (3, 6, 1), (3, 7, -1), (3, 7, 1)..."
+   ]
+  }
+ }
+]

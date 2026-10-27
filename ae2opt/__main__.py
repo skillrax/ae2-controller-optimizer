@@ -5,6 +5,8 @@
                                         find the best controller + tunnel layout
   run [--box X Y Z] [--hours H] [--dir DIR] | run --resume DIR
                                         long run: live panel, p/r/q pause/resume/stop, checkpoints
+  export LAYOUT.json OUT.nbt [--rig]   structure file for a structure block (optionally with test rig)
+  export-tests [--out DIR]              in-game validation suite: .nbt files + TESTING.md checklist
   show LAYOUT.json                      print a layout layer by layer
   import-cfg CONFIG [--save NAME]       show what a config file imports as
   profiles                              list saved profiles
@@ -135,6 +137,21 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("_worker").add_argument("run_dir")  # internal: the solver process of `run`
 
+    e = sub.add_parser("export", help="write a layout as a 1.12.2 structure file (.nbt)")
+    profile_options(e)
+    e.add_argument("layout")
+    e.add_argument("out", help="output .nbt file")
+    e.add_argument("--rig", action="store_true",
+                   help="wrap the build in an in-game test rig (tunnel network, power, output rigs)")
+    e.add_argument("--box", type=int, nargs=3, metavar=("X", "Y", "Z"),
+                   help="with --rig: the box the build was optimized in (default: controller bounding box)")
+
+    t = sub.add_parser("export-tests", help="generate the in-game validation suite (.nbt files + checklist)")
+    profile_options(t)
+    t.add_argument("--out", default="examples/ingame")
+    t.add_argument("--time", type=float, default=60.0, help="optimizer seconds per test build")
+    t.add_argument("--workers", type=int, default=8)
+
     s = sub.add_parser("show", help="print a layout layer by layer")
     s.add_argument("layout")
 
@@ -177,6 +194,26 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "_worker":
             from .runner import worker_main
             return worker_main(args.run_dir)
+        if args.cmd == "export":
+            from .export import save_structure
+            lay = Layout.load(args.layout)
+            if args.rig:
+                from .harness import build_rig
+                profile = _profile_from_args(args)
+                ctrls = lay.controllers()
+                box = tuple(args.box) if args.box else tuple(max(c[i] for c in ctrls) + 1 for i in range(3))
+                rig = build_rig("export", lay, box, profile)
+                for k, v in rig.expected.items():
+                    print(f"  expected {k}: {v}")
+                lay = rig.layout
+            info = save_structure(lay, args.out)
+            print(f"saved {args.out}: {'x'.join(map(str, info['size']))} structure")
+            return 0
+        if args.cmd == "export-tests":
+            from .ingame import write_suite
+            out = write_suite(args.out, _profile_from_args(args), args.time, args.workers)
+            print(f"wrote the in-game test suite to {out} (start with {out / 'TESTING.md'})")
+            return 0
         if args.cmd == "show":
             print(render_layers(Layout.load(args.layout)))
             return 0

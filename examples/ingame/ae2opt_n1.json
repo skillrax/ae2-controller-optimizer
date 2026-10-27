@@ -1,0 +1,106 @@
+{
+ "schema": 1,
+ "blocks": [
+  {
+   "pos": [
+    0,
+    -1,
+    0
+   ],
+   "type": "energy_acceptor"
+  },
+  {
+   "pos": [
+    0,
+    0,
+    0
+   ],
+   "type": "controller"
+  },
+  {
+   "pos": [
+    1,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "normal"
+  },
+  {
+   "pos": [
+    2,
+    0,
+    -1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 1,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 2,
+     "output": false
+    },
+    "north": {
+     "type": "p2p_me",
+     "freq": 3,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 4,
+     "output": false
+    },
+    "east": {
+     "type": "p2p_me",
+     "freq": 5,
+     "output": false
+    }
+   }
+  },
+  {
+   "pos": [
+    2,
+    0,
+    0
+   ],
+   "type": "cable",
+   "cable": "dense"
+  },
+  {
+   "pos": [
+    2,
+    0,
+    1
+   ],
+   "type": "cable",
+   "cable": "normal",
+   "parts": {
+    "down": {
+     "type": "p2p_me",
+     "freq": 6,
+     "output": false
+    },
+    "up": {
+     "type": "p2p_me",
+     "freq": 7,
+     "output": false
+    },
+    "south": {
+     "type": "p2p_me",
+     "freq": 8,
+     "output": false
+    },
+    "west": {
+     "type": "p2p_me",
+     "freq": 9,
+     "output": false
+    }
+   }
+  }
+ ]
+}
