@@ -185,6 +185,7 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
               output_rigs: int = 2) -> TestRig:
     size = tuple(size)
     lay = Layout()
+    ports = {pos for pos, b in build.blocks.items() if isinstance(b, TunnelPort)}
     for pos, b in build.blocks.items():
         if isinstance(b, TunnelPort):
             continue
@@ -196,6 +197,20 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
             lay.place(pos, b)
     # The build's cable space reaches `m` blocks out; the rig starts beyond it.
     m = max([_layer(p, size) for p, b in lay.blocks.items() if not isinstance(b, Controller)] + [1])
+
+    # The build's exits: from its saved tunnel-network ports if it has them
+    # (anchor-free builds leave many outer sides open), else every open outer side
+    # (older anchored builds, where only exits are open).
+    def outer_open(pos):
+        b = lay.get(pos)
+        return [d for d in Direction if _layer(step(pos, d), size) == m + 1 and d not in b.parts]
+    exit_sides: dict[Pos, list] = {}
+    for pos in lay.positions():
+        b = lay.get(pos)
+        if isinstance(b, CableBus) and _layer(pos, size) == m:
+            sides = [d for d in outer_open(pos) if step(pos, d) in ports] if ports else outer_open(pos)
+            if sides:
+                exit_sides[pos] = sides
 
     # 1. Main-network power.
     removed = None
@@ -216,8 +231,7 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
             if not (isinstance(b, CableBus) and _layer(pos, size) == 1):
                 continue
             tunnels = [(d, p) for d, p in b.parts.items() if isinstance(p, P2PTunnel)]
-            exit_side = any(_layer(step(pos, d), size) == m + 1 and d not in b.parts for d in Direction)
-            if len(tunnels) == 1 and len(_connected_cable_sides(lay, pos)) <= 1 and not exit_side:
+            if len(tunnels) == 1 and len(_connected_cable_sides(lay, pos)) <= 1 and pos not in exit_sides:
                 removed = (pos, tunnels[0][0])
                 main_power = pos
                 lay.remove(pos)
@@ -263,13 +277,10 @@ def build_rig(name: str, build: Layout, size, profile: Profile = DEFAULT_PROFILE
     # 3b. Exits: margin cable cells with a side open to the outside. Each keeps one
     #    open side (down if possible); the rest get anchors.
     exits: dict[Pos, Pos] = {}
-    for pos in lay.positions():
+    for pos, open_out in exit_sides.items():
+        if pos not in lay.blocks:
+            continue
         b = lay.get(pos)
-        if not (isinstance(b, CableBus) and _layer(pos, size) == m):
-            continue
-        open_out = [d for d in Direction if _layer(step(pos, d), size) == m + 1 and d not in b.parts]
-        if not open_out:
-            continue
         keep = D.DOWN if D.DOWN in open_out else open_out[0]
         parts = dict(b.parts)
         for d in open_out:

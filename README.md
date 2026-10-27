@@ -69,7 +69,8 @@ without removing any real layout:
 - `tree`: n connected blocks have at least n−1 touching pairs, so tunnels ≤ 4n+2.
 - `degree`: every controller touches another.
 
-Symmetry breaking (mirror plus axis order) is also on. Measured on 16 workers:
+Symmetry breaking (mirror plus axis order) is also on. Measured on 16 workers, with the
+original wiring (routes forced into trees with cable anchors):
 
 | Box | Result | Time |
 |---|---|---|
@@ -79,10 +80,27 @@ Symmetry breaking (mirror plus axis order) is also on. Measured on 16 workers:
 | 4×4×4 | 164 found, at most 168 (2.4% gap) | not proven in 15 min |
 | 5×5×5 | 298 found, at most 314 (5.4% gap) | not proven in 15 min |
 
-**Best known 7×7×7 (default profile):** 708 tunnels = 22,656 channels with 179
-controllers, in [examples/best_7x7x7.json](examples/best_7x7x7.json). It comes from 5 min
-of solving plus 20 min of LNS, and LNS was still improving at the end. It isn't proven
-optimal; the solver's best upper bound is 886.
+**Coloured wiring (current default, 1-layer cable space):**
+
+| Box | Anchor-free (default) | Anchors allowed (`anchor_free=False`) |
+|---|---|---|
+| 3×3×3 | proven 74, 0 anchors, 3 trunks, 13 s | n/a |
+| 4×4×3 | proven 126, 0 anchors, 4 trunks, 284 s | proven 127, 1 anchor, 4 trunks, 163 s |
+| 5×5×5, 5 min | 282 (at most 322), 0 anchors, 11 trunks | n/a |
+| 7×7×7, 5 min + 10 min LNS | 701 (at most 834), 0 anchors, 26 trunks | n/a |
+
+Requiring zero anchors can cost a tunnel (4×4×3: 126 vs 127) and roughly doubles proof
+time. The coloured wiring is about 2× slower to prove than the old anchored trees. A
+2-layer cable space (`margin=2`) saved only 1–2 trunks but searched much worse (7×7×7:
+660 vs 701 tunnels), so the default is 1 layer.
+
+**Best known 7×7×7 (default profile):**
+- **Anchored wiring:** 708 tunnels = 22,656 channels with 179 controllers, in
+  [examples/best_7x7x7.json](examples/best_7x7x7.json). It comes from 5 min of solving plus
+  20 min of LNS. It isn't proven optimal; the best upper bound is 886.
+- **Coloured, anchor-free wiring:** 701 tunnels = 22,432 channels with 178 controllers,
+  0 anchors and 26 trunks, in [examples/best_7x7x7_coloured.json](examples/best_7x7x7_coloured.json)
+  (guide: [.html](examples/best_7x7x7_coloured.html)). It comes from 15 min of solving.
 
 ## Long runs: live progress, pause and resume
 

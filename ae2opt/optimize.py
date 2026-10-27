@@ -61,9 +61,10 @@ class OptimizeSpec:
     exterior_tunnels: bool = True
     # Allow tunnel cells and cable corridors in gaps inside the box.
     interior_tunnels: bool = True
-    # Layers of cable space around the box (1 = tunnel cells only; 2 adds a layer
-    # where dense collectors can merge groups into fuller trunks).
-    margin: int = 2
+    # Layers of cable space around the box. 2 adds a layer where dense collectors
+    # can merge groups into fuller trunks, but the bigger model searches much worse
+    # (7x7x7: 660 vs 701 tunnels in 15 min) for only 1-2 fewer trunks, so 1.
+    margin: int = 1
     # Every controller face next to a cable carries a tunnel, so the build needs no
     # cable anchors at all. Off: unused faces next to cables get anchors instead.
     anchor_free: bool = True
