@@ -77,7 +77,10 @@ for any orientation of the box.
 | 3×3×3 | **74** | 2,368 | 18 | 3 | proven |
 | 3×3×4 | 96 | 3,072 | 24 | 3 | proven |
 | 3×4×4 | **126** | 4,032 | 31 | 4 | proven |
-<!-- BEST-KNOWN-ROWS -->
+| 4×4×4 | 164 | 5,248 | 41 | 6 | best known, at most 170 |
+| 5×5×5 | 298 | 9,536 | 74 | 10 | best known, at most 324 |
+| 6×6×6 | 484 | 15,488 | 122 | 18 | best known, at most 590 |
+| 7×7×7 | 716 | 22,912 | 180 | 27 | best known, at most 1,047 |
 
 The app has every box up to 4 per side (19 proven results). "At most" is the proven upper
 bound: no build in that box can have more.

@@ -1,0 +1,676 @@
+{
+ "schema": 1,
+ "entries": [
+  {
+   "id": "1x1x1",
+   "box": [
+    1,
+    1,
+    1
+   ],
+   "status": "proven",
+   "tunnels": 6,
+   "upper": 6,
+   "controllers": 1,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 11,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 0,
+   "workers": 12,
+   "file": "1x1x1.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x1x2",
+   "box": [
+    1,
+    1,
+    2
+   ],
+   "status": "proven",
+   "tunnels": 10,
+   "upper": 10,
+   "controllers": 2,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 15,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 1,
+   "workers": 12,
+   "file": "1x1x2.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x1x3",
+   "box": [
+    1,
+    1,
+    3
+   ],
+   "status": "proven",
+   "tunnels": 14,
+   "upper": 14,
+   "controllers": 3,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 19,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 1,
+   "workers": 12,
+   "file": "1x1x3.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x1x4",
+   "box": [
+    1,
+    1,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 18,
+   "upper": 18,
+   "controllers": 4,
+   "trunks": 1,
+   "dense_cells": 2,
+   "cable_cells": 24,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x1x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x2x2",
+   "box": [
+    1,
+    2,
+    2
+   ],
+   "status": "proven",
+   "tunnels": 16,
+   "upper": 16,
+   "controllers": 4,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 21,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x2x2.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x2x3",
+   "box": [
+    1,
+    2,
+    3
+   ],
+   "status": "proven",
+   "tunnels": 22,
+   "upper": 22,
+   "controllers": 5,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 26,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x2x3.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x2x4",
+   "box": [
+    1,
+    2,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 28,
+   "upper": 28,
+   "controllers": 7,
+   "trunks": 1,
+   "dense_cells": 2,
+   "cable_cells": 33,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x2x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x2x2",
+   "box": [
+    2,
+    2,
+    2
+   ],
+   "status": "proven",
+   "tunnels": 24,
+   "upper": 24,
+   "controllers": 6,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 27,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "2x2x2.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x3x3",
+   "box": [
+    1,
+    3,
+    3
+   ],
+   "status": "proven",
+   "tunnels": 32,
+   "upper": 32,
+   "controllers": 8,
+   "trunks": 1,
+   "dense_cells": 1,
+   "cable_cells": 36,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x3x3.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x3x4",
+   "box": [
+    1,
+    3,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 40,
+   "upper": 40,
+   "controllers": 10,
+   "trunks": 2,
+   "dense_cells": 2,
+   "cable_cells": 42,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x3x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x2x3",
+   "box": [
+    2,
+    2,
+    3
+   ],
+   "status": "proven",
+   "tunnels": 36,
+   "upper": 36,
+   "controllers": 9,
+   "trunks": 2,
+   "dense_cells": 2,
+   "cable_cells": 35,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "2x2x3.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x4x4",
+   "box": [
+    1,
+    4,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 52,
+   "upper": 52,
+   "controllers": 13,
+   "trunks": 2,
+   "dense_cells": 2,
+   "cable_cells": 51,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "1x4x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x2x4",
+   "box": [
+    2,
+    2,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 46,
+   "upper": 46,
+   "controllers": 12,
+   "trunks": 2,
+   "dense_cells": 2,
+   "cable_cells": 44,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "2x2x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x3x3",
+   "box": [
+    2,
+    3,
+    3
+   ],
+   "status": "proven",
+   "tunnels": 52,
+   "upper": 52,
+   "controllers": 13,
+   "trunks": 2,
+   "dense_cells": 2,
+   "cable_cells": 46,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 2,
+   "workers": 12,
+   "file": "2x3x3.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x3x4",
+   "box": [
+    2,
+    3,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 68,
+   "upper": 68,
+   "controllers": 17,
+   "trunks": 3,
+   "dense_cells": 3,
+   "cable_cells": 56,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 4,
+   "workers": 12,
+   "file": "2x3x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "3x3x3",
+   "box": [
+    3,
+    3,
+    3
+   ],
+   "status": "proven",
+   "tunnels": 74,
+   "upper": 74,
+   "controllers": 18,
+   "trunks": 3,
+   "dense_cells": 4,
+   "cable_cells": 61,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 4,
+   "workers": 12,
+   "file": "3x3x3.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x4x4",
+   "box": [
+    2,
+    4,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 88,
+   "upper": 88,
+   "controllers": 23,
+   "trunks": 3,
+   "dense_cells": 3,
+   "cable_cells": 73,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 10,
+   "workers": 12,
+   "file": "2x4x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "3x3x4",
+   "box": [
+    3,
+    3,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 96,
+   "upper": 96,
+   "controllers": 24,
+   "trunks": 3,
+   "dense_cells": 5,
+   "cable_cells": 79,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 28,
+   "workers": 12,
+   "file": "3x3x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "3x4x4",
+   "box": [
+    3,
+    4,
+    4
+   ],
+   "status": "proven",
+   "tunnels": 126,
+   "upper": 126,
+   "controllers": 31,
+   "trunks": 4,
+   "dense_cells": 4,
+   "cable_cells": 96,
+   "anchors": 0,
+   "mode": "prove",
+   "seconds": 332,
+   "workers": 12,
+   "file": "3x4x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "4x4x4",
+   "box": [
+    4,
+    4,
+    4
+   ],
+   "status": "best_known",
+   "tunnels": 164,
+   "upper": 170,
+   "controllers": 41,
+   "trunks": 6,
+   "dense_cells": 7,
+   "cable_cells": 111,
+   "anchors": 0,
+   "mode": "improve",
+   "seconds": 1219,
+   "workers": 12,
+   "started_from": "best.json",
+   "file": "4x4x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "5x5x5",
+   "box": [
+    5,
+    5,
+    5
+   ],
+   "status": "best_known",
+   "tunnels": 298,
+   "upper": 324,
+   "controllers": 74,
+   "trunks": 10,
+   "dense_cells": 11,
+   "cable_cells": 193,
+   "anchors": 0,
+   "mode": "improve",
+   "seconds": 1529,
+   "workers": 12,
+   "started_from": null,
+   "file": "5x5x5.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "6x6x6",
+   "box": [
+    6,
+    6,
+    6
+   ],
+   "status": "best_known",
+   "tunnels": 484,
+   "upper": 590,
+   "controllers": 122,
+   "trunks": 18,
+   "dense_cells": 21,
+   "cable_cells": 303,
+   "anchors": 0,
+   "mode": "improve",
+   "seconds": 1843,
+   "workers": 12,
+   "started_from": null,
+   "file": "6x6x6.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "7x7x7",
+   "box": [
+    7,
+    7,
+    7
+   ],
+   "status": "best_known",
+   "tunnels": 716,
+   "upper": 1047,
+   "controllers": 180,
+   "trunks": 27,
+   "dense_cells": 27,
+   "cable_cells": 444,
+   "anchors": 0,
+   "mode": "improve",
+   "seconds": 1921,
+   "workers": 12,
+   "started_from": "best_7x7x7_coloured.json",
+   "file": "7x7x7.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  }
+ ]
+}
