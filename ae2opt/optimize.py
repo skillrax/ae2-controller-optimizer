@@ -1050,7 +1050,9 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
     #     so a stopped run still saves tidy wiring.
     polish = _polish_seconds(spec, model)
     if polish > 0:
-        seconds = min(polish, max(2.0, time.monotonic() - search.started))
+        # At least 10 s (it stops early once optimal): fast proofs (3x3x4 in ~5 s with the
+        # relaxed bound) otherwise left a trunk more than the tidy minimum.
+        seconds = min(polish, max(10.0, time.monotonic() - search.started))
         best = _polish(search, best, seconds, notes)
 
     # 4. Build, simulate, and repair anything AE2's pathing would not channel.

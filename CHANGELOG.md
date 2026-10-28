@@ -6,6 +6,7 @@
   channel capacities, simplified cable routing) for a fast upper bound; a build that reaches
   it is proven optimal. On 16 threads: 3×4×4 is proven in 42 s instead of 104 s, and 4×4×4
   from scratch in 31 min, where the full model alone stalls. Needs 6+ threads.
+- Wiring tidy-up gets at least 10 s, so fast proofs still end with the fewest trunks.
 - **6×6×6 bound:** the relaxed model shows 6×6×6 holds at most 549 tunnels (was 590).
 
 ## 1.1.0
