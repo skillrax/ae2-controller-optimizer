@@ -138,6 +138,31 @@ original wiring (routes forced into trees with cable anchors):
 | 5×5×5, 5 min | 282 (at most 322), 0 anchors, 11 trunks | n/a |
 | 7×7×7, 5 min + 10 min LNS | 701 (at most 834), 0 anchors, 26 trunks | n/a |
 
+**Relaxed bound (1.2).** Every proven optimum is (almost) a *tree* of controllers: n
+controllers carry 4n+2 tunnels, or 4n, in all 24 proofs bar three 2-thick slabs. So what
+limits a box is how many controllers can form such a tree and still route their tunnels
+out, not the exact wiring. The optimizer therefore also solves a **relaxed model**: the
+same controllers, cuts and channel capacities, but routing as a plain flow between cable
+cells (no parent per cell, no group/trunk wiring rules). Every real layout fits it, so its
+optimum is a proven upper bound, and it solves far faster. A build that reaches that
+bound is proven optimal; the optimizer then spends at most a quarter of the time so far
+proving the fewest controllers for it.
+
+It runs alongside the main solve with 12+ workers, before it with 6–11, and not with
+fewer (CP-SAT only runs its LP-based workers with 6+, and without them the relaxed model
+stalls). `relaxed_bound=False` turns it off. Measured on 16 workers:
+
+| Box | Without | With |
+|---|---|---|
+| 3×3×4 | proven 96, 17 s | proven 96, 4 s |
+| 3×4×4 | proven 126, 104 s | proven 126, 42 s (33 s, plus 9 s proving 31 controllers is the fewest) |
+| 4×4×4 (from scratch) | not proven; the model's own bound stalls at 172 | proven 164 in 31 min |
+| 6×6×6, 9 min | at most 590 (after hours) | at most 549 |
+
+The relaxation is looser where wiring matters more: on 5×5×5 and 7×7×7 it gives 322 and
+854, above the bounds already known (320, 834). Its best shapes don't make good builds
+either: 76-controller 5×5×5 shapes worth 292–298 relaxed wire to only 277–280.
+
 Requiring zero anchors can cost a tunnel (4×4×3: 126 vs 127) and roughly doubles proof
 time. The coloured wiring is about 2× slower to prove than the old anchored trees. A
 2-layer cable space (`margin=2`) saved only 1–2 trunks but searched much worse (7×7×7:

@@ -116,6 +116,12 @@ class OptimizeSpec:
     # A proven upper bound on tunnels from an earlier run of the same spec. Proven
     # bounds stay valid, so a resumed run reports min(this, its own bound).
     known_upper: int | None = None
+    # Solve the relaxed model (routing="flow") for a fast upper bound: alongside the main
+    # solve with 12+ workers, before it with 6-11, not with fewer. A build that reaches
+    # the bound is proven optimal, so the main solve stops there (then minimizes
+    # controllers briefly). 16 workers: 3x4x4 proven in 33 s instead of 104 s, 4x4x4
+    # from scratch in 31 min (the full model's own bound stalls at 172).
+    relaxed_bound: bool = True
     log: bool = False
 
 
@@ -188,8 +194,9 @@ class _Region:
 # --------------------------------------------------------------------------- model
 
 class _Model:
-    def __init__(self, spec: OptimizeSpec, profile: Profile, size):
+    def __init__(self, spec: OptimizeSpec, profile: Profile, size, routing: str = "forest"):
         self.spec, self.profile = spec, profile
+        self.routing = routing
         self.r = r = _Region(size, spec.exterior_tunnels, spec.margin)
         self.m = m = cp_model.CpModel()
         N = len(r.box)
@@ -302,17 +309,27 @@ class _Model:
         # touch dense cable only at its own attachment and keep trunks apart, and
         # extraction gives touching groups different colours, so whatever route
         # AE2's pathing picks, no cable can exceed its capacity. No cable anchors.
+        #
+        # routing="flow" is a relaxation for bounds only: the same capacities, but a
+        # plain flow between cable cells (no parents, no wiring rules). Every real
+        # layout is a solution of it, so its optimum bounds the real one, and it
+        # solves far faster (3x4x4: bound 126 proven in 28 s vs 332 s).
         self.h, self.par = {}, {}
+        forest = routing == "forest"
         for n in r.cells:
             for d in Direction:
                 o = step(n, d)
                 if o in r.cell_set:
-                    p = m.NewBoolVar(f"par{n}{d.name}")
-                    m.AddImplication(p, self.k[o])
                     v = m.NewIntVar(0, dense, f"h{n}{d.name}")
-                    m.Add(v <= dense * p)
                     self.h[(n, o)] = v
-                    self.par[(n, o)] = p
+                    if forest:
+                        p = m.NewBoolVar(f"par{n}{d.name}")
+                        m.AddImplication(p, self.k[o])
+                        m.Add(v <= dense * p)
+                        self.par[(n, o)] = p
+                    else:
+                        m.Add(v <= dense * self.k[n])
+                        m.Add(v <= dense * self.k[o])
         for (n, o), p in self.par.items():
             if n < o:
                 m.AddBoolOr([p.Not(), self.par[(o, n)].Not()])
@@ -326,11 +343,15 @@ class _Model:
         for n in r.cells:
             outs = r.outward(n)
             if outs:
-                p = m.NewBoolVar(f"parsink{n}")
                 v = m.NewIntVar(0, dense * len(outs), f"sink{n}")
-                m.Add(v <= dense * p)
-                self.sink[n], self.par_sink[n] = v, p
-        for n in r.cells:
+                self.sink[n] = v
+                if forest:
+                    p = m.NewBoolVar(f"parsink{n}")
+                    m.Add(v <= dense * p)
+                    self.par_sink[n] = p
+                else:
+                    m.Add(v <= dense * self.k[n])
+        for n in r.cells if forest else ():
             parents = [self.par[(n, step(n, d))] for d in Direction if (n, step(n, d)) in self.par]
             if n in self.par_sink:
                 parents.append(self.par_sink[n])
@@ -392,7 +413,11 @@ class _Model:
         # Every variant (seed, main, LNS) is a clone of this model plus extra
         # constraints, so variable indices -- and solutions as hints -- carry over.
         # `score` is always "bigger is better" so variants compare uniformly.
-        if spec.target_tunnels is not None:
+        if not forest:
+            self.weight = 1    # a bound on tunnels; controllers don't matter
+            self.score = self.tunnels
+            m.Maximize(self.score)
+        elif spec.target_tunnels is not None:
             m.Add(self.tunnels >= spec.target_tunnels)
             m.Minimize(total_x)
             self.weight = None
@@ -603,6 +628,18 @@ class _Search:
         self.stop = stop or threading.Event()
         self.started = time.monotonic()
         self.best_score: int | None = None
+        self.best_tunnels: int | None = None
+        self.relaxed_upper: int | None = None
+        self.reached = threading.Event()   # a build has reached the relaxed bound
+
+    def relaxed(self, upper: int) -> None:
+        """A proven bound from the relaxed model."""
+        if self.relaxed_upper is not None and upper >= self.relaxed_upper:
+            return
+        self.relaxed_upper = upper
+        self.emit("bound", phase="relaxed bound", tunnels=upper)
+        if self.best_tunnels is not None and self.best_tunnels >= upper:
+            self.reached.set()
 
     def emit(self, kind: str, **data) -> None:
         if self.progress is not None:
@@ -619,14 +656,19 @@ class _Search:
             return
         self.best_score = score
         m = self.model
-        self.emit("solution", phase=phase, score=score, vec=vec,
-                  tunnels=sum(vec[v.Index()] for v in m.f.values()),
+        tunnels = sum(vec[v.Index()] for v in m.f.values())
+        self.best_tunnels = max(tunnels, self.best_tunnels or 0)
+        self.emit("solution", phase=phase, score=score, vec=vec, tunnels=tunnels,
                   controllers=sum(vec[v.Index()] for v in m.x.values()))
+        if self.relaxed_upper is not None and tunnels >= self.relaxed_upper:
+            self.reached.set()
 
     def run(self, target, seconds: float, hint: _Incumbent | None = None, phase: str = "",
-            report_bound: bool = False, stop: threading.Event | None = None):
+            report_bound: bool = False, stop: threading.Event | None = None,
+            also_stop: tuple[threading.Event, ...] = (), workers: int | None = None):
         """Solve `target`; returns (status, solver, vec, score). `stop` replaces the
-        search's own stop signal (polish runs after a stop, on its own signal)."""
+        search's own stop signal (polish runs after a stop, on its own signal);
+        `also_stop` events end this solve too, without stopping the search."""
         spec, model = self.spec, self.model
         stop = stop or self.stop
         if hint is not None:
@@ -637,7 +679,7 @@ class _Search:
         solver = cp_model.CpSolver()
         if math.isfinite(seconds):
             solver.parameters.max_time_in_seconds = max(seconds, 0.1)
-        solver.parameters.num_workers = spec.workers
+        solver.parameters.num_workers = workers or spec.workers
         solver.parameters.random_seed = spec.random_seed
         solver.parameters.log_search_progress = spec.log
         for name, value in spec.solver_params:
@@ -656,7 +698,7 @@ class _Search:
 
         def watch():
             while not done.is_set():
-                if stop.wait(0.25):
+                if stop.wait(0.25) or any(e.is_set() for e in also_stop):
                     solver.StopSearch()
                     return
 
@@ -669,6 +711,125 @@ class _Search:
         if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             return status, solver, list(solver.ResponseProto().solution), int(round(solver.Value(model.score)))
         return status, solver, None, None
+
+
+class _RelaxedBound:
+    """Solves the relaxed model (routing="flow") in a thread, reporting its bound to
+    the search. Every real layout is a solution of it, so the bound is proven."""
+
+    def __init__(self, search: _Search, profile: Profile, size, workers: int):
+        self.search = search
+        self.model = _Model(search.spec, profile, size, routing="flow")
+        self.workers = workers
+        self.finished = threading.Event()   # proved its own optimum (or failed)
+        self.quit = threading.Event()
+        self.thread = threading.Thread(target=self._run, daemon=True)
+        self.thread.start()
+
+    def _run(self) -> None:
+        search, model = self.search, self.model
+        try:
+            target = model.clone()
+            model.add_search_constraints(target, symmetry=search.spec.symmetry_breaking)
+            solver = cp_model.CpSolver()
+            solver.parameters.num_workers = self.workers
+            solver.parameters.random_seed = search.spec.random_seed
+            solver.best_bound_callback = lambda b: search.relaxed(math.floor(b + 1e-9))
+            done = threading.Event()
+
+            def watch():
+                while not done.is_set():
+                    if self.quit.wait(0.25) or search.stop.is_set():
+                        solver.StopSearch()
+                        return
+
+            threading.Thread(target=watch, daemon=True).start()
+            try:
+                status = solver.Solve(target)
+            finally:
+                done.set()
+            if status == cp_model.OPTIMAL:
+                search.relaxed(int(round(solver.ObjectiveValue())))
+            elif status == cp_model.INFEASIBLE:
+                search.relaxed(0)
+        finally:
+            self.finished.set()
+
+    def close(self) -> None:
+        self.quit.set()
+        self.thread.join()
+
+
+def _main_solve(search: _Search, spec: OptimizeSpec, profile: Profile, size, best: _Incumbent | None):
+    """The main solve, with the relaxed bound alongside it (when on). Returns
+    (status name, best incumbent, upper bound or None, finished: optimal or reached)."""
+    model = search.model
+    relaxed = None
+    workers = spec.workers
+    started = time.monotonic()
+    # CP-SAT only runs its LP-based workers (what makes the relaxed model fast) with 6+
+    # workers: with fewer it stalls (3x3x4: no proof in 90 s on 4, 3 s on 6). So it runs
+    # alongside the main solve given 12+ workers, first on all of them given 6-11, and not
+    # at all below that.
+    if spec.relaxed_bound and spec.target_tunnels is None and spec.workers >= 6:
+        if spec.workers >= 12:
+            relaxed = _RelaxedBound(search, profile, size, max(6, spec.workers // 2))
+            workers = spec.workers - relaxed.workers
+        else:
+            search.emit("phase", phase="relaxed bound")
+            pre = _RelaxedBound(search, profile, size, spec.workers)
+            pre.finished.wait(min(60.0, spec.time_limit / 4))
+            pre.close()
+            search.emit("phase", phase="main solve")
+    use_symmetry = spec.symmetry_breaking and (best is None or model.satisfies_symmetry(best.xs(model)))
+    status_name, upper, finished = "NOT RUN", None, False
+    try:
+        while True:
+            left = spec.time_limit - (time.monotonic() - started)
+            target = model.clone()
+            model.add_search_constraints(target, symmetry=use_symmetry)
+            if best is not None:
+                model.at_least(target, best.score)
+            if search.relaxed_upper is not None:
+                target.Add(model.tunnels <= search.relaxed_upper)
+            stops = (search.reached,) + ((relaxed.finished,) if relaxed and not relaxed.finished.is_set() else ())
+            status, solver, vec, score = search.run(target, left, hint=best, phase="main solve", report_bound=True,
+                                                    also_stop=stops, workers=workers)
+            status_name = solver.StatusName(status)
+            if vec is not None and (best is None or score >= best.score):
+                best = _Incumbent(vec, score, "main solve")
+            if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+                b = search.tunnels_bound(solver.BestObjectiveBound())
+                upper = b if upper is None else min(upper, b)
+            finished = status == cp_model.OPTIMAL or search.reached.is_set()
+            # The relaxed model proved its optimum: go on with every worker and its bound
+            # as a constraint (the main solve can't take new constraints while it runs).
+            if (not finished and relaxed is not None and relaxed.finished.is_set() and workers < spec.workers
+                    and not search.stop.is_set() and spec.time_limit - (time.monotonic() - started) > 1):
+                workers = spec.workers
+                search.emit("phase", phase="main solve (relaxed bound proved; all workers)")
+                continue
+            break
+    finally:
+        if relaxed is not None:
+            relaxed.close()
+    if search.relaxed_upper is not None:
+        upper = search.relaxed_upper if upper is None else min(upper, search.relaxed_upper)
+    if search.reached.is_set() and not search.stop.is_set():
+        # Tunnels are proven; the fewest controllers for that many isn't yet. Fix the
+        # tunnels and minimize controllers, for at most a quarter of the time so far.
+        left = spec.time_limit - (time.monotonic() - started)
+        budget = min(left, max(10.0, (time.monotonic() - started) / 4))
+        target = model.clone()
+        model.add_search_constraints(target, symmetry=use_symmetry)
+        target.Add(model.tunnels == upper)
+        model.at_least(target, best.score)
+        search.emit("phase", phase="fewest controllers for the proven tunnels")
+        status, solver, vec, score = search.run(target, budget, hint=best, phase="main solve")
+        if vec is not None and score >= best.score:
+            best = _Incumbent(vec, score, "main solve")
+        status_name = solver.StatusName(status)   # OPTIMAL here: controllers proven minimal too
+    return status_name, best, upper, finished
 
 
 def _neighbourhood(rng: random.Random, size) -> tuple[str, list[Pos]]:
@@ -865,28 +1026,21 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
 
     # 2. Main solve over everything, hinted with the best seed. Symmetry breaking
     #    stays on when the seed already satisfies it (e.g. a canonical start shape).
-    status_name, upper = "NOT RUN", None
+    status_name, upper, finished = "NOT RUN", None, False
     if spec.time_limit > 0 and not search.stop.is_set():
         search.emit("phase", phase="main solve")
-        target = model.clone()
-        use_symmetry = spec.symmetry_breaking and (best is None or model.satisfies_symmetry(best.xs(model)))
-        model.add_search_constraints(target, symmetry=use_symmetry)
-        if best is not None:
-            model.at_least(target, best.score)
-        status, solver, vec, score = search.run(target, spec.time_limit, hint=best, phase="main solve",
-                                                report_bound=True)
-        status_name = solver.StatusName(status)
-        if vec is not None and (best is None or score >= best.score):
-            best = _Incumbent(vec, score, "main solve")
-        if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-            upper = search.tunnels_bound(solver.BestObjectiveBound())
+        status_name, best, upper, finished = _main_solve(search, spec, profile, size, best)
+        if search.reached.is_set():
+            notes.append(f"tunnels proven by the relaxed bound ({search.relaxed_upper})"
+                         + ("" if status_name == "OPTIMAL" else "; the controller count is not proven minimal"))
     if spec.known_upper is not None:
         upper = spec.known_upper if upper is None else min(upper, spec.known_upper)
     if best is None:
         raise RuntimeError(f"no layout found ({status_name}); check forbidden/required/blocked cells")
 
     # 3. Large-neighbourhood search.
-    if spec.lns_time > 0 and not search.stop.is_set():
+    proven = upper is not None and _tunnels_of(model, best) >= upper
+    if spec.lns_time > 0 and not search.stop.is_set() and not proven:
         best = _lns(search, best, spec.lns_time, notes)
     if search.stop.is_set():
         notes.append("stopped early; this is the best layout found so far")

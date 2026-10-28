@@ -130,6 +130,27 @@ class OptimizeTests(unittest.TestCase):
         sol = self.solve(size=(3, 3, 3), time_limit=60)
         self.assertEqual((sol.tunnels_validated, sol.status), (74, "OPTIMAL"))
 
+    def test_relaxed_model_bounds_the_real_one(self):
+        from ortools.sat.python import cp_model
+
+        from ae2opt.optimize import _Model
+        for size in ((2, 2, 2), (3, 2, 1), (3, 3, 3)):
+            with self.subTest(size=size):
+                m = _Model(OptimizeSpec(size=size), Profile(), size, routing="flow")
+                solver = cp_model.CpSolver()
+                solver.parameters.num_workers = 8
+                solver.parameters.max_time_in_seconds = 60
+                self.assertEqual(solver.Solve(m.m), cp_model.OPTIMAL)
+                real = brute_force(size)[0] if size != (3, 3, 3) else 74
+                self.assertGreaterEqual(round(solver.ObjectiveValue()), real)
+                self.assertEqual(round(solver.ObjectiveValue()), real)   # tight on these boxes
+
+    def test_relaxed_bound_proof_keeps_fewest_controllers(self):
+        sol = self.solve(size=(3, 3, 4), time_limit=120, workers=8)
+        self.assertEqual((sol.tunnels_validated, sol.upper_bound, sol.status, sol.controllers), (96, 96, "OPTIMAL", 24))
+        off = self.solve(size=(2, 2, 2), relaxed_bound=False)
+        self.assertEqual((off.tunnels_validated, off.status), (24, "OPTIMAL"))
+
     def test_start_layout_is_never_lost(self):
         # A start shape alone (no main solve) is evaluated and returned.
         start = frozenset({(0, 0, 0), (1, 0, 0)})
