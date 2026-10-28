@@ -134,6 +134,7 @@ original wiring (routes forced into trees with cable anchors):
 |---|---|---|
 | 3×3×3 | proven 74, 0 anchors, 3 trunks, 13 s | n/a |
 | 4×4×3 | proven 126, 0 anchors, 4 trunks, 284 s | proven 127, 1 anchor, 4 trunks, 163 s |
+| 4×4×4, started from 164 | proven 164, 0 anchors, 6 trunks, 57 min | n/a |
 | 5×5×5, 5 min | 282 (at most 322), 0 anchors, 11 trunks | n/a |
 | 7×7×7, 5 min + 10 min LNS | 701 (at most 834), 0 anchors, 26 trunks | n/a |
 

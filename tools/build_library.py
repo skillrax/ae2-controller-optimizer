@@ -27,7 +27,9 @@ from ae2opt.patterns import canonical  # noqa: E402
 OUT = REPO / "ae2opt" / "library"
 RESULTS = OUT / "_results.jsonl"
 
-# Proofs: every box with sides <= 4 (sorted), except 4x4x4, which doesn't prove.
+# Proofs: every box with sides <= 4 (sorted), except 4x4x4, which doesn't prove in this
+# budget. Its proof (164) came from a ~1 h app run started from the best known build and
+# was appended to _results.jsonl, so 4x4x4 is skipped below while that line stays.
 PROVE = [b for b in itertools.combinations_with_replacement((1, 2, 3, 4), 3) if b != (4, 4, 4)]
 # Best known: (main solve s, LNS s, optional start layout, optional known upper bound)
 IMPROVE = {

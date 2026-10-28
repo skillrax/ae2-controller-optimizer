@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- **4×4×4 is now proven optimal:** 164 tunnels (5,248 channels) with 41 controllers and 6
+  trunks. The bundled build also uses one cable fewer. Every box up to 4 per side is now
+  proven.
+
 ## 1.0.0
 
 First release.

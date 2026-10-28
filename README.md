@@ -19,8 +19,8 @@ follows AE2's own pathfinding, and the results were confirmed in game.
   it in game. X-ray, a channel heat map and a layer slider help with big builds.
 - **Optimizer.** Pick a box size and let it search, with a live chart of the best build found
   against the proven maximum. Pause it to free your CPU, stop it, and continue later.
-- **Known results built in.** Every box up to 4 per side (except 4×4×4) is already proven
-  optimal, and the best known builds for 4×4×4 to 7×7×7 are included. There's no need to
+- **Known results built in.** Every box up to 4 per side is already proven optimal, and the
+  best known builds for 5×5×5 to 7×7×7 are included. There's no need to
   re-run those on your PC; the Optimize tab tells you when a result is already known.
 - **Easy-to-build wiring.** Tunnels sit on coloured smart cable in groups of up to 8, which feed
   a few fluix dense trunks. No cable anchors. The optimizer uses the fewest trunks it can.
@@ -32,7 +32,7 @@ follows AE2's own pathfinding, and the results were confirmed in game.
 
 ## Download and run (Windows)
 
-1. Download `AE2ControllerOptimizer-1.0.0-windows.zip` from
+1. Download `AE2ControllerOptimizer-<version>-windows.zip` from
    [Releases](../../releases/latest) and unzip it anywhere.
 2. Run `AE2ControllerOptimizer.exe`. The app opens in your web browser.
 
@@ -77,17 +77,17 @@ for any orientation of the box.
 | 3×3×3 | **74** | 2,368 | 18 | 3 | proven |
 | 3×3×4 | 96 | 3,072 | 24 | 3 | proven |
 | 3×4×4 | **126** | 4,032 | 31 | 4 | proven |
-| 4×4×4 | 164 | 5,248 | 41 | 6 | best known, at most 170 |
+| 4×4×4 | **164** | 5,248 | 41 | 6 | proven |
 | 5×5×5 | 298 | 9,536 | 74 | 10 | best known, at most 324 |
 | 6×6×6 | 484 | 15,488 | 122 | 18 | best known, at most 590 |
 | 7×7×7 | 716 | 22,912 | 180 | 27 | best known, at most 1,047 |
 
-The app has every box up to 4 per side (19 proven results). "At most" is the proven upper
+The app has every box up to 4 per side (20 proven results). "At most" is the proven upper
 bound: no build in that box can have more.
 
 **Why bigger boxes aren't proven:** the solver proves a result by ruling out every better
-possibility, and the work that takes grows explosively with box size. 4×4×4 already doesn't
-finish in hours. More in [docs/TECHNICAL.md](docs/TECHNICAL.md#how-the-optimizer-works).
+possibility, and the work that takes grows explosively with box size. 4×4×4 took about an
+hour on 16 threads, even starting from the best known build; 5×5×5 is far beyond that. More in [docs/TECHNICAL.md](docs/TECHNICAL.md#how-the-optimizer-works).
 
 ## How accurate is it?
 
