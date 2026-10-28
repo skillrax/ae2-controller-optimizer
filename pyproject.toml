@@ -1,6 +1,6 @@
 [project]
 name = "ae2opt"
-version = "1.1.0"
+version = "1.2.0"
 description = "Offline builder, simulator and optimizer for AE2 1.12.2 ME controller / P2P builds"
 requires-python = ">=3.11"
 license = "MIT"

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 
 - **Faster proofs.** The optimizer also solves a relaxed model (the same controllers and
   channel capacities, simplified cable routing) for a fast upper bound; a build that reaches

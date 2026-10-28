@@ -138,7 +138,7 @@ original wiring (routes forced into trees with cable anchors):
 | 5×5×5, 5 min | 282 (at most 322), 0 anchors, 11 trunks | n/a |
 | 7×7×7, 5 min + 10 min LNS | 701 (at most 834), 0 anchors, 26 trunks | n/a |
 
-**Relaxed bound (1.2).** Every proven optimum is (almost) a *tree* of controllers: n
+**Relaxed bound (1.2.0).** Every proven optimum is (almost) a *tree* of controllers: n
 controllers carry 4n+2 tunnels, or 4n, in all 24 proofs bar three 2-thick slabs. So what
 limits a box is how many controllers can form such a tree and still route their tunnels
 out, not the exact wiring. The optimizer therefore also solves a **relaxed model**: the
