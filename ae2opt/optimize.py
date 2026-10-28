@@ -38,6 +38,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 
+from .bounds import counting_bound
 from .geometry import Direction, Pos, step
 from .layout import CableAnchor, CableType, Layout, P2PTunnel
 from .patterns import lattice_shapes
@@ -1000,6 +1001,10 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
     model = _Model(spec, profile, size)
     search = _Search(model, spec, progress, stop)
     search.emit("start", model=model, size=size)
+    # Face counting bounds every build (bounds.py); the solver's bound only beats it
+    # after a while, if at all (7x7x7: never).
+    counted = counting_bound(size)
+    search.emit("bound", phase="counting bound", tunnels=counted)
     notes: list[str] = []
     best: _Incumbent | None = None
 
@@ -1035,6 +1040,7 @@ def optimize(profile: Profile = DEFAULT_PROFILE, spec: OptimizeSpec = OptimizeSp
                          + ("" if status_name == "OPTIMAL" else "; the controller count is not proven minimal"))
     if spec.known_upper is not None:
         upper = spec.known_upper if upper is None else min(upper, spec.known_upper)
+    upper = counted if upper is None else min(upper, counted)
     if best is None:
         raise RuntimeError(f"no layout found ({status_name}); check forbidden/required/blocked cells")
 

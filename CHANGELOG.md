@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Counting bound:** face counting proves that an a×b×c box holds at most
+  2abc + ab + bc + ca + 1 tunnels, under any config. Runs show it from the start. It tightens
+  6×6×6 to at most 541 (was 549). Proof and research notes:
+  [docs/RESEARCH.md](docs/RESEARCH.md).
+
 ## 1.2.0
 
 - **Faster proofs.** The optimizer also solves a relaxed model (the same controllers and

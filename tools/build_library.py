@@ -22,6 +22,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from ae2opt import DEFAULT_PROFILE, Layout, check, library, runner  # noqa: E402
+from ae2opt.bounds import counting_bound  # noqa: E402
 from ae2opt.optimize import MODEL_VERSION, OptimizeSpec, optimize  # noqa: E402
 from ae2opt.patterns import canonical  # noqa: E402
 
@@ -136,6 +137,10 @@ def write_index() -> None:
         latest[r["id"]] = r   # a later line for the same box replaces an earlier one
     entries = []
     for r in sorted(latest.values(), key=lambda r: (r["box"][0] * r["box"][1] * r["box"][2], r["box"])):
+        counted = counting_bound(r["box"])
+        if counted < r["upper"]:
+            r = {**r, "upper": counted, "bound_from": "counting bound (docs/RESEARCH.md)"}
+            r["status"] = "proven" if r["tunnels"] >= counted else "best_known"
         entries.append({**r, "file": f"{r['id']}.json", "rules": rules})
     (OUT / "index.json").write_text(json.dumps({"schema": 1, "entries": entries}, indent=1), "utf-8")
     print(f"index.json: {len(entries)} entries "

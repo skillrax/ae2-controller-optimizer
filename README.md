@@ -82,12 +82,14 @@ for any orientation of the box.
 | 3×4×4 | **126** | 4,032 | 31 | 4 | proven |
 | 4×4×4 | **164** | 5,248 | 41 | 6 | proven |
 | 5×5×5 | 298 | 9,536 | 74 | 10 | best known, at most 320 |
-| 6×6×6 | 484 | 15,488 | 122 | 18 | best known, at most 549 |
+| 6×6×6 | 484 | 15,488 | 122 | 18 | best known, at most 541 |
 | 7×7×7 | 719 | 23,008 | 182 | 30 | best known, at most 834 |
 
 The app has every box up to 4 per side, plus 1×4×7, 1×5×7, 1×7×7 and 2×2×7 (24 proven
 results). "At most" is the proven upper
-bound: no build in that box can have more.
+bound: no build in that box can have more. Any a×b×c box holds at most
+2abc + ab + bc + ca + 1 tunnels, under any config; the proof and the research behind the
+results are in [docs/RESEARCH.md](docs/RESEARCH.md).
 
 **Why bigger boxes aren't proven:** the solver proves a result by ruling out every better
 possibility, and the work that takes grows explosively with box size. 4×4×4 takes about

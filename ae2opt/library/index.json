@@ -742,7 +742,7 @@
    ],
    "status": "best_known",
    "tunnels": 484,
-   "upper": 549,
+   "upper": 541,
    "controllers": 122,
    "trunks": 18,
    "dense_cells": 21,
@@ -752,7 +752,7 @@
    "seconds": 1843,
    "workers": 12,
    "started_from": null,
-   "bound_from": "relaxed model (routing=flow), 540 s on 16 workers",
+   "bound_from": "counting bound (docs/RESEARCH.md)",
    "file": "6x6x6.json",
    "rules": {
     "normal": 8,
