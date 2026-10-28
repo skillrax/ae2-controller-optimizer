@@ -134,7 +134,7 @@ def analyze(layout: Layout, profile: Profile) -> dict:
 
 # --------------------------------------------------------------------------- optimizer runs
 
-def _settings_to_spec(settings: dict, profile: Profile):
+def _settings_to_spec(settings: dict, profile: Profile, runs: "RunManager | None" = None):
     from ..optimize import OptimizeSpec
     from ..optimize import check_box
     box = tuple(int(v) for v in settings.get("box") or profile.max_controller_size)
@@ -142,23 +142,27 @@ def _settings_to_spec(settings: dict, profile: Profile):
     prove = settings.get("mode", "improve") == "prove"
     target = settings.get("target")
     start, upper = None, None
-    if settings.get("start_library"):
-        # Start from the shipped best-known build; its proven bound still holds.
+    opts = (bool(settings.get("exterior", True)), bool(settings.get("interior", True)),
+            bool(settings.get("anchor_free", True)))
+    if settings.get("start_known") or settings.get("start_library"):
+        # Start from the best known build (shipped or one of the user's runs); the
+        # tightest proven bound for the same rules still holds.
         from ..patterns import canonical
-        entry = library.match(profile, box, bool(settings.get("exterior", True)),
-                              bool(settings.get("interior", True)), bool(settings.get("anchor_free", True)))
-        if entry is not None:
-            start = canonical(frozenset(library.load(entry["id"], box).controllers()), box)
-            upper = entry["upper"]
+        known = runs.known(profile, box, *opts) if runs else None
+        if known is None:
+            entry = library.match(profile, box, *opts)
+            known = entry and {"tunnels": entry["tunnels"], "upper": entry["upper"],
+                               "layout": lambda: library.load(entry["id"], box)}
+        if known and known.get("layout"):
+            start = canonical(frozenset(known["layout"]().controllers()), box)
+            upper = known["upper"]
     return OptimizeSpec(
         size=box,
         start=start, known_upper=upper, seed_time=60.0 if start else 10.0,
         time_limit=math.inf if prove else float(settings.get("main", 300)),
         lns_time=0.0 if prove else math.inf,
         workers=max(1, int(settings.get("workers", os.cpu_count() or 8))),
-        exterior_tunnels=bool(settings.get("exterior", True)),
-        interior_tunnels=bool(settings.get("interior", True)),
-        anchor_free=bool(settings.get("anchor_free", True)),
+        exterior_tunnels=opts[0], interior_tunnels=opts[1], anchor_free=opts[2],
         symmetry_breaking=bool(settings.get("symmetry", True)),
         target_tunnels=int(target) if target else None,
     )
@@ -384,7 +388,7 @@ class RunManager:
                "active": data.get("active_seconds", 0.0), "sessions": data.get("sessions", 1),
                "mode": "prove" if spec.get("lns_time") in (0, 0.0) else "improve",
                "dense": prof["dense_channel_capacity"], "has_best": (d / runner.BEST_FILE).exists(),
-               "modified": (d / runner.RUN_FILE).stat().st_mtime}
+               "modified": (d / runner.RUN_FILE).stat().st_mtime, "rules": runner.run_rules(data)}
         live = self.live.get(d.name)
         if live is not None:
             out.update(live.status())
@@ -406,6 +410,31 @@ class RunManager:
                     continue
         return sorted(runs, key=lambda r: -r["modified"])
 
+    def known(self, profile: Profile, box, exterior: bool = True, interior: bool = True,
+              anchor_free: bool = True, exclude: str | None = None) -> dict | None:
+        """The best known result for these rules: the most tunnels in the shipped
+        library or any of the user's runs, and the tightest proven bound from either."""
+        want = sorted(int(v) for v in box)
+        best, upper = None, None
+        entry = library.match(profile, want, exterior, interior, anchor_free)
+        if entry is not None:
+            best = {"tunnels": entry["tunnels"], "source": f"library:{entry['id']}",
+                    "layout": lambda: library.load(entry["id"], box)}
+            upper = entry["upper"]
+        for r in sorted(self.list(), key=lambda r: r["modified"]):   # ties go to the earlier result
+            if (r["id"] == exclude or sorted(r["box"]) != want
+                    or not library.rules_match(r["rules"], profile, exterior, interior, anchor_free)):
+                continue
+            if r["upper"] is not None:
+                upper = r["upper"] if upper is None else min(upper, r["upper"])
+            if r["tunnels"] is not None and r["has_best"] and (best is None or r["tunnels"] > best["tunnels"]):
+                path, stored = self.root / r["id"] / runner.BEST_FILE, r["box"]
+                best = {"tunnels": r["tunnels"], "source": f"run:{r['id']}",
+                        "layout": lambda path=path, stored=stored: library.orient(Layout.load(path), stored, box)}
+        if best is None and upper is None:
+            return None
+        return {**(best or {"tunnels": None, "source": None, "layout": None}), "upper": upper}
+
     def detail(self, run_id: str) -> dict:
         d = self._dir(run_id)
         out = self.summary(d)
@@ -415,7 +444,7 @@ class RunManager:
         return out
 
     def start(self, profile: Profile, settings: dict) -> str:
-        spec = _settings_to_spec(settings, profile)
+        spec = _settings_to_spec(settings, profile, self)
         box = "x".join(map(str, spec.size))
         run_id = f"{box}-{time.strftime('%Y%m%d-%H%M%S')}"
         d = self.root / run_id

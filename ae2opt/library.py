@@ -37,19 +37,34 @@ def get(entry_id: str) -> dict:
     raise KeyError(entry_id)
 
 
+def rules_match(r: dict, profile: Profile, exterior: bool = True, interior: bool = True,
+                anchor_free: bool = True) -> bool:
+    """Whether a result recorded under rules `r` (a library entry's or a run's) holds
+    for these settings. Runs with custom constraints never match."""
+    from .optimize import MODEL_VERSION
+    return (r["normal"] == profile.normal_channel_capacity and r["dense"] == profile.dense_channel_capacity
+            and r["model"] == MODEL_VERSION and r.get("margin", 1) == 1 and not r.get("custom")
+            and r.get("channels", True) and profile.channels_enabled
+            and r["exterior"] == exterior and r["interior"] == interior and r["anchor_free"] == anchor_free)
+
+
 def match(profile: Profile, box, exterior: bool = True, interior: bool = True,
           anchor_free: bool = True) -> dict | None:
     """The known result for exactly these rules, if there is one."""
-    from .optimize import MODEL_VERSION
     want = sorted(int(b) for b in box)
     for e in entries():
-        r = e["rules"]
-        if (sorted(e["box"]) == want and r["normal"] == profile.normal_channel_capacity
-                and r["dense"] == profile.dense_channel_capacity and r["model"] == MODEL_VERSION
-                and r["exterior"] == exterior and r["interior"] == interior
-                and r["anchor_free"] == anchor_free and profile.channels_enabled):
+        if sorted(e["box"]) == want and rules_match(e["rules"], profile, exterior, interior, anchor_free):
             return e
     return None
+
+
+def orient(lay: Layout, stored, box) -> Layout:
+    """`lay`, built in a box with sides `stored`, turned to fit `box` (same sides, any order)."""
+    if list(box) == list(stored):
+        return lay
+    if sorted(box) != sorted(stored):
+        raise ValueError(f"a {list(stored)} build doesn't fit a {list(box)} box")
+    return permute_layout(lay, _permutation(list(stored), list(box)))
 
 
 def _permutation(stored, box) -> tuple[int, int, int]:
@@ -83,5 +98,5 @@ def load(entry_id: str, box=None) -> Layout:
     if box is not None and list(box) != list(e["box"]):
         if sorted(box) != sorted(e["box"]):
             raise ValueError(f"{entry_id} is a {e['box']} box, not {list(box)}")
-        lay = permute_layout(lay, _permutation(e["box"], list(box)))
+        lay = orient(lay, e["box"], box)
     return lay

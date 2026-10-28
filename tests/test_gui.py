@@ -164,6 +164,60 @@ class GuiServerTests(unittest.TestCase):
         self.assertEqual(spec.lns_time, 0.0)
 
 
+class KnownResultTests(unittest.TestCase):
+    """The user's runs count towards what's known, under the same rules as the library."""
+
+    def setUp(self):
+        from ae2opt.gui.server import RunManager
+        self.tmp = tempfile.TemporaryDirectory()
+        self.runs = RunManager(Path(self.tmp.name))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def fake_run(self, name, box, tunnels, upper, **spec_changes):
+        """A stopped run whose best build is the shipped one for that box."""
+        from dataclasses import replace
+
+        from ae2opt import library, runner
+        from ae2opt.optimize import OptimizeSpec
+        d = self.runs.root / name
+        runner.new_run(d, DEFAULT_PROFILE, replace(OptimizeSpec(size=tuple(box)), **spec_changes))
+        library.load("x".join(map(str, sorted(box))), box).save(d / runner.BEST_FILE)
+        data = runner.read_run(d)
+        data.update(best_tunnels=tunnels, best_upper=upper, status="STOPPED")
+        runner.write_run(d, data)
+
+    def test_a_better_run_beats_the_shipped_result_and_tightens_the_bound(self):
+        self.fake_run("5-a", (5, 5, 5), 300, 310)
+        k = self.runs.known(DEFAULT_PROFILE, (5, 5, 5))
+        self.assertEqual((k["tunnels"], k["upper"], k["source"]), (300, 310, "run:5-a"))
+        before = self.runs.known(DEFAULT_PROFILE, (5, 5, 5), exclude="5-a")
+        self.assertEqual((before["tunnels"], before["upper"], before["source"]), (298, 320, "library:5x5x5"))
+
+    def test_a_proof_bounds_every_run(self):
+        self.fake_run("3x3x4", (3, 3, 4), 96, 99)
+        k = self.runs.known(DEFAULT_PROFILE, (3, 3, 4))
+        self.assertEqual((k["tunnels"], k["upper"], k["source"]), (96, 96, "library:3x3x4"))   # ties keep the shipped one
+
+    def test_runs_under_other_rules_dont_count(self):
+        self.fake_run("custom", (3, 3, 4), 99, 99, target_tunnels=99)
+        self.fake_run("no-interior", (4, 3, 3), 90, 95, interior_tunnels=False)
+        k = self.runs.known(DEFAULT_PROFILE, (3, 3, 4))
+        self.assertEqual((k["tunnels"], k["upper"]), (96, 96))
+        other = self.runs.known(DEFAULT_PROFILE, (3, 3, 4), interior=False)
+        self.assertEqual((other["tunnels"], other["upper"], other["source"]), (90, 95, "run:no-interior"))
+        xs = other["layout"]().controllers()
+        self.assertEqual(max(z for _, _, z in xs), 3)   # a 4x3x3 build turned to fit 3x3x4
+
+    def test_a_run_can_start_from_the_best_known_run(self):
+        from ae2opt.gui.server import _settings_to_spec
+        self.fake_run("better", (5, 5, 5), 300, 310)
+        spec = _settings_to_spec({"box": [5, 5, 5], "start_known": True}, DEFAULT_PROFILE, self.runs)
+        self.assertEqual(spec.known_upper, 310)
+        self.assertEqual(len(spec.start), 74)
+
+
 class QuitTests(unittest.TestCase):
     def test_quit_stops_the_app(self):
         with tempfile.TemporaryDirectory() as tmp:

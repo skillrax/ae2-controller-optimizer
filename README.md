@@ -20,8 +20,11 @@ follows AE2's own pathfinding, and the results were confirmed in game.
 - **Optimizer.** Pick a box size and let it search, with a live chart of the best build found
   against the proven maximum. Pause it to free your CPU, stop it, and continue later.
 - **Known results built in.** Every box up to 4 per side is already proven optimal, and the
-  best known builds for 5×5×5 to 7×7×7 are included. There's no need to
-  re-run those on your PC; the Optimize tab tells you when a result is already known.
+  best known builds for 5×5×5 to 7×7×7 are included. There's no need to re-run those on
+  your PC; the Optimize tab tells you when a result is already known.
+- **Your results count.** When one of your runs proves a box or beats the best known build,
+  the app says so, the Optimize tab starts new runs from it, and the Library shows it in
+  place of the shipped result. Runs are grouped by box with how close each is to proven.
 - **Easy-to-build wiring.** Tunnels sit on coloured smart cable in groups of up to 8, which feed
   a few fluix dense trunks. No cable anchors. The optimizer uses the fewest trunks it can.
 - **Into the game.** Export any build as a structure-block `.nbt` file (optionally with a
@@ -61,7 +64,7 @@ Everything except the optimizer works without OR-Tools (`pip install -e .`).
 |---|---|
 | **Design** | Look at and edit a build. **Tools:** keys 1–8; with the tunnel tool, clicking a controller face adds a cable with a tunnel facing it. **Remove/undo:** right-click removes; Ctrl+Z undoes. **Issues:** click one to outline the blocks involved. **Output:** Export .nbt and Build guide are at the top. |
 | **Optimize** | Start a run: box size, goal ("find a great build" or "prove the best"), time budget and CPU threads. The sliders stop at what your config and the optimizer allow. "Open in designer" shows the best build so far. |
-| **Library** | Known results (proven and best known), and your own optimizer results. Click a card to open it. |
+| **Library** | Known results (proven and best known, including what your runs proved or beat), and your runs grouped by box, with how close each is to the proven maximum. Click a card to open it. |
 | **Profiles** | Channel capacities and controller size. Import a config file to fill them in; nothing is saved until you press Save. |
 
 ## Known results
@@ -78,11 +81,12 @@ for any orientation of the box.
 | 3×3×4 | 96 | 3,072 | 24 | 3 | proven |
 | 3×4×4 | **126** | 4,032 | 31 | 4 | proven |
 | 4×4×4 | **164** | 5,248 | 41 | 6 | proven |
-| 5×5×5 | 298 | 9,536 | 74 | 10 | best known, at most 324 |
+| 5×5×5 | 298 | 9,536 | 74 | 10 | best known, at most 320 |
 | 6×6×6 | 484 | 15,488 | 122 | 18 | best known, at most 590 |
-| 7×7×7 | 716 | 22,912 | 180 | 27 | best known, at most 1,047 |
+| 7×7×7 | 719 | 23,008 | 182 | 30 | best known, at most 834 |
 
-The app has every box up to 4 per side (20 proven results). "At most" is the proven upper
+The app has every box up to 4 per side, plus 1×4×7, 1×5×7, 1×7×7 and 2×2×7 (24 proven
+results). "At most" is the proven upper
 bound: no build in that box can have more.
 
 **Why bigger boxes aren't proven:** the solver proves a result by ruling out every better

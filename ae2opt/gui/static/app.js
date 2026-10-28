@@ -196,18 +196,70 @@ async function runCheck() {
 }
 
 // --------------------------------------------------------------------------- shipped library
-// Same matching as ae2opt/library.py: a known result only counts for the exact rules.
-function libraryMatch(box, opts) {
-  const p = S.profile, want = [...box].sort((a, b) => a - b).join("x");
-  return (S.server.library || []).find(e => {
-    const r = e.rules;
-    return [...e.box].sort((a, b) => a - b).join("x") === want && r.normal === p.normal_channel_capacity
-      && r.dense === p.dense_channel_capacity && r.model === S.server.model_version && p.channels_enabled
-      && r.exterior === opts.exterior && r.interior === opts.interior && r.anchor_free === opts.anchor_free;
-  }) || null;
+// Same matching as ae2opt/library.py rules_match: a result only counts for the exact rules,
+// whether it's shipped or one of the user's runs. Results with equal keys are comparable.
+const boxId = box => [...box].sort((a, b) => a - b).join("x");
+const rulesKey = r => [r.normal, r.dense, r.model, r.exterior, r.interior, r.anchor_free, r.margin ?? 1].join("|");
+const comparable = r => !r.custom && r.channels !== false && (r.margin ?? 1) === 1;
+const wantedRules = opts => ({ normal: S.profile.normal_channel_capacity, dense: S.profile.dense_channel_capacity,
+  model: S.server.model_version, exterior: opts.exterior, interior: opts.interior, anchor_free: opts.anchor_free, margin: 1 });
+
+// Every box + rules combination that has a result: the shipped entry (if any), the user's
+// runs, and what's known overall (most tunnels, tightest proven bound). See RunManager.known.
+function resultGroups() {
+  const groups = new Map();
+  const group = (box, rules) => {
+    const k = `${boxId(box)}|${rulesKey(rules)}`;
+    if (!groups.has(k)) groups.set(k, { key: k, box: boxId(box).split("x").map(Number), rules, entry: null, runs: [] });
+    return groups.get(k);
+  };
+  for (const e of S.server.library || []) group(e.box, e.rules).entry = e;
+  for (const r of S.server.runs || []) if (r.rules && comparable(r.rules) && (r.tunnels != null || r.upper != null)) group(r.box, r.rules).runs.push(r);
+  for (const g of groups.values()) Object.assign(g, groupStats(g));
+  return groups;
 }
+
+// What a group knows, optionally leaving one run out ("what was known before this run").
+function groupStats(g, exclude = null) {
+  let tunnels = g.entry?.tunnels ?? null, upper = g.entry?.upper ?? null, run = null;
+  for (const r of [...g.runs].sort((a, b) => a.modified - b.modified)) {   // ties go to the earlier result
+    if (r.id === exclude) continue;
+    if (r.upper != null) upper = upper == null ? r.upper : Math.min(upper, r.upper);
+    if (r.tunnels != null && r.has_best && (tunnels == null || r.tunnels > tunnels)) { tunnels = r.tunnels; run = r; }
+  }
+  return { tunnels, upper, run, proven: tunnels != null && tunnels === upper,
+    controllers: run ? run.controllers : g.entry?.controllers, trunks: run ? null : g.entry?.trunks };
+}
+
+function knownBest(box, opts) {
+  if (!S.profile.channels_enabled) return null;
+  return resultGroups().get(`${boxId(box)}|${rulesKey(wantedRules(opts))}`) || null;
+}
+
+// How a run stands against what was known before it.
+function runStanding(r) {
+  if (!r.rules || !comparable(r.rules) || r.tunnels == null) return null;
+  const g = resultGroups().get(`${boxId(r.box)}|${rulesKey(r.rules)}`);
+  if (!g) return null;
+  const prev = groupStats(g, r.id), proved = r.upper != null && r.tunnels >= r.upper;
+  const bound = prev.upper != null && r.upper != null && r.upper < prev.upper ? ` Proven maximum tightened: ${r.upper} (was ${prev.upper}).` : "";
+  if (proved) return prev.proven
+    ? { kind: "same", text: `Matches the known proof: ${prev.tunnels} tunnels is optimal.` }
+    : { kind: "proof", text: `New proof: ${r.tunnels} tunnels is optimal for this box${prev.tunnels != null ? ` (best known was ${prev.tunnels}, proven maximum ${prev.upper})` : ""}.` };
+  if (prev.tunnels == null) return { kind: "first", text: `First result for this box with these settings.${bound}` };
+  const d = r.tunnels - prev.tunnels;
+  if (d > 0) return { kind: "record", text: `New best known: ${d} more than the previous best (${prev.tunnels}).${bound}` };
+  return { kind: d ? "below" : "tie", text: `${d ? `${-d} below` : "Ties"} the best known (${prev.tunnels}${prev.proven ? ", proven optimal" : ""}).${bound}` };
+}
+
 const libSrc = (e, box) => `library:${e.id}${box ? "@" + box.join("x") : ""}`;
 const libTitle = (e, box) => `${(box || e.box).join("×")} · ${e.status === "proven" ? "proven optimal" : "best known"} (${e.tunnels} tunnels)`;
+const pct = (a, b) => a != null && b ? `${(Math.min(1, a / b) * 100).toFixed(1)}%` : "–";
+// Opens the build behind a group's best result, turned to `box` when that's given.
+function openKnown(g, box) {
+  if (g.run) return openRun(g.run.id, `${g.run.box.join("×")} · ${g.proven ? "proven optimal" : "best known"} (${g.tunnels} tunnels, your run)`);
+  return openLibrary(g.entry, box);
+}
 
 // --------------------------------------------------------------------------- tools
 const ICON = {
@@ -403,8 +455,10 @@ const Design = {
     p.onclick = e => { const b = e.target.closest("[data-c]"); if (b) setColour(b.dataset.c); };
   },
 
+  // Layers are the build's own: tunnel-network connections above or below it show with
+  // its top or bottom layer (see buildItems) rather than as layers of their own.
   updateSlicer(reset = false) {
-    const ys = [...S.blocks.values()].map(b => b.pos[1]);
+    const ys = [...S.blocks.values()].filter(b => b.type !== "port").map(b => b.pos[1]);
     const r = $("#sliceRange");
     $("#slicer").hidden = ys.length < 2 || Math.min(...ys) === Math.max(...ys);
     if (!ys.length) return;
@@ -415,7 +469,7 @@ const Design = {
   },
 
   render({ refit = false } = {}) {
-    const items = buildItems(S.blocks, { analysis: S.analysis, slice: S.view.slice, xray: S.view.xray, heat: S.view.heat });
+    const items = buildItems(S.blocks, { analysis: S.analysis, slice: S.view.slice, sliceTop: +$("#sliceRange").max, xray: S.view.xray, heat: S.view.heat });
     this.viewer.setItems(items.concat(this.ghostItems), { refit });
     $("#emptyState").hidden = S.blocks.size > 0;
     $("#hints").style.opacity = S.blocks.size ? 1 : 0.5;
@@ -692,6 +746,7 @@ const Opt = {
   pollTimer: 0,
   lastBest: null,
   mini: null,
+  announced: new Set(),
 
   init() {
     $("#workers").max = S.server.cpu_count;
@@ -779,20 +834,28 @@ const Opt = {
     this.renderKnown();
   },
 
+  // What's already known for this box and these settings: the shipped library and the
+  // user's own runs, whichever has more tunnels (and the tightest proven bound of all).
   renderKnown() {
-    const el = $("#knownNote"), s = this.settings(), e = libraryMatch(this.box, s);
-    this.known = e;
-    el.hidden = !e;
-    $("#btnStart").textContent = e?.status === "proven" ? "Run anyway" : "Start optimizing";
-    if (!e) return;
-    el.className = `known ${e.status === "proven" ? "proven" : ""}`;
-    el.innerHTML = e.status === "proven"
-      ? `<b>Already proven:</b> ${e.tunnels} tunnels is the best possible for this box with these settings (${e.controllers} controllers, ${e.trunks} trunk${e.trunks === 1 ? "" : "s"}). Running it again can't find more.
+    const el = $("#knownNote"), g = knownBest(this.box, this.settings());
+    this.known = g?.tunnels != null ? g : null;
+    const k = this.known;
+    $("#btnStart").textContent = k?.proven ? "Run anyway" : "Start optimizing";
+    const from = k?.run ? ` Found by your run <span class="mono">${esc(k.run.id)}</span>${k.entry ? ` (the shipped build has ${k.entry.tunnels})` : ""}.` : "";
+    const parts = k && [k.controllers != null && `${k.controllers} controllers`, k.trunks != null && `${k.trunks} trunk${k.trunks === 1 ? "" : "s"}`].filter(Boolean).join(", ");
+    const html = !k ? "" : k.proven
+      ? `<b>Already proven:</b> ${k.tunnels} tunnels is the best possible for this box with these settings${parts ? ` (${parts})` : ""}. Running it again can't find more.${from}
          <div class="row"><button class="btn primary" id="btnOpenKnown">Open it</button></div>`
-      : `<b>Best known:</b> ${e.tunnels} tunnels (proven maximum ${e.upper}), ${e.controllers} controllers, ${e.trunks} trunks.
+      : `<b>Best known:</b> ${k.tunnels} tunnels, ${pct(k.tunnels, k.upper)} of the proven maximum (${k.upper})${parts ? `; ${parts}` : ""}.${from}
          <div class="row"><button class="btn" id="btnOpenKnown">Open it</button>
          <label class="check"><input type="checkbox" id="startFromKnown" ${store.get("startKnown", true) ? "checked" : ""}> start the run from it</label></div>`;
-    $("#btnOpenKnown").onclick = () => openLibrary(e, this.box);
+    el.hidden = !k;
+    if (html === this.knownHtml) return;   // runs refresh every few seconds; keep the note still
+    this.knownHtml = html;
+    if (!k) return;
+    el.className = `known ${k.proven ? "proven" : ""}`;
+    el.innerHTML = html;
+    $("#btnOpenKnown").onclick = () => openKnown(this.known, this.box);
     const cb = $("#startFromKnown");
     if (cb) cb.onchange = () => store.set("startKnown", cb.checked);
   },
@@ -812,7 +875,7 @@ const Opt = {
       exterior: $("#optExterior").checked, interior: $("#optInterior").checked,
       anchor_free: $("#optAnchorFree").checked, symmetry: $("#optSymmetry").checked,
       normal_priority: $("#optPriority").checked,
-      start_library: !!(this.known && this.known.status !== "proven" && $("#startFromKnown")?.checked),
+      start_known: !!(this.known && !this.known.proven && $("#startFromKnown")?.checked),
     };
   },
 
@@ -842,14 +905,15 @@ const Opt = {
   },
 
   renderRuns(runs) {
-    this.runs = runs;
+    this.runs = S.server.runs = runs;
     $("#liveDot").hidden = !runs.some(r => r.live);
     Lib.renderRuns(runs);
+    if (this.box) this.renderKnown();
     const tb = $("#runsTable tbody");
     if (!runs.length) { tb.innerHTML = `<tr><td colspan="7" class="none">No runs yet.</td></tr>`; return; }
     tb.innerHTML = runs.map(r => `<tr data-id="${esc(r.id)}" class="${r.id === this.current ? "sel" : ""}">
       <td class="num">${r.box.join("×")}</td><td>${r.mode === "prove" ? "Prove" : "Improve"}</td>
-      <td class="num">${r.tunnels ?? "–"}</td><td class="num">${r.upper ?? "–"}</td><td class="num">${fmtTime(r.active)}</td>
+      <td class="num">${r.tunnels ?? "–"} ${runTag(r)}</td><td class="num">${r.upper ?? "–"}</td><td class="num">${fmtTime(r.active)}</td>
       <td>${statePill(r)}</td><td>${r.has_best ? "▸" : ""}</td></tr>`).join("");
   },
 
@@ -890,6 +954,14 @@ const Opt = {
     const frac = r.tunnels != null && r.upper ? Math.min(1, r.tunnels / r.upper) : 0;
     $("#runBar").style.width = `${frac * 100}%`;
     $("#runBarText").textContent = r.tunnels == null ? "searching…" : r.upper ? (gap <= 0 ? "proven optimal" : `${(frac * 100).toFixed(1)}% of proven max · gap ${gap.toFixed(1)}%`) : `${r.tunnels} tunnels`;
+    const st = runStanding(r), stEl = $("#runStanding");
+    stEl.hidden = !st;
+    if (st) { stEl.className = `standing ${st.kind}`; stEl.textContent = st.text; }
+    // Say so once when a running search beats what was known.
+    if (st && r.live && (st.kind === "record" || st.kind === "proof")) {
+      const k = `${r.id}:${st.kind}:${r.tunnels}`;
+      if (!this.announced.has(k)) { this.announced.add(k); toast(`${r.box.join("×")}: ${st.text}`, "ok"); }
+    }
     $("#runPhase").textContent = r.error ? `Error: ${r.error}` : r.live ? `▸ ${r.phase || ""}` : (r.result || "").split("\n")[0];
     $("#btnPause").hidden = !r.live || r.paused;
     $("#btnResume").hidden = !r.live || !r.paused;
@@ -948,6 +1020,14 @@ async function openRun(id, title) {
     } else if (t?.error) toast(`Couldn't tidy the wiring (${t.error}); showing it as saved.`, "bad");
   } catch (err) { toast(`No saved layout yet: ${err.message}`, "bad"); }
   busy(null);
+}
+
+// A run's standing in lists: it proved its box, or it holds the best known result.
+function runTag(r) {
+  if (r.tunnels == null) return "";
+  if (r.upper != null && r.tunnels >= r.upper) return `<span class="tag proven">proven</span>`;
+  const g = r.rules && comparable(r.rules) && resultGroups().get(`${boxId(r.box)}|${rulesKey(r.rules)}`);
+  return g && g.run?.id === r.id ? `<span class="tag best">best known</span>` : "";
 }
 
 function statePill(r, id = "") {
@@ -1013,26 +1093,42 @@ const Lib = {
     this.renderExamples(S.server.examples);
   },
 
-  card(src, title, meta, folder, status) {
+  card(src, title, meta, folder, status, extra = "", group = "") {
     const t = this.thumbs.get(src);
-    const tag = status ? `<span class="tag ${status === "proven" ? "proven" : "best"}">${status === "proven" ? "Proven optimal" : "Best known"}</span>` : "";
-    return `<div class="lcard" data-src="${esc(src)}" data-title="${esc(title)}"><div class="thumb">${t ? `<img src="${t}" alt="">` : `<div class="spinner"></div>`}</div>
-      <div class="body">${tag}${folder ? `<div class="folder">${esc(folder)}</div>` : ""}<div class="name">${esc(title)}</div><div class="meta">${meta}</div></div></div>`;
+    const TAGS = { proven: "Proven optimal", best: "Best known" };
+    const tag = TAGS[status] ? `<span class="tag ${status}">${TAGS[status]}</span>` : "";
+    return `<div class="lcard" data-src="${esc(src)}" data-title="${esc(title)}"${group ? ` data-group="${esc(group)}"` : ""}><div class="thumb">${t ? `<img src="${t}" alt="">` : `<div class="spinner"></div>`}</div>
+      <div class="body">${tag}${folder ? `<div class="folder">${esc(folder)}</div>` : ""}<div class="name">${esc(title)}</div><div class="meta">${meta}</div>${extra}</div></div>`;
   },
 
+  // A thin bar: how close the best known build is to the proven maximum.
+  meter(tunnels, upper) {
+    if (tunnels == null || !upper) return "";
+    return `<div class="meter" title="${tunnels} of at most ${upper} tunnels"><i style="width:${Math.min(1, tunnels / upper) * 100}%"></i></div>`;
+  },
+
+  // The shipped results, updated with anything the user's runs proved or beat
+  // (same rules as the library: default capacities, coloured wiring).
   renderKnown() {
     const el = $("#libKnown");
-    const lib = [...(S.server.library || [])].sort((a, b) => (a.status === "proven" ? 0 : 1) - (b.status === "proven" ? 0 : 1)
-      || a.box[0] * a.box[1] * a.box[2] - b.box[0] * b.box[1] * b.box[2]);
-    $("#libKnownNote").textContent = lib.length ? `· default config (8 / 32), coloured wiring · ${lib.filter(e => e.status === "proven").length} proven, ${lib.filter(e => e.status !== "proven").length} best known` : "";
-    el.innerHTML = lib.length ? lib.map(e => this.card(libSrc(e), `${e.box.join("×")}`,
-      `${e.tunnels} tunnels${e.status === "proven" ? "" : ` (max ${e.upper})`} · ${e.controllers} controllers · ${e.trunks} trunk${e.trunks === 1 ? "" : "s"}`,
-      "", e.status)).join("") : `<p class="none">No library bundled.</p>`;
+    const libKey = S.server.library?.length ? rulesKey(S.server.library[0].rules) : null;
+    const groups = [...resultGroups().values()].filter(g => g.tunnels != null && (g.entry || rulesKey(g.rules) === libKey))
+      .sort((a, b) => (a.proven ? 0 : 1) - (b.proven ? 0 : 1) || a.box[0] * a.box[1] * a.box[2] - b.box[0] * b.box[1] * b.box[2]);
+    this.known = new Map(groups.map(g => [g.key, g]));
+    const proven = groups.filter(g => g.proven).length, yours = groups.filter(g => g.run).length;
+    $("#libKnownNote").textContent = groups.length ? `· default config (8 / 32), coloured wiring · ${proven} proven, ${groups.length - proven} best known${yours ? ` · ${yours} from your runs` : ""}` : "";
+    const html = groups.length ? groups.map(g => {
+      const src = g.run ? `run:${g.run.id}` : libSrc(g.entry);
+      const meta = [g.proven ? `${g.tunnels} tunnels` : `${g.tunnels} tunnels (max ${g.upper})`,
+        g.controllers != null && `${g.controllers} controllers`, g.trunks != null && `${g.trunks} trunk${g.trunks === 1 ? "" : "s"}`].filter(Boolean).join(" · ");
+      const folder = g.run ? (g.entry ? `your run · shipped ${g.entry.status === "proven" ? "proof" : "best"} was ${g.entry.tunnels}${g.entry.upper !== g.upper ? ` (max ${g.entry.upper})` : ""}` : "your run") : "";
+      return this.card(src, g.box.join("×"), meta, folder, g.proven ? "proven" : "best", g.proven ? "" : this.meter(g.tunnels, g.upper), g.key);
+    }).join("") : `<p class="none">No library bundled.</p>`;
+    if (html !== this.knownHtml) { el.innerHTML = this.knownHtml = html; this.thumbAll(el); }
     el.onclick = ev => {
       const c = ev.target.closest(".lcard");
-      if (c) openLibrary(S.server.library.find(e => libSrc(e) === c.dataset.src));
+      if (c) openKnown(this.known.get(c.dataset.group));
     };
-    this.thumbAll(el);
   },
 
   renderExamples(list) {
@@ -1045,14 +1141,44 @@ const Lib = {
     this.thumbAll(el);
   },
 
+  // The user's runs, grouped by box and settings, each group headed by what's known for it.
   renderRuns(runs) {
-    const el = $("#libRuns");
-    const done = runs.filter(r => r.has_best);
-    el.innerHTML = done.length ? done.map(r => this.card(`run:${r.id}`, `${r.box.join("×")} run`,
-      `${r.tunnels ?? "?"} tunnels${r.upper ? ` · max ${r.upper}` : ""} · ${fmtTime(r.active)}`, r.id)).join("")
-      : `<p class="none">Results from the Optimize tab appear here.</p>`;
+    const el = $("#libRuns"), groups = resultGroups();
+    const byGroup = new Map();
+    for (const r of runs.filter(r => r.has_best)) {
+      const k = r.rules && comparable(r.rules) ? `${boxId(r.box)}|${rulesKey(r.rules)}` : `custom|${r.id}`;
+      if (!byGroup.has(k)) byGroup.set(k, []);
+      byGroup.get(k).push(r);
+    }
+    const latest = list => Math.max(...list.map(r => r.modified));
+    const order = [...byGroup.entries()].sort((a, b) => latest(b[1]) - latest(a[1]));
+    const html = order.length ? order.map(([k, list]) => {
+      const g = groups.get(k), r0 = list[0];
+      const head = !g ? `<b>${r0.box.join("×")}</b><span class="muted">custom settings</span>`
+        : `<b>${g.box.join("×")}</b>${g.proven ? `<span class="tag proven">Proven optimal</span>` : `<span class="tag best">Best known</span>`}
+           <span>${g.tunnels} tunnels${g.proven ? "" : ` of at most ${g.upper} · ${pct(g.tunnels, g.upper)}`}${g.run ? " · your run" : g.entry ? " · shipped" : ""}</span>
+           ${g.proven ? "" : this.meter(g.tunnels, g.upper)}<span class="muted">${esc(this.rulesLabel(g.rules))}</span>`;
+      list.sort((a, b) => (b.tunnels ?? -1) - (a.tunnels ?? -1) || b.modified - a.modified);
+      const cards = list.map(r => {
+        const proved = r.upper != null && r.tunnels >= r.upper, holds = g && g.run?.id === r.id;
+        const d = g && g.tunnels != null && r.tunnels != null ? g.tunnels - r.tunnels : null;
+        const behind = !proved && !holds && d != null ? ` · ${d ? `${d} below best` : "ties best"}` : "";
+        return this.card(`run:${r.id}`, `${r.tunnels ?? "?"} tunnels`,
+          `${r.upper && !proved ? `${pct(r.tunnels, r.upper)} of max ${r.upper} · ` : ""}${fmtTime(r.active)}${behind}`,
+          r.id, proved ? "proven" : holds ? "best" : "");
+      }).join("");
+      return `<div class="rgroup"><div class="rgroup-head">${head}</div><div class="cards">${cards}</div></div>`;
+    }).join("") : `<p class="none">Results from the Optimize tab appear here.</p>`;
+    if (html !== this.runsHtml) { el.innerHTML = this.runsHtml = html; this.thumbAll(el); }
     el.onclick = e => this.open(e);
-    this.thumbAll(el);
+    if (this.knownHtml !== undefined) this.renderKnown();
+  },
+
+  rulesLabel(r) {
+    const lib = S.server.library?.[0]?.rules;
+    if (lib && rulesKey(r) === rulesKey(lib)) return "default config";
+    const where = r.exterior && r.interior ? "" : r.exterior ? ", outside only" : ", inside only";
+    return `${r.normal} / ${r.dense}${where}${r.anchor_free ? "" : ", anchors allowed"}`;
   },
 
   async open(e) {

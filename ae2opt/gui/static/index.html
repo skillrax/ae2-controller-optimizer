@@ -162,6 +162,7 @@
           </div>
           <div class="stats" id="runStats"></div>
           <div class="progress"><div class="bar" id="runBar"></div><span id="runBarText"></span></div>
+          <div class="standing" id="runStanding" hidden></div>
           <div class="run-grid">
             <div class="chart-wrap"><canvas id="runChart"></canvas><div class="chart-legend"><span class="sw fluix"></span>best found<span class="sw cyan dashed"></span>proven maximum</div></div>
             <div class="mini"><canvas id="runView"></canvas><span class="mini-label" id="runViewLabel">best so far</span></div>
@@ -197,7 +198,7 @@
     <h3>Known results <span class="muted small" id="libKnownNote"></span></h3>
     <div class="cards" id="libKnown"></div>
     <h3>Your optimizer results</h3>
-    <div class="cards" id="libRuns"></div>
+    <div id="libRuns"></div>
     <h3 id="libExamplesHead">Test structures</h3>
     <div class="cards" id="libExamples"></div>
   </div>

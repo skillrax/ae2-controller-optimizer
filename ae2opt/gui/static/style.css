@@ -301,8 +301,18 @@ table.runs td.num { font-family: var(--mono); }
 .known b { color: var(--text); }
 .known .row { margin-top: 8px; }
 .known .btn { padding: 4px 10px; font-size: 12.5px; }
-.lcard .tag { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; margin-bottom: 4px; }
-.lcard .tag.proven { background: rgba(155,128,255,.2); color: var(--accent-2); }
-.lcard .tag.best { background: rgba(77,227,255,.12); color: var(--cyan); }
+.tag { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; font-family: system-ui, sans-serif; white-space: nowrap; }
+.lcard .tag { margin-bottom: 4px; }
+.tag.proven { background: rgba(155,128,255,.2); color: var(--accent-2); }
+.tag.best { background: rgba(77,227,255,.12); color: var(--cyan); }
+.meter { height: 4px; border-radius: 2px; background: var(--bg-2); overflow: hidden; margin-top: 6px; }
+.meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--cyan)); }
+.rgroup { margin-bottom: 16px; }
+.rgroup-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; margin-bottom: 8px; }
+.rgroup-head b { font-family: var(--mono); font-size: 14px; }
+.rgroup-head .meter { width: 120px; margin: 0; }
+.standing { margin-top: 8px; font-size: 13px; padding: 7px 10px; border-radius: 8px; background: var(--panel-2); color: var(--muted); }
+.standing.record, .standing.proof { color: var(--text); border: 1px solid rgba(155,128,255,.55); background: linear-gradient(135deg, rgba(124,92,240,.18), rgba(77,227,255,.08)); }
+.mono { font-family: var(--mono); }
 .closed { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; background: var(--bg); z-index: 200; }
 .closed p { color: var(--muted); }

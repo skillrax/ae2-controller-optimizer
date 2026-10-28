@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.0
+
+- **Your runs count as known results.** A run that proves its box, or finds more tunnels than
+  the best known build, is recognised as such: the run panel says how it stands against
+  what was known before it (and announces a new best while it runs), the Optimize tab's
+  "best known" and "start the run from it" use it, and the tightest proven maximum from any
+  run applies.
+- **Library:** your runs are grouped by box and settings, each group headed by its best
+  result and how close it is to the proven maximum. Known results show your proofs and
+  records in place of the shipped ones.
+- **Designer:** the layer slider covers the build's own layers; the tunnel-network
+  connection markers show with the top and bottom layers instead of as layers of their own.
+- **New known results:** 7×7×7 best known is now 719 tunnels (at most 834), 5×5×5 is at most
+  320, and 1×4×7, 1×5×7, 1×7×7 and 2×2×7 are proven.
+- `tools/build_library.py --add-run <run folder>` folds a run into the shipped library.
+
 ## 1.0.1
 
 - **4×4×4 is now proven optimal:** 164 tunnels (5,248 channels) with 41 controllers and 6

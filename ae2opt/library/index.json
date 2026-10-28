@@ -466,6 +466,66 @@
    }
   },
   {
+   "id": "1x4x7",
+   "box": [
+    1,
+    4,
+    7
+   ],
+   "status": "proven",
+   "tunnels": 88,
+   "upper": 88,
+   "controllers": 22,
+   "trunks": 4,
+   "dense_cells": 4,
+   "cable_cells": 86,
+   "anchors": 0,
+   "mode": "run",
+   "seconds": 4,
+   "workers": 16,
+   "run": "1x7x4-20261028-153253",
+   "file": "1x4x7.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "2x2x7",
+   "box": [
+    2,
+    2,
+    7
+   ],
+   "status": "proven",
+   "tunnels": 78,
+   "upper": 78,
+   "controllers": 20,
+   "trunks": 3,
+   "dense_cells": 3,
+   "cable_cells": 70,
+   "anchors": 0,
+   "mode": "run",
+   "seconds": 8,
+   "workers": 16,
+   "run": "2x7x2-20261028-015122",
+   "file": "2x2x7.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
    "id": "2x4x4",
    "box": [
     2,
@@ -484,6 +544,36 @@
    "seconds": 10,
    "workers": 12,
    "file": "2x4x4.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
+   "id": "1x5x7",
+   "box": [
+    1,
+    5,
+    7
+   ],
+   "status": "proven",
+   "tunnels": 108,
+   "upper": 108,
+   "controllers": 27,
+   "trunks": 6,
+   "dense_cells": 5,
+   "cable_cells": 102,
+   "anchors": 0,
+   "mode": "run",
+   "seconds": 5,
+   "workers": 16,
+   "run": "1x7x5-20261028-153336",
+   "file": "1x5x7.json",
    "rules": {
     "normal": 8,
     "dense": 32,
@@ -553,6 +643,36 @@
    }
   },
   {
+   "id": "1x7x7",
+   "box": [
+    1,
+    7,
+    7
+   ],
+   "status": "proven",
+   "tunnels": 146,
+   "upper": 146,
+   "controllers": 36,
+   "trunks": 7,
+   "dense_cells": 7,
+   "cable_cells": 132,
+   "anchors": 0,
+   "mode": "run",
+   "seconds": 42,
+   "workers": 16,
+   "run": "1x7x7-20261028-153359",
+   "file": "1x7x7.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
    "id": "4x4x4",
    "box": [
     4,
@@ -591,7 +711,7 @@
    ],
    "status": "best_known",
    "tunnels": 298,
-   "upper": 324,
+   "upper": 320,
    "controllers": 74,
    "trunks": 10,
    "dense_cells": 11,
@@ -601,6 +721,7 @@
    "seconds": 1529,
    "workers": 12,
    "started_from": null,
+   "bound_from": "5x5x5-20261028-133515",
    "file": "5x5x5.json",
    "rules": {
     "normal": 8,
@@ -650,17 +771,17 @@
     7
    ],
    "status": "best_known",
-   "tunnels": 716,
-   "upper": 1047,
-   "controllers": 180,
-   "trunks": 27,
-   "dense_cells": 27,
-   "cable_cells": 444,
+   "tunnels": 719,
+   "upper": 834,
+   "controllers": 182,
+   "trunks": 30,
+   "dense_cells": 24,
+   "cable_cells": 440,
    "anchors": 0,
-   "mode": "improve",
-   "seconds": 1921,
-   "workers": 12,
-   "started_from": "best_7x7x7_coloured.json",
+   "mode": "run",
+   "seconds": 1701,
+   "workers": 16,
+   "run": "7x7x7-20261028-160108",
    "file": "7x7x7.json",
    "rules": {
     "normal": 8,

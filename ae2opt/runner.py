@@ -83,6 +83,18 @@ def spec_from_dict(d: dict) -> OptimizeSpec:
     return OptimizeSpec(**d)
 
 
+def run_rules(data: dict) -> dict:
+    """A run's rules in the shape of a library entry's (see library.rules_match)."""
+    spec, prof = data["spec"], data["profile"]
+    return {"normal": prof["normal_channel_capacity"], "dense": prof["dense_channel_capacity"],
+            "channels": prof.get("channels_enabled", True),
+            "model": data.get("model", 2),   # runs from before the field was added used model 2
+            "exterior": spec.get("exterior_tunnels", True), "interior": spec.get("interior_tunnels", True),
+            "anchor_free": spec.get("anchor_free", True), "margin": spec.get("margin", 1),
+            "custom": bool(spec.get("target_tunnels") or spec.get("forbidden") or spec.get("required")
+                           or spec.get("blocked"))}
+
+
 def read_run(run_dir: Path) -> dict:
     return json.loads((run_dir / RUN_FILE).read_text("utf-8"))
 
@@ -229,8 +241,10 @@ def new_run(run_dir: Path, profile: Profile, spec: OptimizeSpec) -> None:
     if (run_dir / RUN_FILE).exists():
         raise FileExistsError(f"{run_dir} already holds a run; use --resume {run_dir} or another --dir")
     run_dir.mkdir(parents=True, exist_ok=True)
-    write_run(run_dir, {"profile": profile.to_dict(), "spec": spec_to_dict(spec), "active_seconds": 0.0,
-                        "sessions": 1, "best_upper": None, "best_tunnels": None, "status": "RUNNING"})
+    from .optimize import MODEL_VERSION
+    write_run(run_dir, {"profile": profile.to_dict(), "spec": spec_to_dict(spec), "model": MODEL_VERSION,
+                        "active_seconds": 0.0, "sessions": 1, "best_upper": None, "best_tunnels": None,
+                        "status": "RUNNING"})
 
 
 def prepare_resume(run_dir: Path) -> dict:

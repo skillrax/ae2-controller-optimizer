@@ -83,7 +83,9 @@ export function buildItems(blocks, opts = {}) {
   const items = [];
   const cells = opts.analysis?.cells || {};
   for (const b of blocks.values()) {
-    if (opts.slice != null && b.pos[1] > opts.slice) continue;
+    // A connection above the build belongs to its top layer (`sliceTop`); one below, to the bottom.
+    const y = b.type === "port" && opts.sliceTop != null ? Math.min(b.pos[1], opts.sliceTop) : b.pos[1];
+    if (opts.slice != null && y > opts.slice) continue;
     const k = key(b.pos), info = cells[k] || {};
     const owner = { pos: b.pos, key: k };
     const push = (box, color, glow, extra = {}) =>
