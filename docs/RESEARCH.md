@@ -146,14 +146,17 @@ numerically.
 
 ## 4. What "proven" means
 
-A library entry marked proven rests on three things. Only the first is checked independently.
+A library entry marked proven rests on three things.
 
 1. **Soundness:** every build the model returns works in the game. The simulator (a port
    of AE2's channel pathing) checks every result, and in-game tests confirmed the simulator
    (`examples/ingame/RESULTS.md`).
 2. **Completeness:** every build allowed by R1–R11 and D1–D4 is a solution of the model.
-   This is **assumed, not checked**. An encoding that is stricter than the rules would make
-   "proven" optima too low, and nothing would notice.
+   An encoding that is stricter than the rules would make "proven" optima too low. A
+   second model, written from the rules without reading `optimize.py`, re-proved 23 of the
+   24 proven boxes with the same optimum ([INDEPENDENT_CHECK.md](INDEPENDENT_CHECK.md)).
+   On 4×4×4 it found 164 but did not close its bound (168) in 4 h, so that box is not
+   independently checked.
 3. **Solver correctness:** CP-SAT's OPTIMAL status. It comes with **no checkable
    certificate**.
 
@@ -248,10 +251,9 @@ the even numbers next to it.
 
 ## 7. Open problems and plan
 
-1. **An independent encoding.** Write a second model of R1–R11 + D1–D4 from MECHANICS.md
-   and this page alone, without reading `optimize.py`. Re-prove the small boxes with it. This
-   tests completeness (§4.2). Agreement on every box up to 3×3×3 would be strong evidence;
-   any disagreement is a bug in one of them.
+1. **An independent encoding.** *Done for 23 of 24 boxes*
+   ([INDEPENDENT_CHECK.md](INDEPENDENT_CHECK.md)): no disagreement. Still open: 4×4×4
+   (164 found, at most 168 after 4 h).
 2. **Box families.** For a fixed cross-section a×b, waste should become linear in c,
    possibly with a repeating wobble (subadditivity): W(a,b,c) ≈ w(a,b)·c + constant. The
    family proofs in the prediction log measure w(a,b). For thin cross-sections, a
