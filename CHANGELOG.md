@@ -6,6 +6,11 @@
   2abc + ab + bc + ca + 1 tunnels, under any config. Runs show it from the start. It tightens
   6×6×6 to at most 541 (was 549). Proof and research notes:
   [docs/RESEARCH.md](docs/RESEARCH.md).
+- **New known results:** 4×4×5 holds 202 tunnels (at most 205), and 5×5×5 is at most 318
+  (was 320).
+- **Independent check:** a second model, written from the rules without reading the
+  optimizer, re-proves 23 of the 24 proven results
+  ([docs/INDEPENDENT_CHECK.md](docs/INDEPENDENT_CHECK.md)).
 
 ## 1.2.0
 

@@ -193,7 +193,7 @@ class KnownResultTests(unittest.TestCase):
         k = self.runs.known(DEFAULT_PROFILE, (5, 5, 5))
         self.assertEqual((k["tunnels"], k["upper"], k["source"]), (300, 310, "run:5-a"))
         before = self.runs.known(DEFAULT_PROFILE, (5, 5, 5), exclude="5-a")
-        self.assertEqual((before["tunnels"], before["upper"], before["source"]), (298, 320, "library:5x5x5"))
+        self.assertEqual((before["tunnels"], before["upper"], before["source"]), (298, 318, "library:5x5x5"))
 
     def test_a_proof_bounds_every_run(self):
         self.fake_run("3x3x4", (3, 3, 4), 96, 99)

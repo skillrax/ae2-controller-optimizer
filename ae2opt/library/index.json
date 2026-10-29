@@ -703,6 +703,36 @@
    }
   },
   {
+   "id": "4x4x5",
+   "box": [
+    4,
+    4,
+    5
+   ],
+   "status": "best_known",
+   "tunnels": 202,
+   "upper": 205,
+   "controllers": 51,
+   "trunks": 7,
+   "dense_cells": 7,
+   "cable_cells": 135,
+   "anchors": 0,
+   "mode": "run",
+   "seconds": 382,
+   "workers": 16,
+   "run": "4x4x5-202",
+   "file": "4x4x5.json",
+   "rules": {
+    "normal": 8,
+    "dense": 32,
+    "model": 2,
+    "exterior": true,
+    "interior": true,
+    "anchor_free": true,
+    "margin": 1
+   }
+  },
+  {
    "id": "5x5x5",
    "box": [
     5,
@@ -711,7 +741,7 @@
    ],
    "status": "best_known",
    "tunnels": 298,
-   "upper": 320,
+   "upper": 318,
    "controllers": 74,
    "trunks": 10,
    "dense_cells": 11,
@@ -721,7 +751,7 @@
    "seconds": 1529,
    "workers": 12,
    "started_from": null,
-   "bound_from": "5x5x5-20261028-133515",
+   "bound_from": "load-level model, 20 min (docs/RESEARCH.md, Theorem 3)",
    "file": "5x5x5.json",
    "rules": {
     "normal": 8,
