@@ -296,6 +296,11 @@ the even numbers next to it.
      see that subtrees are indivisible (cover or knapsack cuts on capacity-8 routes), or a
      decomposition over core configurations so the core's routing is solved exactly, is
      the most direct route to a 5×5×5 bound below 320.
+   - **Core decomposition, tested (2026-10-29): infeasible as stated.** The 3×3×3 core has
+     2²⁷ controller patterns; 104 million pass the cross rule inside the core, about 2.2
+     million up to the cube's 48 symmetries. Fixing the core barely simplifies the
+     problem: with the library's own core fixed, the relaxed model on 16 threads is still
+     unproven after 2 min (bound 305). The shell, not the core, is where the search is.
 5. **Certificates.** A proof log that an independent checker can verify (e.g. a MaxSAT
    encoding with VeriPB proof logging) for the small boxes, to replace "the solver said so".
 
