@@ -28,7 +28,7 @@ Interpretation (see docs/INDEPENDENT_CHECK.md for the reasoning):
 Proofs use mirror and axis-swap symmetry breaking and the face-count cut
 T + 2 E_X <= 6n, E_X >= n - 1 (validity arguments in docs/INDEPENDENT_CHECK.md).
 
-Run:  python tools/independent_model.py 2 2 2 [--time 600] [--out build.json]
+Run:  python -m lab.independent 2 2 2 [--time 600] [--out build.json]
 """
 
 from __future__ import annotations

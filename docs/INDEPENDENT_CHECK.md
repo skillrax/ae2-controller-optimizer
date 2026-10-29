@@ -5,7 +5,7 @@ written without seeing the first, re-solves the boxes the library calls proven. 
 first model forbade valid builds (§4.2, completeness), the second one would find more
 tunnels somewhere.
 
-**How it was written.** The model is [`tools/independent_model.py`](../tools/independent_model.py).
+**How it was written.** The model is [`lab/independent.py`](../lab/independent.py).
 It did not open, grep or import `ae2opt/optimize.py` or any other file that builds the
 CP-SAT model. What it did read:
 
@@ -80,7 +80,7 @@ Nothing disagreed, so there was nothing to explain.
   `results_v1_mirror_only.jsonl` (first version). Re-check one with
   `python -m ae2opt check docs/independent_check/3x4x4.json`.
 - **4×4×4** would need a longer run (the library's own proof took 57 min from a warm
-  start at 164). `python tools/independent_model.py 4 4 4 --time 43200` is the next step.
+  start at 164). `python -m lab.independent 4 4 4 --time 43200` is the next step.
 
 ### Cuts and symmetry breaking used, and why each is valid
 

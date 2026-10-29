@@ -280,8 +280,12 @@ the even numbers next to it.
 
 ## Reproducing
 
+Experiments run from the lab ([lab/README.md](../lab/README.md)), which logs every run to
+`lab/results.jsonl`:
+
 ```bash
+python -m lab solve 3 3 5 --model both --time 1800
+python -m unittest discover -s lab/tests -t .
 python -m unittest tests.test_bounds
 python -c "from ae2opt import library; from ae2opt.bounds import waste_breakdown; print(waste_breakdown(library.load('4x4x4')))"
-python -m ae2opt run --box 3 3 5 --workers 16 --hours 0.5 --dir runs/3x3x5
 ```
