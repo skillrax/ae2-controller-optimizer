@@ -226,6 +226,23 @@ bound, shown where the build isn't proven optimal.
   12/10 alternation at 2×2×7 = 78, which was re-proven with the current code (22 s, through
   the relaxed bound). Longer families need a controller-size config above 7 (Extended Life
   allows up to 63) to follow them further.
+- **O6. Where the relaxed model is loose** (lab, 2026-10-29; `lab/diagnose.py`). With the
+  controllers fixed, the relaxed and real wiring give the same count on the library shapes
+  for 3×3×4 (96) and 5×5×5 (298), and on the 4×4×5 record shape (202). On shapes the
+  relaxed model itself prefers, it can be far off: one 5×5×5 shape scores 302 relaxed and
+  279 real. Adding the real rules back one at a time, the whole loss comes from one rule:
+  **a cable cell has one parent**. The relaxed solution splits a cell's channels across
+  two or three routes through the 3×3×3 core (4 + 4, 2 + 2); real cable can't. The other
+  wiring rules (attachment, separate trunks, dense parents) cost nothing on any shape
+  tried. Keeping the one-parent rule in the bound model doesn't help on its own: the
+  solver's LP relaxation can't see it (4×4×5: 208 after 20 min vs 206 without; 5×5×5:
+  320 either way). The loss is a packing effect: whole subtrees must fit in a capacity-8
+  route, where split flow fills it exactly.
+- **O7. Relax, then fix.** The relaxed model finds controller shapes faster than the full
+  model, and wiring a fixed shape takes under a second. On 4×4×5 a relaxed 202 shape
+  wired for real at **202** (the 2-hour full-model run had stopped at 200). On 5×5×5 it
+  didn't help: the relaxed search's favourite shapes are exactly the splitting ones of O6
+  (best real 279).
 
 ## 6. Prediction log
 
@@ -275,6 +292,10 @@ the even numbers next to it.
    - **Pinning it down:** a lower bound here plus problem 3 would give 5×5×5–7×7×7 bounds
      far below today's.
    - **On the build side:** O2 suggests trying 5×5×5 builds without cable loops.
+   - **The missing cut is unsplittable flow (O6).** A valid inequality that makes the LP
+     see that subtrees are indivisible (cover or knapsack cuts on capacity-8 routes), or a
+     decomposition over core configurations so the core's routing is solved exactly, is
+     the most direct route to a 5×5×5 bound below 320.
 5. **Certificates.** A proof log that an independent checker can verify (e.g. a MaxSAT
    encoding with VeriPB proof logging) for the small boxes, to replace "the solver said so".
 

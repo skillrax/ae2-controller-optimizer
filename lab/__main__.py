@@ -112,6 +112,10 @@ def print_log(last: int):
                   f"best {r['best']}, bound {r['bound']}" + (f", cuts {r['cuts']}" if r["cuts"] else "")
                   + (f"  - {r['note']}" if r["note"] else ""))
             continue
+        if r["model"] == "diagnose":
+            print(f"{r['when'][:16]}  {r['commit']:9} {r['box']:6} diagnose    shape {r['shape']}: "
+                  + ", ".join(f"{s['rules']} {s['T']}" for s in r["steps"]))
+            continue
         if r["model"] == "relaxfix":
             lib = r["library"]["tunnels"] if r["library"] else "-"
             print(f"{r['when'][:16]}  {r['commit']:9} {r['box']:6} relaxfix    {r['seconds']:>8}s  "

@@ -19,6 +19,7 @@ from ae2opt import DEFAULT_PROFILE
 from ae2opt.optimize import OptimizeSpec, _Model
 from lab import cuts as lab_cuts
 from lab.__main__ import RESULTS, RUNS, commit
+from lab.diagnose import build
 
 
 class Trace(cp_model.CpSolverSolutionCallback):
@@ -47,14 +48,14 @@ def main(argv=None) -> int:
     ap.add_argument("--time", type=float, default=900.0)
     ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--cut", action="append", default=[], choices=sorted(lab_cuts.CUTS))
+    ap.add_argument("--rules", nargs="*", default=[], help="real wiring rules to add (lab.diagnose), "
+                    "e.g. forest")
     ap.add_argument("--log", help="write CP-SAT's search log here")
     ap.add_argument("--note", default="")
     args = ap.parse_args(argv)
     box = tuple(args.dims)
 
-    model = _Model(OptimizeSpec(size=box), DEFAULT_PROFILE, box, routing="flow")
-    m = model.clone()
-    model.add_search_constraints(m, symmetry=True)
+    m, model = build(box, None, tuple(args.rules))
     for name in args.cut:
         lab_cuts.CUTS[name](model, m)
     solver = cp_model.CpSolver()
@@ -77,13 +78,13 @@ def main(argv=None) -> int:
     solver.best_bound_callback = on_bound
     status = solver.StatusName(solver.Solve(m, cb))
     rec = {"when": time.strftime("%Y-%m-%dT%H:%M:%S"), "commit": commit(), "box": "x".join(map(str, box)),
-           "model": "relaxed-trace", "cuts": args.cut, "status": status, "best": cb.best,
+           "model": "relaxed-trace", "cuts": args.cut + args.rules, "status": status, "best": cb.best,
            "bound": int(solver.BestObjectiveBound() + 1e-9), "seconds": round(time.monotonic() - t0, 1),
            "trace": cb.events, "note": args.note}
     print(json.dumps({k: rec[k] for k in ("status", "best", "bound", "seconds")}))
     if cb.cells:
         RUNS.mkdir(exist_ok=True)
-        tag = "-".join([rec["box"], *args.cut]) or rec["box"]
+        tag = "-".join([rec["box"], *args.cut, *args.rules])
         (RUNS / f"relaxed-{tag}.json").write_text(json.dumps(cb.cells), "utf-8")
     with RESULTS.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec) + "\n")
