@@ -144,6 +144,36 @@ full optimum. ∎
 This proves the code as written. `test_relaxed_model_bounds_the_real_one` also checks it
 numerically.
 
+**Theorem 3 (load levels).** Add to the flow model the load-level constraints of
+`levels` in `lab/cuts.py`. The result can still only over-estimate.
+
+The constraints, for each cable cell n with t_n own tunnels:
+
+- A smart cell picks one load level ℓ ∈ {0, …, 8} (one-hot z(n,ℓ)), and one-hot τ(n,j)
+  records t_n.
+- A smart cell at level ℓ ≥ 1 has exactly one outlet at that level: an arc y(n→o,ℓ) to a
+  cable neighbour, or an exit e(n,ℓ). The flow on a link equals the levels of the arcs on
+  it, h(n→o) = Σ_ℓ ℓ·y(n→o,ℓ), so a smart cell's load can't split.
+- A smart parent sits high enough: y(n→o,ℓ) + τ(o,j) ≤ 1 + Σ_{ℓ′ ≥ ℓ+j} z(o,ℓ′) + d(o).
+- A dense cell has exactly one outlet: a dense neighbour, or an exit.
+
+**Proof.** Take a full solution (a real build). Set z to its smart cells' loads (each at
+most 8, by the node capacity), y and e to its parent links, and τ to its tunnel counts.
+A smart cell's load goes whole to its parent, so the flow on each link is that load.
+A parent's load is its own tunnels plus all its children's loads, so it is at least
+ℓ + t_o for each child at level ℓ. Dense cells' parents are dense or the outside (the full
+model's wiring rule, W3). Restricted to the flow model's variables it is a flow solution
+(Theorem 2), so it satisfies everything above with the same tunnel count. ∎
+
+**Checks.** With the controllers fixed it gives the real wiring's count on every shape
+tried, including 279 on the splitting 5×5×5 shape of O6 (plain flow: 302). Over all
+shapes it reproduces the proven optima of 3×3×4, 2×4×4, 3×4×4 and 3×3×5, and its 3×4×5
+bound after 10 min is the proven 158 (`lab/tests/test_levels.py`).
+
+**Result.** 20 minutes on 16 threads: **5×5×5 ≤ 318** (was 320) and 4×4×5 ≤ 205. Like
+every bound here it also rests on the model's completeness (§4.2), which the independent
+check covers only up to 3×4×4.
+
 ## 4. What "proven" means
 
 A library entry marked proven rests on three things.
@@ -194,8 +224,8 @@ bound, shown where the build isn't proven optimal.
 | 3×3×5 † | 120 | | 130 | 10 | 1 | 0 | 4 | 5 | 0 |
 | 3×4×5 † | 158 | | 168 | 10 | 2 | 0 | 3 | 5 | 0 |
 | 3×5×5 † | 192 | | 206 | 14 | 1 | 0 | 5 | 8 | 0 |
-| 4×4×5 | 200 | 205 | 217 | 17 | 1 | 1 | 9 | 6 | 0 |
-| 5×5×5 | 298 | 320 | 326 | 28 | 0 | 1 | 17 | 10 | 0 |
+| 4×4×5 | 202 | 205 | 217 | 15 | 2 | 0 | 7 | 6 | 0 |
+| 5×5×5 | 298 | 318 | 326 | 28 | 0 | 1 | 17 | 10 | 0 |
 | 6×6×6 | 484 | 541 | 541 | 57 | 3 | 9 | 33 | 12 | 0 |
 | 7×7×7 | 719 | 834 | 834 | 115 | 4 | 36 | 59 | 11 | 5 |
 

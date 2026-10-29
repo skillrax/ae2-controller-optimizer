@@ -130,4 +130,76 @@ def load_chain(model, m):
         m.AddBoolOr(options)
 
 
-CUTS = {"cable_faces": cable_faces, "parent_room": parent_room, "load_chain": load_chain}
+def levels(model, m):
+    """Load levels: an extended formulation in which split flow is visible to the LP.
+
+    Each smart cable cell picks one load level 0..8 (z). A smart cell with load sends it
+    whole to one parent, recorded as an arc at its level (y), or exits (e). The relaxed
+    flow on each link equals the level arcs on it, so the flow can't split. A smart
+    parent with t own tunnels must be at a level at least the child's level plus t; with
+    the one-hot tunnel count tau this is linear: y + tau[o][j] <= 1 + sum_{l' >= l + j}
+    z[o][l']. Dense cells pick one parent that is dense or the outside.
+
+    Valid: in a real build take z = the real loads, y = the real parent links, tau = the
+    real tunnel counts. Loads add up the tree, so a parent's load covers its child's load
+    plus its own tunnels; dense parents are dense or the outside (W3).
+    """
+    r, k, s, d, h = model.r, model.k, model.s, model.d, model.h
+    cap = model.profile.normal_channel_capacity
+    dense = model.profile.dense_channel_capacity
+    t = _tunnels_on(model)
+    levels_ = range(cap + 1)
+    z, tau = {}, {}
+    for n in r.cells:
+        z[n] = [m.NewBoolVar(f"z{n}_{l}") for l in levels_]
+        m.Add(sum(z[n]) == s[n])
+        tau[n] = [m.NewBoolVar(f"tau{n}_{j}") for j in range(7)]
+        m.Add(sum(tau[n]) == s[n])
+        m.Add(sum(j * v for j, v in enumerate(tau[n])) == t[n])
+    for n in r.cells:
+        out_arcs = {l: [] for l in levels_ if l}
+        for dd in Direction:
+            o = step(n, dd)
+            if (n, o) not in h:
+                continue
+            ys = []
+            for l in levels_:
+                if not l:
+                    continue
+                y = m.NewBoolVar(f"y{n}{dd.name}_{l}")
+                m.AddImplication(y, s[n])
+                m.AddImplication(y, k[o])
+                out_arcs[l].append(y)
+                ys.append((l, y))
+                # a smart parent sits at least l + (its own tunnels) high
+                for j in range(7):
+                    higher = [z[o][l2] for l2 in levels_ if l2 >= l + j]
+                    m.Add(y + tau[o][j] <= 1 + sum(higher) + d[o])
+            # the flow on this link is the level arcs (smart cells) or a dense parent
+            pd = m.NewBoolVar(f"pd{n}{dd.name}")
+            m.AddImplication(pd, d[n])
+            m.AddImplication(pd, d[o])
+            m.Add(h[(n, o)] <= sum(l * y for l, y in ys) + dense * pd)
+            m.Add(h[(n, o)] >= sum(l * y for l, y in ys))
+            out_arcs.setdefault("dense", []).append(pd)
+        if n in model.sink:
+            es = []
+            for l in levels_:
+                if not l:
+                    continue
+                e = m.NewBoolVar(f"e{n}_{l}")
+                out_arcs[l].append(e)
+                es.append((l, e))
+            de = m.NewBoolVar(f"de{n}")
+            m.AddImplication(de, d[n])
+            out_arcs.setdefault("dense", []).append(de)
+            m.Add(model.sink[n] <= sum(l * e for l, e in es) + dense * de)
+            m.Add(model.sink[n] >= sum(l * e for l, e in es))
+        for l in levels_:
+            if l:
+                m.Add(sum(out_arcs[l]) == z[n][l])
+        m.Add(sum(out_arcs.get("dense", [])) == d[n])
+
+
+CUTS = {"cable_faces": cable_faces, "parent_room": parent_room, "load_chain": load_chain,
+        "levels": levels}
