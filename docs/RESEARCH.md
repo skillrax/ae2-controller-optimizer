@@ -301,6 +301,14 @@ the even numbers next to it.
      million up to the cube's 48 symmetries. Fixing the core barely simplifies the
      problem: with the library's own core fixed, the relaxed model on 16 threads is still
      unproven after 2 min (bound 305). The shell, not the core, is where the search is.
+   - **Packing cuts, tested (2026-10-29)** (`lab/cuts.py`). *Parent room* (every cable
+     cell has a neighbour with room for its tunnels) is valid but too weak: the splitting
+     5×5×5 shape still scores 302. *Load chain* (each cell has a load within capacity and
+     a parent whose load covers it plus its own tunnels) captures most of the gap on that
+     shape (302 → 283, real 279) and leaves good shapes exact, but doesn't lower the
+     ceiling over all shapes (4×4×5: 206, 5×5×5: 322 after 20 min). Both are either/or
+     rules, which the solver's LP relaxation can't see. A cut has to be linear in the
+     model's own variables, or come with an extended formulation whose LP is strong.
 5. **Certificates.** A proof log that an independent checker can verify (e.g. a MaxSAT
    encoding with VeriPB proof logging) for the small boxes, to replace "the solver said so".
 

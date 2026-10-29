@@ -57,4 +57,77 @@ def cable_faces(model, m):
     m.Add(edges >= sum(k[n] for n in r.box if n in k) - sum(k[n] for n in r.box if n in k and surface[n]))
 
 
-CUTS = {"cable_faces": cable_faces}
+def _tunnels_on(model):
+    """Per cable cell: the tunnel variables on its faces."""
+    into = {n: [] for n in model.r.cells}
+    for (c, d), f in model.f.items():
+        into[step(c, d)].append(f)
+    return {n: sum(v) if v else 0 for n, v in into.items()}
+
+
+def parent_room(model, m):
+    """Every cable cell has a parent with room for it (O6: no splitting).
+
+    In a real build each cable cell n sends its whole load L_n (its own tunnels plus its
+    subtree's) to one parent: a cable neighbour o, or the outside. If o is smart, its load
+    L_o >= L_n + t_o >= t_n + t_o, and L_o <= the smart capacity. So n has a neighbour o that
+    is dense, or smart with t_n + t_o <= capacity, or n exits. A choice variable g per
+    candidate parent encodes this.
+
+    Valid: it is implied by the forest model for every build, with g = the real parent.
+    """
+    r, k, s = model.r, model.k, model.s
+    cap = model.profile.normal_channel_capacity
+    t = _tunnels_on(model)
+    for n in r.cells:
+        options = []
+        if n in model.sink:
+            options.append(k[n])          # an exit always has room
+        for d in Direction:
+            o = step(n, d)
+            if o not in k:
+                continue
+            g = m.NewBoolVar(f"room{n}{d.name}")
+            m.AddImplication(g, k[o])
+            if not (isinstance(t[n], int) and isinstance(t[o], int)):
+                m.Add(t[n] + t[o] <= cap).OnlyEnforceIf([g, s[o]])
+            options.append(g)
+        m.AddBoolOr(options + [k[n].Not()])
+
+
+def load_chain(model, m):
+    """Loads grow along the route to the outside (O6: no splitting, any number of hops).
+
+    Each cable cell gets a load L_n with t_n <= L_n <= its capacity, and must have a
+    parent: the outside (if it can exit), or a cable neighbour o with L_o >= L_n + t_o.
+
+    Valid: in a real build, take L_n = the cell's real load (own tunnels plus its subtree)
+    and the real parent. The load is within capacity, and a parent carries its child's
+    whole load plus its own tunnels. (Real loads also add up over several children; this
+    cut only asks for one child at a time, so it is weaker than the forest model.)
+    """
+    r, k, d = model.r, model.k, model.d
+    normal = model.profile.normal_channel_capacity
+    dense = model.profile.dense_channel_capacity
+    t = _tunnels_on(model)
+    L = {}
+    for n in r.cells:
+        L[n] = m.NewIntVar(0, dense, f"L{n}")
+        m.Add(L[n] <= normal * k[n] + (dense - normal) * d[n])
+        m.Add(L[n] >= t[n])
+    for n in r.cells:
+        options = [k[n].Not()]
+        if n in model.sink:
+            options.append(k[n])
+        for dd in Direction:
+            o = step(n, dd)
+            if o not in k:
+                continue
+            g = m.NewBoolVar(f"chain{n}{dd.name}")
+            m.AddImplication(g, k[o])
+            m.Add(L[o] >= L[n] + t[o]).OnlyEnforceIf(g)
+            options.append(g)
+        m.AddBoolOr(options)
+
+
+CUTS = {"cable_faces": cable_faces, "parent_room": parent_room, "load_chain": load_chain}
