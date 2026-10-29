@@ -238,7 +238,7 @@ the even numbers next to it.
 | 2026-10-28 | 3×3×5 | 119.1 | **120**, proven | 26 s, 16 threads |
 | 2026-10-28 | 3×4×5 | 155.7 | **158**, proven | 10 min |
 | 2026-10-28 | 3×5×5 | 192.4 | **192**, proven | 24 min |
-| 2026-10-28 | 4×4×5 | 203.4 | 200 found, at most 205 | stopped at 2 h |
+| 2026-10-28 | 4×4×5 | 203.4 | 200 found, at most 205; later **202** (relax, then fix) | stopped at 2 h; 202 from a 52 s relaxed solve |
 | 2026-10-28 22:14 | 2×2×5 | 57.0 | **58**, proven | 13 s |
 | 2026-10-28 22:14 | 2×2×6 | 67.7 | **68**, proven | 14 s |
 | 2026-10-28 22:14 | 2×3×5 | 82.7 | **84**, proven | 17 s |

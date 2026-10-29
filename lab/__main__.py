@@ -103,6 +103,21 @@ def print_log(last: int):
         return
     recs = [json.loads(l) for l in RESULTS.read_text("utf-8").splitlines() if l.strip()]
     for r in recs[-last:]:
+        if r["model"] == "split":
+            print(f"{r['when'][:16]}  {r['commit']:9} {r['box']:6} split       T >= {r['target']}: "
+                  + ("impossible, proven" if r["proven"] else f"open for n = {r['open']}"))
+            continue
+        if r["model"] == "relaxed-trace":
+            print(f"{r['when'][:16]}  {r['commit']:9} {r['box']:6} relaxed     {r['seconds']:>8}s  "
+                  f"best {r['best']}, bound {r['bound']}" + (f", cuts {r['cuts']}" if r["cuts"] else "")
+                  + (f"  - {r['note']}" if r["note"] else ""))
+            continue
+        if r["model"] == "relaxfix":
+            lib = r["library"]["tunnels"] if r["library"] else "-"
+            print(f"{r['when'][:16]}  {r['commit']:9} {r['box']:6} relaxfix    {r['seconds']:>8}s  "
+                  f"real {r['T']} (library {lib}), relaxed bound {r['relaxed_bound']}"
+                  + (f"  - {r['note']}" if r["note"] else ""))
+            continue
         print(f"{r['when'][:16]}  {r['commit']:9} {r['box']:6} {r['model']:11} {r['seconds']:>8}s  "
               f"{verdict(r)}" + (f"  - {r['note']}" if r["note"] else ""))
 
